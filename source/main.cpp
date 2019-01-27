@@ -33,6 +33,10 @@ extern "C" {
         if (R_FAILED(rc))
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
+        rc = plInitialize();
+        if (R_FAILED(rc))
+            fatalSimple(rc);
+
         viInitialize(ViServiceType_Manager);
 
         if (&__nx_win_init) __nx_win_init();
@@ -59,10 +63,10 @@ int main(int argc, char* argv[])
     Drawing *drawing = new Drawing();
     svcSleepThread(1000000);
     drawing->Setup();
+    drawing->Test();
     while (appletMainLoop())
     {
-        drawing->Test();
-        svcSleepThread(10000);
+        drawing->Render();
     }
     drawing->Exit();
     return 0;
