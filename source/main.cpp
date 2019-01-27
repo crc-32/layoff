@@ -6,28 +6,14 @@
 // Include the main libnx system header, for Switch development
 #include "drawing.hpp"
 #include <switch.h>
-#define INNER_HEAP_SIZE 0x80000
 
 extern "C" {
     extern u32 __start__;
-    extern u32 __nx_applet_type = AppletType_OverlayApplet;
+    extern u32 __nx_applet_type;
+    extern __attribute__((weak)) size_t __nx_heap_size;
 
-
-    size_t nx_inner_heap_size = INNER_HEAP_SIZE;
-    char   nx_inner_heap[INNER_HEAP_SIZE];
-
-    void __libnx_initheap(void)
-    {
-        void*  addr = nx_inner_heap;
-        size_t size = nx_inner_heap_size;
-
-        // Newlib
-        extern char* fake_heap_start;
-        extern char* fake_heap_end;
-
-        fake_heap_start = (char*)addr;
-        fake_heap_end   = (char*)addr + size;
-    }
+    __attribute__((weak)) size_t __nx_heap_size = 0x4000000;
+    u32 __nx_applet_type = AppletType_OverlayApplet;
 
     void __attribute__((weak)) __nx_win_init(void);
     void __attribute__((weak)) userAppInit(void);
@@ -35,7 +21,6 @@ extern "C" {
     void __attribute__((weak)) __appInit(void)
     {
         Result rc;
-
         rc = smInitialize();
         if (R_FAILED(rc))
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
@@ -68,23 +53,16 @@ extern "C" {
         smExit();
     }
 }
-
 // Main program entrypoint
 int main(int argc, char* argv[])
 {
-    bool draw = false;
     Drawing *drawing = new Drawing();
+    svcSleepThread(1000000);
     drawing->Setup();
     while (appletMainLoop())
     {
-        hidScanInput();
-        u64 kHeld = hidKeysHeld(CONTROLLER_P1_AUTO);
-        if((kHeld & KEY_PLUS & KEY_MINUS)) {
-            draw = !draw;
-        }
-        if(draw) {
-            drawing->Test();
-        }
+        drawing->Test();
+        svcSleepThread(10000);
     }
     drawing->Exit();
     return 0;
