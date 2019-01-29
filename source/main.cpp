@@ -4,7 +4,7 @@
 #include <string.h>
 
 // Include the main libnx system header, for Switch development
-#include "drawing.hpp"
+#include "UI.hpp"
 #include <switch.h>
 
 extern "C" {
@@ -37,7 +37,12 @@ extern "C" {
         if (R_FAILED(rc))
             fatalSimple(rc);
 
-        viInitialize(ViServiceType_Manager);
+        //viInitialize(ViServiceType_Manager);
+		rc = fsInitialize();
+		if (R_FAILED(rc))
+			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+
+		fsdevMountSdmc();
 
         if (&__nx_win_init) __nx_win_init();
         if (&userAppInit) userAppInit();
@@ -52,6 +57,8 @@ extern "C" {
         if (&__nx_win_exit) __nx_win_exit();
 
         // Cleanup default services.
+		fsdevUnmountAll();
+		fsExit();
         appletExit();
         hidExit();
         smExit();
@@ -59,15 +66,20 @@ extern "C" {
 }
 // Main program entrypoint
 int main(int argc, char* argv[])
-{
-    Drawing *drawing = new Drawing();
+{    
     svcSleepThread(1000000);
-    drawing->Setup();
-    drawing->Test();
+	SdlInit();
+	//SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND); //Currently disabled to rule out possible issues
+	SDL_SetRenderDrawColor(sdl_render,0xff ,0xff,0xff,0x7F); //Drawing white to test on the black background of the nro
+	
+	//Label lbl("Hello",WHITE, -1, font30); //Font loading WILL fail as currently we're not replacing the romfs
+	SDL_Rect bg {0,0, 200,100};
     while (appletMainLoop())
     {
-        drawing->Render();
+		SDL_RenderFillRect(sdl_render, &bg);
+		//lbl.Render(20,20);
+		SDL_RenderPresent(sdl_render);		
     }
-    drawing->Exit();
+	SdlExit();
     return 0;
 }

@@ -36,7 +36,7 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 EXEFS_SRC	:=	exefs_src
-#ROMFS	:=	romfs
+ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
 APP_TITLEID := 010000000000100C
@@ -56,7 +56,10 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs`
+LIBS	:=  -lSDL2_ttf -lSDL2_image -lSDL2 \
+			-lpng -lz -ljpeg \
+			 -lEGL -lGLESv2 -lglapi -ldrm_nouveau  \
+			-lnx -lm -lfreetype -lbz2 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
