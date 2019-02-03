@@ -6,10 +6,7 @@ if not exist %BasePath%\ goto err
 	mkdir %BasePath%\atmosphere
     mkdir %BasePath%\atmosphere\titles
     mkdir %BasePath%\atmosphere\titles\010000000000100C
-    mkdir %BasePath%\atmosphere\titles\010000000000100C\exefs\
-    npdmtool npdm.json %BasePath%\atmosphere\titles\010000000000100C\exefs\main.npdm
-    copy build\exefs\main %BasePath%\atmosphere\titles\010000000000100C\exefs\main
-    echo > %BasePath%\atmosphere\titles\010000000000100C\exefs\rtld.stub
+    copy layoff.nsp %BasePath%\atmosphere\titles\010000000000100C\exefs.nsp
 goto :eof
 :err
 echo %BasePath% doesn't exist.

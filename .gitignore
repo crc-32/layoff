@@ -1,4 +1,9 @@
 .vscode/
 build/
-layoff.*
+*.nro
+*.nso
+*.nsp
+*.elf
+*.nacp
+*.npdm
 npdmtool.exe
