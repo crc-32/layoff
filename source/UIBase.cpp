@@ -13,8 +13,11 @@ https://github.com/devkitPro/SDL/blob/aa66a900d790d7a93ab7aa369dc5a264bebc2c57/s
 This may break if this struct is changed in the source, it's unlikely as it just got updated with the new libnx apis
 */
 extern "C"{ 
-	extern DECLSPEC const char * SDLCALL SDL_GetDisplayDriverData(int displayIndex);
+	//extern DECLSPEC const char * SDLCALL SDL_GetDisplayDriverData(int displayIndex);
+	extern DECLSPEC void* SDL_GetWindowData(SDL_Window* window, const char* name);
+	extern ViDisplay SWITCH_defDisplay; //for some reason SDL_GetDisplayDriverData returns NULL even in sdl itself (?)
 }
+#define SWITCH_DATA "_SDL_SwitchData"
 
 extern void RemapErr();
 
@@ -22,6 +25,7 @@ extern void RemapErr();
 
 void SdlInit()
 {
+	fflush(stderr);
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		SDLLOG(1)
 	
@@ -33,18 +37,19 @@ void SdlInit()
 	if (!sdl_render)
 		SDLLOG(3)	
 
-	SDL_DisplayData *ddata = (SDL_DisplayData *)SDL_GetDisplayDriverData(0);
-	SDL_WindowData *wdata = (SDL_WindowData *)sdl_win->driverdata;
+	SWITCH_WindowData *wdata = (SWITCH_WindowData *)SDL_GetWindowData(sdl_win,SWITCH_DATA);
+
+	if (!wdata)
+		SDLLOG(5)
 	
-	viSetDisplayAlpha(&ddata->viDisplay, 1.0f);
 	u64 maxZ = 0;
-	viGetDisplayMaximumZ(&ddata->viDisplay, &maxZ);	
+	viGetDisplayMaximumZ(&SWITCH_defDisplay, &maxZ);	
     viSetLayerZ(&wdata->viLayer, maxZ);
 	
 	SDL_SetRenderTarget(sdl_render, NULL);
 	
 	IMG_Init( IMG_INIT_PNG | IMG_INIT_JPG);
-	TTF_Init();	//This WILL fail as currently we're not replacing the romfs
+	//TTF_Init();	//This WILL fail as currently we're not replacing the romfs
 }
 
 void SdlExit()

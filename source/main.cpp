@@ -37,7 +37,7 @@ extern "C" {
         if (R_FAILED(rc))
             fatalSimple(rc);
 
-        //viInitialize(ViServiceType_Manager);
+        viInitialize(ViServiceType_Manager);
 		rc = fsInitialize();
 		if (R_FAILED(rc))
 			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     svcSleepThread(1000000);
 	freopen("/errlog.txt", "w", stderr);
 	SdlInit();
-	//SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND); //Currently disabled to rule out possible issues
+	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(sdl_render,0xff ,0xff,0xff,0x7F); //Drawing white to test on the black background of the nro
 	
 	//Label lbl("Hello",WHITE, -1, font30); //Font loading WILL fail as currently we're not replacing the romfs

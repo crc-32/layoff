@@ -1,0 +1,1 @@
+This is the content of the `switch-sdl2-2.0.8-8-any.pkg.tar.xz` package. Newer versions won't work because opengl can't run in the OverlayDisp context
