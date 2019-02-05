@@ -64,10 +64,15 @@ extern "C" {
         smExit();
     }
 }
+
+//Not sure if needed, this will close the errlog file before calling fatal
+void RemapErr() { freopen("/noerr.txt", "w", stderr);}
+ 
 // Main program entrypoint
 int main(int argc, char* argv[])
 {    
     svcSleepThread(1000000);
+	freopen("/errlog.txt", "w", stderr);
 	SdlInit();
 	//SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND); //Currently disabled to rule out possible issues
 	SDL_SetRenderDrawColor(sdl_render,0xff ,0xff,0xff,0x7F); //Drawing white to test on the black background of the nro

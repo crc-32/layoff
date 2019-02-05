@@ -16,7 +16,9 @@ extern "C"{
 	extern DECLSPEC const char * SDLCALL SDL_GetDisplayDriverData(int displayIndex);
 }
 
-#define SDLLOG(eCode) { FILE * f = fopen("/sdllog.txt", "w"); if (!f) fatalSimple(MAKERESULT(999, eCode)); fprintf(f,"%s", SDL_GetError()); fclose(f); fatalSimple(MAKERESULT(666, eCode));}
+extern void RemapErr();
+
+#define SDLLOG(eCode) { fprintf(stderr,"\nERR:\n%s", SDL_GetError()); RemapErr(); fatalSimple(MAKERESULT(666, eCode));}
 
 void SdlInit()
 {
