@@ -42,20 +42,22 @@ void SdlInit()
 	if (!wdata)
 		SDLLOG(5)
 	
-	u64 maxZ = 0;
+	u64 maxZ = 0;	
 	viGetDisplayMaximumZ(&SWITCH_defDisplay, &maxZ);	
     viSetLayerZ(&wdata->viLayer, maxZ);
 	
 	SDL_SetRenderTarget(sdl_render, NULL);
 	
 	IMG_Init( IMG_INIT_PNG | IMG_INIT_JPG);
-	//TTF_Init();	//This WILL fail as currently we're not replacing the romfs
+	TTF_Init();	//This WILL fail as currently we're not replacing the romfs
+	FontInit();
 }
 
 void SdlExit()
 {	
-	IMG_Quit();
+	FontExit();
 	TTF_Quit();
+	IMG_Quit();
 	
 	SDL_Delay(10);
 	SDL_DestroyWindow(sdl_win);
@@ -72,6 +74,8 @@ TTF_Font *font40;
 void FontInit()
 {
 	font20 = LoadFont(20);
+	if (!font20)
+		fatalSimple(MAKERESULT(666, 6));
 	font25 = LoadFont(25);
 	font30 = LoadFont(30);
 	font40 = LoadFont(40);

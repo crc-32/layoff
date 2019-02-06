@@ -36,7 +36,8 @@ SOURCES		:=	source source/compatibility
 DATA		:=	data
 INCLUDES	:=	include libs/include
 EXEFS_SRC	:=	exefs_src
-ROMFS	:=	romfs
+#Don't add the romfs as the target is layeredfs
+#ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
 APP_TITLEID := 010000000000100C
@@ -179,7 +180,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all	:	$(OUTPUT).nsp $(OUTPUT).nro
+all	:	$(OUTPUT).nsp
 
 ifeq ($(strip $(APP_JSON)),)
 $(OUTPUT).nsp	:	$(OUTPUT).nso

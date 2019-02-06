@@ -1,1 +1,1 @@
-This is the content of the `switch-sdl2-2.0.8-8-any.pkg.tar.xz` package. Newer versions won't work because opengl can't run in the OverlayDisp context
+This custom SDL lib is based on this [commit](https://github.com/devkitPro/SDL/tree/077bac3730f8c244d609695592abc404dd415fd2) from DevkitPro's SDL port. The changed files (currently only one) are in `Changes`. This basically is the old software rendering SDL with the new Vi and Framebuffer apis. This custom build is needed because opengl doesn't work in the OverlayDisp context

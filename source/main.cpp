@@ -71,19 +71,22 @@ void RemapErr() { freopen("/noerr.txt", "w", stderr);}
 // Main program entrypoint
 int main(int argc, char* argv[])
 {    
-    svcSleepThread(1000000);
+    svcSleepThread(5000000);
 	freopen("/errlog.txt", "w", stderr);
+	romfsInit();	
 	SdlInit();
 	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(sdl_render,0xff ,0xff,0xff,0x7F); //Drawing white to test on the black background of the nro
+	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
 	
-	//Label lbl("Hello",WHITE, -1, font30); //Font loading WILL fail as currently we're not replacing the romfs
-	SDL_Rect bg {0,0, 200,100};
+	Label lbl("",WHITE, -1, font30);
+	SDL_Rect bg {0,0, 600,100};
+	u64 counter = 0;
     while (appletMainLoop())
     {
+		lbl.SetString("Hello layout, Have a counter: " + std::to_string(counter++));
 		SDL_RenderFillRect(sdl_render, &bg);
-		//lbl.Render(20,20);
-		SDL_RenderPresent(sdl_render);		
+		lbl.Render(20,20);
+		SDL_RenderPresent(sdl_render);
     }
 	SdlExit();
     return 0;
