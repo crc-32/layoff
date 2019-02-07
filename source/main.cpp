@@ -83,22 +83,21 @@ int main(int argc, char* argv[])
 	freopen("/errlog.txt", "w", stderr);
 #endif
 
-	romfsInit();	//For some reason romfs doesn't work anymore (?)
-	FILE *font = fopen("romfs:/opensans.ttf","rb");
+	romfsInit();
 	
 	SdlInit();
 	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	
 	Label lbl("",WHITE, -1, font30);
-	Image img("/trollface.png");
-	SDL_Rect bg {0,0, 600,100};
+	Image img("romfs:/trollface.png");
+	SDL_Rect bg {0,0, 620,100};
 	u64 counter = 0;
     while (appletMainLoop())
     {		
 		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 		SDL_RenderClear(sdl_render);
-		lbl.SetString("Hello layout, Have a counter: " + std::to_string(counter++) + (font ? " - Romfs" : " - noRomfs"));
+		lbl.SetString("Hello overlay, Have a counter: " + std::to_string(counter++));
 		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
 		SDL_RenderFillRect(sdl_render, &bg);
 		lbl.Render(20,20);

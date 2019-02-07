@@ -44,7 +44,7 @@ void SdlExit()
 	SDL_Quit();
 }
 
-#define LoadFont(num) TTF_OpenFont("/opensans.ttf", num);
+#define LoadFont(num) TTF_OpenFont("romfs:/opensans.ttf", num);
 TTF_Font *font20;
 TTF_Font *font25;
 TTF_Font *font30;
