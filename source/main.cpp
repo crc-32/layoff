@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
 		lbl.Render(20,20);
 		img.Render(757,359);
 		SDL_RenderPresent(sdl_render);
+		svcSleepThread(33333333); //lock to ~30 fps
     }
 	SdlExit();
     return 0;
