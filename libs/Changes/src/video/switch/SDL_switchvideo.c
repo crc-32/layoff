@@ -40,12 +40,9 @@ typedef struct
     SDL_Surface *surface;
     int x_offset;
     int y_offset;
-	ViLayer viLayer;
-	NWindow nWindow;
+	NWindow *nWindow;
 	Framebuffer fb;
 } SWITCH_WindowData;
-
-ViDisplay SWITCH_defDisplay;
 
 static int SWITCH_VideoInit(_THIS);
 
@@ -103,20 +100,9 @@ VideoBootStrap SWITCH_bootstrap = {
 
 static int SWITCH_VideoInit(_THIS)
 {
-    u32 display_width, display_height;
+    u32 display_width = 1280, display_height = 720;
     SDL_DisplayMode mode;
 	
-	if (R_FAILED(viOpenDefaultDisplay(&SWITCH_defDisplay))) {
-        ERRORSDL("viOpenDefaultDisplay");
-    }
-    if (R_FAILED(viGetDisplayLogicalResolution(&SWITCH_defDisplay, &display_width, &display_height))) {
-        ERRORSDL("viGetDisplayLogicalResolution");
-    }
-    if (R_FAILED(viSetDisplayMagnification(&SWITCH_defDisplay, 0, 0, display_width, display_height))) {
-        ERRORSDL("viSetDisplayMagnification");
-    }
-	viSetDisplayAlpha(&SWITCH_defDisplay, 1.0f); 
-
     // add default mode (1280x720)
     mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.w = display_width;
@@ -143,7 +129,6 @@ static int SWITCH_VideoInit(_THIS)
 static void SWITCH_VideoQuit(_THIS)
 {
     SWITCH_QuitTouch();
-	viCloseDisplay(&SWITCH_defDisplay);
 }
 
 static int SWITCH_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
@@ -172,8 +157,7 @@ static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *for
     int bpp;
     Uint32 r, g, b, a;
     SDL_Surface *surface;
-SWITCH_WindowData *data ;    
-	u64 maxZ = 0;
+	SWITCH_WindowData *data ;
 
     // create sdl surface framebuffer
     SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ABGR8888, &bpp, &r, &g, &b, &a);
@@ -187,18 +171,9 @@ SWITCH_WindowData *data ;
 		ERRORSDL("BadDataAlloc");
     data->surface = surface;
 	
-    if (R_FAILED(viCreateLayer(&SWITCH_defDisplay, &data->viLayer))) {
-        ERRORSDL("viCreateLayer");
-    }
+	data->nWindow = nwindowGetDefault();
 
-	//viGetDisplayMaximumZ(&SWITCH_defDisplay, &maxZ);	
-    //viSetLayerZ(&data->viLayer, maxZ);
-	
-    if (R_FAILED(nwindowCreateFromLayer(&data->nWindow, &data->viLayer))) {
-        ERRORSDL("nwindowCreateFromLayer");
-    }
-
-    if (R_FAILED(framebufferCreate(&data->fb, &data->nWindow, 1280, 720, PIXEL_FORMAT_RGBA_8888, 1))) {
+    if (R_FAILED(framebufferCreate(&data->fb, data->nWindow, 1280, 720, PIXEL_FORMAT_RGBA_8888, 2))) {
         ERRORSDL("framebufferCreate");
     }
     framebufferMakeLinear(&data->fb);
@@ -265,8 +240,6 @@ static void SWITCH_DestroyWindowFramebuffer(_THIS, SDL_Window *window)
     SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
     SDL_FreeSurface(data->surface);
 	framebufferClose(&data->fb);
-	nwindowClose(&data->nWindow);
-    viCloseLayer(&data->viLayer);
     SDL_free(data);
 }
 

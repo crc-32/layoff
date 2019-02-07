@@ -10,7 +10,9 @@
 #include <SDL2/SDL_image.h>
 
 #define SCR_W 1280
-#define SCR_H 720
+#define SCR_H 
+
+#define ELOG(eTxt) {fprintf(stderr,eTxt); fflush(stderr);}
 
 //I've recycled ~once again~ my graphics stuff to quickly have a base to work with, we can remove this as soon as we get sdl working
 
@@ -33,6 +35,17 @@ void FontExit();
 
 extern const SDL_Rect ScreenRect;
 
+struct LoadedImage
+{
+	SDL_Rect Rect;
+	SDL_Texture* image;
+};
+
+LoadedImage OpenImage(const std::string &Path);
+LoadedImage LoadImage(const std::vector<u8> &data);
+void FreeImage(LoadedImage &img);
+
+LoadedImage LoadImage(std::string URL);
 #define defProp(name,type) type Get ## name(); void Set ## name(type arg); 
 class Label
 {
@@ -56,16 +69,22 @@ class Label
 		~Label();
 		void Render(int X, int Y);
 };
-#undef defProp
 
-
-//Internal sdl structs
-typedef struct
+class Image
 {
-    SDL_Surface *surface;
-    int x_offset;
-    int y_offset;
-	ViLayer viLayer;
-	NWindow nWindow;
-	Framebuffer fb;
-} SWITCH_WindowData;
+	public: 
+		bool Visible = true;
+	
+		Image(const std::vector<u8> &data);
+		Image(const std::string &path);
+		~Image();
+		
+		defProp(Rect,SDL_Rect);
+		
+		void ImageSetMaxSize(int MaxW, int MaxH);
+		void ImageSetSize(int W, int H);
+		void Render(int X, int Y);
+	private:
+		LoadedImage _img;
+};
+#undef defProp

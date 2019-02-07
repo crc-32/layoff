@@ -37,14 +37,12 @@ extern "C" {
         if (R_FAILED(rc))
             fatalSimple(rc);
 
-        viInitialize(ViServiceType_Manager);
 		rc = fsInitialize();
 		if (R_FAILED(rc))
 			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
 		fsdevMountSdmc();
 
-        if (&__nx_win_init) __nx_win_init();
         if (&userAppInit) userAppInit();
     }
 
@@ -65,27 +63,46 @@ extern "C" {
     }
 }
 
+//#define USE_REDIR_STDERR
+
 //Not sure if needed, this will close the errlog file before calling fatal
-void RemapErr() { freopen("/noerr.txt", "w", stderr);}
+void RemapErr() 
+{
+#ifdef USE_REDIR_STDERR
+	freopen("/noerr.txt", "w", stderr);
+#endif
+}
  
 // Main program entrypoint
 int main(int argc, char* argv[])
 {    
-    svcSleepThread(5000000);
+    svcSleepThread(5e+9);
+	__nx_win_init(); 
+	
+#ifdef USE_REDIR_STDERR
 	freopen("/errlog.txt", "w", stderr);
-	romfsInit();	
+#endif
+
+	romfsInit();	//For some reason romfs doesn't work anymore (?)
+	FILE *font = fopen("romfs:/opensans.ttf","rb");
+	
 	SdlInit();
 	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
-	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
+	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	
 	Label lbl("",WHITE, -1, font30);
+	Image img("/trollface.png");
 	SDL_Rect bg {0,0, 600,100};
 	u64 counter = 0;
     while (appletMainLoop())
-    {
-		lbl.SetString("Hello layout, Have a counter: " + std::to_string(counter++));
+    {		
+		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+		SDL_RenderClear(sdl_render);
+		lbl.SetString("Hello layout, Have a counter: " + std::to_string(counter++) + (font ? " - Romfs" : " - noRomfs"));
+		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
 		SDL_RenderFillRect(sdl_render, &bg);
 		lbl.Render(20,20);
+		img.Render(757,359);
 		SDL_RenderPresent(sdl_render);
     }
 	SdlExit();
