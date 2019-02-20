@@ -4,6 +4,9 @@ then
     mkdir atmosphere
     mkdir atmosphere/titles
     mkdir atmosphere/titles/010000000000100C
+    mkdir atmosphere/titles/010000000000100C/flags
+    touch atmosphere/titles/010000000000100C/flags/fsmitm.flag
+    cp -R romfs atmosphere/titles/010000000000100C/
     cp layoff.nsp atmosphere/titles/010000000000100C/exefs.nsp
 else
     mkdir $1/atmosphere
