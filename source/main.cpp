@@ -4,7 +4,7 @@
 #include <string.h>
 
 // Include the main libnx system header, for Switch development
-#include "drawing.hpp"
+#include "UI.hpp"
 #include <switch.h>
 
 extern "C" {
@@ -37,9 +37,12 @@ extern "C" {
         if (R_FAILED(rc))
             fatalSimple(rc);
 
-        viInitialize(ViServiceType_Manager);
+		rc = fsInitialize();
+		if (R_FAILED(rc))
+			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
-        if (&__nx_win_init) __nx_win_init();
+		fsdevMountSdmc();
+
         if (&userAppInit) userAppInit();
     }
 
@@ -52,22 +55,56 @@ extern "C" {
         if (&__nx_win_exit) __nx_win_exit();
 
         // Cleanup default services.
+		fsdevUnmountAll();
+		fsExit();
         appletExit();
         hidExit();
         smExit();
     }
 }
+
+//#define USE_REDIR_STDERR
+
+//Not sure if needed, this will close the errlog file before calling fatal
+void RemapErr() 
+{
+#ifdef USE_REDIR_STDERR
+	freopen("/noerr.txt", "w", stderr);
+#endif
+}
+ 
 // Main program entrypoint
 int main(int argc, char* argv[])
-{
-    Drawing *drawing = new Drawing();
-    svcSleepThread(1000000);
-    drawing->Setup();
-    drawing->Test();
+{    
+    svcSleepThread(5e+9);
+	__nx_win_init(); 
+	
+#ifdef USE_REDIR_STDERR
+	freopen("/errlog.txt", "w", stderr);
+#endif
+
+	romfsInit();
+	
+	SdlInit();
+	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+	
+	Label lbl("",WHITE, -1, font30);
+	Image img("romfs:/trollface.png");
+	SDL_Rect bg {0,0, 620,100};
+	u64 counter = 0;
     while (appletMainLoop())
-    {
-        drawing->Render();
+    {		
+		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+		SDL_RenderClear(sdl_render);
+		lbl.SetString("Hello overlay, Have a counter: " + std::to_string(counter++));
+		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
+		SDL_RenderFillRect(sdl_render, &bg);
+		lbl.Render(20,20);
+		img.Render(757,359);
+		SDL_RenderPresent(sdl_render);
+		svcSleepThread(33333333); //lock to ~30 fps
     }
-    drawing->Exit();
+	SdlExit();
     return 0;
 }
