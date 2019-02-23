@@ -28,10 +28,14 @@ extern "C" {
         rc = appletInitialize();
         if (R_FAILED(rc))
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
-
+		
         rc = hidInitialize();
         if (R_FAILED(rc))
             fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+		
+		rc = hidSysInitialize();
+        if (R_FAILED(rc))
+            fatalSimple(MAKERESULT(255, 11));
 
         rc = plInitialize();
         if (R_FAILED(rc))
@@ -58,6 +62,7 @@ extern "C" {
 		fsdevUnmountAll();
 		fsExit();
         appletExit();
+		hidSysExit();
         hidExit();
         smExit();
     }
@@ -72,8 +77,45 @@ void RemapErr()
 	freopen("/noerr.txt", "w", stderr);
 #endif
 }
- 
-// Main program entrypoint
+
+Event homeMenuEvent = {0};
+
+#include "demo/SdlEyes.hpp"
+int EyesDemo()
+{	
+	hidSysExit();
+	hidSysInitialize();
+	hidSysEnableAppletToGetInput(true);	
+	SdlEyes eyes(0,200);
+	eyes.X = 1280/2 - eyes.TotalW / 2;
+	eyes.Update(1280/2, 720);
+    while (appletMainLoop())
+    {	
+		hidScanInput();
+		
+		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+		SDL_RenderClear(sdl_render);
+		
+		u32 touch_count = hidTouchCount();
+		if (touch_count > 0)
+		{
+			touchPosition touch;
+			hidTouchRead(&touch, 0);
+			eyes.Update(touch.px, touch.py);			
+		}		
+		
+		eyes.Render();
+		
+		SDL_RenderPresent(sdl_render);
+		svcSleepThread(33333333); //lock to ~30 fps
+		
+		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_PLUS)
+			break;
+    }	
+	hidSysAcquireHomeButtonEventHandle(&homeMenuEvent); //re-aquire the home menu event as the hidSys service has been terminated.
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {    
     svcSleepThread(5e+9);
@@ -83,26 +125,59 @@ int main(int argc, char* argv[])
 	freopen("/errlog.txt", "w", stderr);
 #endif
 
-	romfsInit();
-	
+	romfsInit();	
 	SdlInit();
 	SDL_SetRenderDrawBlendMode(sdl_render, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	
-	Label lbl("",WHITE, -1, font30);
-	Image img("romfs:/trollface.png");
-	SDL_Rect bg {0,0, 620,100};
+	Label menuLbl("LAYOFF !\n\nPress A for home menu\nPress X for swEyes demo\nPress B to cancel.",WHITE, 950, font30);
+	Image img("romfs:/trollface.png");	
+	SDL_Rect bg {320, 100, 640,520};
+	
+	hidSysAcquireHomeButtonEventHandle(&homeMenuEvent);
+
+RESET:
+	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+	SDL_RenderClear(sdl_render);
+	SDL_RenderPresent(sdl_render);
+	
+	appletEndToWatchShortHomeButtonMessage(); //Unlock input for the foreground app
+	eventClear(&homeMenuEvent); //the event is usually set on boot.
+	
+	eventWait(&homeMenuEvent,U64_MAX);
+	eventClear(&homeMenuEvent);
+	appletBeginToWatchShortHomeButtonMessage(); //Lock input for the foreground app.
+	
 	u64 counter = 0;
     while (appletMainLoop())
     {		
 		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 		SDL_RenderClear(sdl_render);
-		lbl.SetString("Hello overlay, Have a counter: " + std::to_string(counter++));
 		SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0x7F);
 		SDL_RenderFillRect(sdl_render, &bg);
-		lbl.Render(20,20);
-		img.Render(757,359);
+		menuLbl.Render(320 + 5,110);
+		img.Render(320 , 570);
 		SDL_RenderPresent(sdl_render);
+		
+		hidScanInput();
+		u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+		if (kDown & KEY_A)
+		{
+			libappletRequestHomeMenu();			
+			goto RESET;
+		}
+		else if (kDown & KEY_B)
+		{	
+			goto RESET;
+		}
+		else if (kDown & KEY_X)
+		{
+			appletEndToWatchShortHomeButtonMessage();
+			EyesDemo();			
+			appletBeginToWatchShortHomeButtonMessage();
+			continue;
+		}
+		
 		svcSleepThread(33333333); //lock to ~30 fps
     }
 	SdlExit();

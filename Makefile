@@ -64,7 +64,7 @@ LIBS	:=  -lSDL2_ttf -lfreetype -lpng -lSDL2_gfx -lSDL2_image -lSDL2 -lbz2 -ljpeg
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CURDIR)/libs $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(CURDIR)/libs $(PORTLIBS) /z/VM/libnx/nx
 
 
 #---------------------------------------------------------------------------------
