@@ -32,7 +32,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source
+SOURCES		:=	source source/UI
 DATA		:=	data
 INCLUDES	:=	include libs/include
 EXEFS_SRC	:=	exefs_src
@@ -57,14 +57,14 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=  -lSDL2_ttf -lfreetype -lpng -lSDL2_gfx -lSDL2_image -lSDL2 -lbz2 -ljpeg -lz -lnx
+LIBS	:=  -lSDL2_image -lSDL2 -lpng -ljpeg -lbz2 -ljpeg -lz -lnx
 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(CURDIR)/libs $(PORTLIBS) $(LIBNX)
+LIBDIRS	:= $(CURDIR)/libs $(PORTLIBS) /z/VM/libnx/nx
 
 
 #---------------------------------------------------------------------------------
