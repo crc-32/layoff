@@ -237,7 +237,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 int main(int argc, char* argv[])
 {    
 	void *heap;
-	svcSetHeapSize(&heap, 0x00F00000);
+	svcSetHeapSize(&heap, 0x10000000);
 	svcSleepThread(5e+9);
 	__nx_win_init(); 
 
