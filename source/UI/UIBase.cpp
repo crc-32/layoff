@@ -28,7 +28,7 @@ void SdlInit()
 	
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("romfs:/opensans.ttf", 30);
+	io.Fonts->AddFontFromFileTTF("romfs:/opensans.ttf", 40);
 	ImGuiSDL::Initialize(sdl_render, 1280, 720);
 }
 

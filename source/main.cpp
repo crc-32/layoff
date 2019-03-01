@@ -3,6 +3,8 @@
 #include <string>
 #include "UI/UI.hpp"
 #include <switch.h>
+#include <time.h>
+#include "setsys.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
 #define EVENT_NOT_FIRED(x) R_FAILED(eventWait(x,0))
@@ -93,9 +95,12 @@ void SwitchToPassiveMode()
 	console->Print("[Input passive mode]\n");
 }
 
+//Events
 bool HomeLongPressed = false;
 bool HomePressed = false;
 bool PowerPressed = false;
+//Settings
+bool IsWirelessEnabled = false;
 bool OverlayAppletMainLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
@@ -143,8 +148,10 @@ void ImguiBindInputs(ImGuiIO& io)
 
 #include "demo/SdlEyes.hpp"
 #include "demo/Calc.hpp"
+#include "demo/GameDemo.hpp"
 SdlEyes *demoEyes = nullptr;
 DemoCalc *demoCalc = nullptr;
+DemoGame *demoGame = nullptr;
 
 void LayoffMainWindow() 
 {
@@ -166,7 +173,25 @@ void LayoffMainWindow()
 		}
 		if (ImGui::Button("???", ImVec2(511, 0)))
 		{
-			//TODO
+			if (!demoGame)
+				demoGame = new DemoGame();
+		}
+	}
+	ImGui::Spacing();
+	if (ImGui::CollapsingHeader("System", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		if (IsWirelessEnabled)
+		{
+			if (ImGui::Button("Disable wireless", ImVec2(511, 0)))
+			{
+				SetSys::SetWirelessEnableFlag(false);
+				IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
+			}
+		}
+		else if (ImGui::Button("Enable wireless", ImVec2(511, 0)))
+		{
+			SetSys::SetWirelessEnableFlag(true);
+			IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
 		}
 	}
 	ImGui::End();
@@ -201,6 +226,8 @@ bool WidgetDraw(UiItem** item)
 
 bool LayoffMainLoop(ImGuiIO& io)
 {
+	//Get the wireless status only when opening the menu
+	IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
 	while (OverlayAppletMainLoop())
 	{       
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
@@ -217,7 +244,8 @@ bool LayoffMainLoop(ImGuiIO& io)
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
 		DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
 		DrewSomething |= WidgetDraw((UiItem**)&demoCalc);
-			
+		DrewSomething |= WidgetDraw((UiItem**)&demoGame);
+
 		ImGui::Render();
 		ImGuiSDL::Render(ImGui::GetDrawData());
 		SDL_RenderPresent(sdl_render);		
