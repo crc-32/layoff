@@ -12,9 +12,6 @@ using namespace std;
 extern "C" {
 	extern u32 __start__;
 	extern u32 __nx_applet_type;
-	extern __attribute__((weak)) size_t __nx_heap_size;
-
-	__attribute__((weak)) size_t __nx_heap_size = 0x4000000;
 	u32 __nx_applet_type = AppletType_OverlayApplet;
 
 	void __attribute__((weak)) __nx_win_init(void);
@@ -221,7 +218,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ImGui::Render();
 		ImGuiSDL::Render(ImGui::GetDrawData());
 		SDL_RenderPresent(sdl_render);		
-		svcSleepThread(33333333); //lock to ~30 fps
 		
 		if (HomeLongPressed || HomePressed)
 			return true;
@@ -240,6 +236,8 @@ bool LayoffMainLoop(ImGuiIO& io)
 
 int main(int argc, char* argv[])
 {    
+	void *heap;
+	svcSetHeapSize(&heap, 0x10000000);
 	svcSleepThread(5e+9);
 	__nx_win_init(); 
 
