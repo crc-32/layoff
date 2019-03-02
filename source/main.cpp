@@ -13,6 +13,24 @@ extern "C" {
 	extern u32 __start__;
 	extern u32 __nx_applet_type;
 	u32 __nx_applet_type = AppletType_OverlayApplet;
+	extern size_t __nx_heap_size;
+
+	void __libnx_initheap(void)
+	{
+		__nx_heap_size =  0x2000000*6;
+		void*  addr;
+		Result rc = svcSetHeapSize(&addr, __nx_heap_size);
+
+		if (R_FAILED(rc))
+			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_HeapAllocFailed));
+
+		// Newlib
+		extern char* fake_heap_start;
+		extern char* fake_heap_end;
+
+		fake_heap_start = (char*)addr;
+		fake_heap_end   = (char*)addr + __nx_heap_size;
+	}
 
 	void __attribute__((weak)) __nx_win_init(void);
 	void __attribute__((weak)) userAppInit(void);
@@ -236,8 +254,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 
 int main(int argc, char* argv[])
 {    
-	void *heap;
-	svcSetHeapSize(&heap, 0x10000000);
 	svcSleepThread(5e+9);
 	__nx_win_init(); 
 
