@@ -4,9 +4,10 @@ A replacement for the default Switch overlay (menu when home is held and the pow
 **Not yet ready for end-users to install**
 ## Building
 
-**At the time of writing, the libnx implementations required to build are not in a release, you have to clone master, build libnx and add the path to the nx folder in the repository to the LIBDIRS (replacing `/z/VM/libnx/nx`)**
+**At the time of writing, the libnx implementations required to build are not in a release, you have to clone master, build libnx and add the path to the nx folder in the `localconfig.mk` file)**
 
 Clone the repository and just `make`, the scripts `makelayeredfs.bat` and `makelayeredfs.sh` generate the folder structure to replace the overlay via atmosphere layeredfs for laziness' sake
+Run `git update-index --assume-unchanged localconfig.mk` to avoid annoyances with the file showing as modified
 
 ## Features and (currently) planned features
   - Custom overlay menu with the built in old overlay's features
