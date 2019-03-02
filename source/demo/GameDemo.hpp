@@ -8,6 +8,7 @@ class DemoGame : public UiItem
 public:
 	bool Draw() override 
 	{
+		if (!Running) return false;
 		if (!ImGui::Begin("T-Rex", &Running, ImGuiWindowFlags_NoResize))
 		{
 			ImGui::End();
@@ -34,7 +35,7 @@ public:
 			ImGui::Image(texTarget, ImVec2(400, 200));
 		}
 		ImGui::End();
-		return Running;
+		return true; //can't return false here as texTarget would be deallocated but ImGui would still try to render it at the end of the frame.
 	}
 
 	DemoGame() : io(ImGui::GetIO())
