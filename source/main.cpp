@@ -251,6 +251,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		{
 			if(!pwrwindow->Draw()){
 				PowerMenu = false;
+				return true;
 			}
 		}
 		

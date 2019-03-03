@@ -41,6 +41,44 @@ Result sleepConsole() {
     return rc;
 }
 
+Result powerShutdown(bool reboot) {
+	Service Srv;
+	Result rc;
+	rc = smGetService(&Srv, "appletOE");
+	
+    if (R_FAILED(rc))
+        return rc;
+
+    IpcCommand c;
+    ipcInitialize(&c);
+
+    struct CmdStruct{
+        u64 magic;
+        u64 cmdid;
+    } *cmdStruct;
+
+    cmdStruct = (CmdStruct*) ipcPrepareHeader(&c, sizeof(*cmdStruct));
+
+    cmdStruct->magic = SFCI_MAGIC;
+    cmdStruct->cmdid = reboot ? 71 : 70;
+
+    rc = serviceIpcDispatch(&Srv);
+
+    if (R_SUCCEEDED(rc)) {
+        IpcParsedCommand r;
+        ipcParse(&r);
+
+        struct Resp{
+            u64 magic;
+            u64 result;
+        } *resp = (Resp*) r.Raw;
+
+        rc = resp->result;
+    }
+
+    return rc;
+}
+
 class PowerMenuWindow
 {
 public:
@@ -61,13 +99,13 @@ public:
 		}
 		ImGui::NewLine();
 		ImGui::SetCursorPosX((1280/2)-(500/2));
-		//TODO:
+
 		if(ImGui::Button("Reboot", ImVec2(500,78))){
-			//bpcRebootSystem();
+			powerShutdown(true);
 		}
 		ImGui::SetCursorPosX((1280/2)-(500/2));
 		if(ImGui::Button("Power off", ImVec2(500,78))){
-            //bpcShutdownSystem();
+            powerShutdown(false);
         }
 		ImGui::NewLine();
 		ImGui::SetCursorPosX((1280/2)-(500/2));
