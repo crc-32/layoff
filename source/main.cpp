@@ -101,6 +101,19 @@ bool HomePressed = false;
 bool PowerPressed = false;
 //Settings
 bool IsWirelessEnabled = false;
+float BrightnessLevel = 0;
+bool IsAutoBrightnessEnabled = false;
+char CurIpAddress[16];
+
+void UpdateIpAddress()
+{
+	u32 i = 0;
+	nifmGetCurrentIpAddress(&i);	
+	snprintf(CurIpAddress, 16 ,"%i.%i.%i.%i",
+          (i >> 24) & 0xFF, (i >> 16) & 0xFF,
+          (i >> 8) & 0xFF, i & 0xFF);
+}
+
 bool OverlayAppletMainLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
@@ -184,15 +197,37 @@ void LayoffMainWindow()
 		{
 			if (ImGui::Button("Disable wireless", ImVec2(511, 0)))
 			{
-				SetSys::SetWirelessEnableFlag(false);
-				IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
+				nifmSetWirelessCommunicationEnabled(false);
+				nifmIsWirelessCommunicationEnabled(&IsWirelessEnabled);
 			}
 		}
 		else if (ImGui::Button("Enable wireless", ImVec2(511, 0)))
 		{
-			SetSys::SetWirelessEnableFlag(true);
-			IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
+			nifmSetWirelessCommunicationEnabled(true);
+			nifmIsWirelessCommunicationEnabled(&IsWirelessEnabled);
 		}
+		ImGui::Spacing();
+		ImGui::Text("Ip address: %s",CurIpAddress);
+		ImGui::Spacing();
+		ImGui::Spacing();
+		if (ImGui::Checkbox("Auto brightness", &IsAutoBrightnessEnabled))
+		{
+			if (IsAutoBrightnessEnabled)
+			{
+				if (R_FAILED(lblEnableAutoBrightnessControl()))
+					console->Print("Auto brightness change failed\n");
+			}
+			else
+			{
+				if (R_FAILED(lblDisableAutoBrightnessControl()))
+					console->Print("Auto brightness change failed\n");
+			}
+		}
+		ImGui::Text("Brightness "); ImGui::SameLine();
+		if (ImGui::SliderFloat("##Brightness", &BrightnessLevel, 0.0f, 1.0f, ""))
+			if (R_FAILED(lblSetCurrentBrightnessSetting(BrightnessLevel)))
+				console->Print("Brightness change failed\n");
+		
 	}
 	ImGui::End();
 }
@@ -226,8 +261,12 @@ bool WidgetDraw(UiItem** item)
 
 bool LayoffMainLoop(ImGuiIO& io)
 {
-	//Get the wireless status only when opening the menu
-	IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
+	//Get the system status only when opening the menu
+	nifmIsWirelessCommunicationEnabled(&IsWirelessEnabled);
+	UpdateIpAddress();	
+	lblGetCurrentBrightnessSetting(&BrightnessLevel);
+	lblIsAutoBrightnessControlEnabled(&IsAutoBrightnessEnabled);
+	
 	while (OverlayAppletMainLoop())
 	{       
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
@@ -273,6 +312,9 @@ int main(int argc, char* argv[])
 
 	romfsInit();    
 	SdlInit();
+	nifmInitialize();
+	lblInitialize();
+	
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	
@@ -300,6 +342,8 @@ QUIT: //does the overlay applet ever close ?
 	
 	delete console;
 	
+	lblExit();
+	nifmExit();
 	SdlExit();
 	return 0;
 }
