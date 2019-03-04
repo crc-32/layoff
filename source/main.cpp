@@ -4,7 +4,6 @@
 #include "UI/UI.hpp"
 #include <switch.h>
 #include <time.h>
-#include "setsys.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
 #define EVENT_NOT_FIRED(x) R_FAILED(eventWait(x,0))

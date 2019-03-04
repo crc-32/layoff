@@ -1,1 +1,1 @@
-#LNXNIGHTLY := <repo path>/nx/
+LNXNIGHTLY := /z/VM/libnx/nx
