@@ -71,18 +71,12 @@ extern "C" {
 	}
 }
 
-#include "screenConsole.hpp"
-#include "PowerMenuWindow.hpp"
-ScreenConsole *console = nullptr;
-PowerMenuWindow *pwrwindow = nullptr;
-
 bool ActiveMode;
 //Get inputs while blocking the foreground app, the long press home button is not detected in this mode
 void SwitchToActiveMode()
 {	
 	appletBeginToWatchShortHomeButtonMessage();
 	ActiveMode = true;
-	console->Print("[Input active mode]\n");
 }
 
 //Get inputs without blocking the foreground app
@@ -94,7 +88,6 @@ void SwitchToPassiveMode()
 	hidsysInitialize();
 	hidsysEnableAppletToGetInput(true); 
 	ActiveMode = false;
-	console->Print("[Input passive mode]\n");
 }
 
 //Events
@@ -104,7 +97,11 @@ bool PowerPressed = false;
 //Settings
 bool IsWirelessEnabled = false;
 
-bool PowerMenu = false;
+#include "screenConsole.hpp"
+#include "PowerMenuWindow.hpp"
+ScreenConsole *console = nullptr;
+PowerMenuWindow *pwrwindow = nullptr;
+
 bool OverlayAppletMainLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
@@ -206,7 +203,6 @@ bool IdleLoop()
 	HomeLongPressed = false;	
 	HomePressed = false;
 	PowerPressed = false;
-	PowerMenu = false;
 	while (OverlayAppletMainLoop())
 	{		
 		if (HomeLongPressed)
@@ -242,21 +238,29 @@ bool LayoffMainLoop(ImGuiIO& io)
 		SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
-		if(PowerPressed)
-			PowerMenu = true;
 		
-		if (ActiveMode && !PowerMenu) //Draw the main window only if we have exclusive input like overlay would do
-			LayoffMainWindow();
-		else if (ActiveMode && PowerMenu)
+		if (pwrwindow)
 		{
-			if(!pwrwindow->Draw()){
-				PowerMenu = false;
-				return true;
+			bool ReturnAtTheEnd = false;
+			if (!pwrwindow->Draw())
+			{
+				ReturnAtTheEnd = pwrwindow->WasIdle;
+				delete pwrwindow;
+				pwrwindow = nullptr;
 			}
+			ImGui::Render();
+			ImGuiSDL::Render(ImGui::GetDrawData());
+			SDL_RenderPresent(sdl_render);		
+			svcSleepThread(33333333); //lock to ~30 fps
+			if (ReturnAtTheEnd)
+				return true;
+			continue;
 		}
 		
+		if (ActiveMode) //Draw the main window only if we have exclusive input like overlay would do
+			LayoffMainWindow();		
 		
-		if (console && !PowerMenu) 
+		if (console) 
 			console->Draw();
 		
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
@@ -273,7 +277,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 			return true;
 		
 		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B){
-			PowerMenu = false;
 			if (!DrewSomething)
 				return true;
 			else if (ActiveMode)
@@ -282,6 +285,9 @@ bool LayoffMainLoop(ImGuiIO& io)
 		
 		if (!DrewSomething && !ActiveMode)
 			SwitchToActiveMode();
+		
+		if (PowerPressed)
+			pwrwindow = new PowerMenuWindow(false);
 	}
 	return false; //The app should terminate
 }
@@ -297,7 +303,6 @@ int main(int argc, char* argv[])
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	
 	console = new ScreenConsole();
-	pwrwindow = new PowerMenuWindow();
 
 RESET:
 	console->Print("Entering idle mode...\n");
@@ -309,7 +314,8 @@ RESET:
 		goto QUIT;
 	HomeLongPressed = false;	
 	HomePressed = false;
-	PowerMenu = PowerPressed;
+	if (PowerPressed && pwrwindow == nullptr)
+		pwrwindow = new PowerMenuWindow(true);
 	PowerPressed = false;
 	SwitchToActiveMode(); //Lock input for the foreground app.
 	
