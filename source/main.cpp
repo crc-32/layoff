@@ -109,8 +109,8 @@ void UpdateIpAddress()
 	u32 i = 0;
 	nifmGetCurrentIpAddress(&i);	
 	snprintf(CurIpAddress, 16 ,"%i.%i.%i.%i",
-          (i >> 24) & 0xFF, (i >> 16) & 0xFF,
-          (i >> 8) & 0xFF, i & 0xFF);
+			i & 0xFF,(i >> 8) & 0xFF, 
+			(i >> 16) & 0xFF,(i >> 24) & 0xFF);
 }
 
 bool OverlayAppletMainLoop(void) {
