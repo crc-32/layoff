@@ -45,6 +45,10 @@ extern "C" {
 		if (R_FAILED(rc))
 			fatalSimple(rc);
 
+		rc = psmInitialize();
+		if (R_FAILED(rc))
+			fatalSimple(rc);
+
 		rc = fsInitialize();
 		if (R_FAILED(rc))
 			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
@@ -66,6 +70,7 @@ extern "C" {
 		fsExit();
 		appletExit();
 		hidsysExit();
+		psmExit();
 		hidExit();
 		smExit();
 	}
@@ -94,6 +99,8 @@ void SwitchToPassiveMode()
 	ActiveMode = false;
 	console->Print("[Input passive mode]\n");
 }
+u32 batteryPercentage = 0;
+u64 ltimestamp;
 
 //Events
 bool HomeLongPressed = false;
@@ -104,6 +111,16 @@ bool IsWirelessEnabled = false;
 bool OverlayAppletMainLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
+
+	u64 ctimestamp;
+	timeGetCurrentTime(TimeType_LocalSystemClock, &ctimestamp);
+	if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
+		psmGetBatteryChargePercentage(&batteryPercentage);
+		ltimestamp = ctimestamp;
+	} else if (!ltimestamp){
+		psmGetBatteryChargePercentage(&batteryPercentage);
+		ltimestamp = ctimestamp;
+	}
 	
 	if (console)
 		console->Print("Received message: " + to_string(msg) + "\n");
@@ -145,7 +162,48 @@ void ImguiBindInputs(ImGuiIO& io)
 	io.NavInputs[ImGuiNavInput_FocusNext] = kHeld & (KEY_ZR | KEY_R);
 	io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
 }
+Texture *statusTexTarget;
+void StatusDisplay()
+{
+	//Battery
+	std::string ptext = std::to_string(batteryPercentage) + "%%";
+	ImVec2 ptextSize = ImGui::CalcTextSize(ptext.c_str());
+	ImGuiStyle cStyle = ImGui::GetStyle();
+	int bOffsetY = ptextSize.y/2;
+    SDL_Rect Battery =  {450,bOffsetY-16,32,16};
+    SDL_Rect BatteryT = {450+32,(bOffsetY-16)+4,4,8};
+	SDL_SetRenderTarget(sdl_render, statusTexTarget->Source);
+	ImVec4 bgCol = cStyle.Colors[ImGuiCol_WindowBg];
+	ImVec4 fgCol = cStyle.Colors[ImGuiCol_Text];
 
+	SDL_SetRenderDrawColor(sdl_render,  //ImVec4 to seperate RGBA
+		max(0, min(255, (int)floor(bgCol.x * 256.0))),
+		max(0, min(255, (int)floor(bgCol.y * 256.0))),
+		max(0, min(255, (int)floor(bgCol.z * 256.0))),
+		max(0, min(255, (int)floor(bgCol.w * 256.0))));
+	SDL_RenderClear(sdl_render);
+
+    SDL_SetRenderDrawColor(sdl_render,
+		max(0, min(255, (int)floor(fgCol.x * 256.0))),
+		max(0, min(255, (int)floor(fgCol.y * 256.0))),
+		max(0, min(255, (int)floor(fgCol.z * 256.0))),
+		max(0, min(255, (int)floor(fgCol.w * 256.0))));
+    SDL_RenderDrawRect(sdl_render, &Battery);
+    SDL_RenderFillRect(sdl_render, &BatteryT);
+    SDL_Rect BatteryP = {450+2,(bOffsetY-16)+2,static_cast<int>(nearbyint(((double)batteryPercentage)*28/100)),12};
+	if(batteryPercentage <= 15) {
+		SDL_SetRenderDrawColor(sdl_render, 255, 0, 0, 255);
+	}
+    SDL_RenderFillRect(sdl_render, &BatteryP);
+
+	//Back to rendering for window
+	SDL_SetRenderTarget(sdl_render, NULL);
+    ImGui::Image(statusTexTarget, ImVec2(512, 32));
+	//Battery %
+	ImGui::SetCursorPos(ImVec2(475-(ptextSize.x), 0));
+	ImGui::Text(ptext.c_str());
+	ImGui::Spacing();
+}
 #include "demo/SdlEyes.hpp"
 #include "demo/Calc.hpp"
 #include "demo/GameDemo.hpp"
@@ -158,6 +216,7 @@ void LayoffMainWindow()
 	ImGui::Begin("Layoff", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 	ImGui::SetWindowPos(ImVec2(1280 - 512, 0));
 	ImGui::SetWindowSize(ImVec2(512, 720));
+	StatusDisplay();
 	ImGui::Checkbox("Show screenConsole", &console->Display);
 	if (ImGui::CollapsingHeader("Demos"))
 	{
@@ -228,6 +287,11 @@ bool LayoffMainLoop(ImGuiIO& io)
 {
 	//Get the wireless status only when opening the menu
 	IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
+	statusTexTarget = new Texture();
+	statusTexTarget->Source = SDL_CreateTexture(sdl_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 512, 32);
+	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
+	psmGetBatteryChargePercentage(&batteryPercentage);
+
 	while (OverlayAppletMainLoop())
 	{       
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
@@ -279,6 +343,8 @@ int main(int argc, char* argv[])
 	console = new ScreenConsole();
 
 RESET:
+	if(statusTexTarget)
+		ImGuiSDL::FreeTexture(statusTexTarget);
 	console->Print("Entering idle mode...\n");
 	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	SDL_RenderClear(sdl_render);
