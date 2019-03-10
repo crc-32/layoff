@@ -111,16 +111,6 @@ bool IsWirelessEnabled = false;
 bool OverlayAppletMainLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
-
-	u64 ctimestamp;
-	timeGetCurrentTime(TimeType_LocalSystemClock, &ctimestamp);
-	if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
-		psmGetBatteryChargePercentage(&batteryPercentage);
-		ltimestamp = ctimestamp;
-	} else if (!ltimestamp){
-		psmGetBatteryChargePercentage(&batteryPercentage);
-		ltimestamp = ctimestamp;
-	}
 	
 	if (console)
 		console->Print("Received message: " + to_string(msg) + "\n");
@@ -290,10 +280,20 @@ bool LayoffMainLoop(ImGuiIO& io)
 	statusTexTarget = new Texture();
 	statusTexTarget->Source = SDL_CreateTexture(sdl_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 512, 32);
 	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
-	psmGetBatteryChargePercentage(&batteryPercentage);
 
 	while (OverlayAppletMainLoop())
 	{       
+		// Battery % checks
+		u64 ctimestamp;
+		timeGetCurrentTime(TimeType_LocalSystemClock, &ctimestamp);
+		if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
+			psmGetBatteryChargePercentage(&batteryPercentage);
+			ltimestamp = ctimestamp;
+		} else if (!ltimestamp){
+			psmGetBatteryChargePercentage(&batteryPercentage);
+			ltimestamp = ctimestamp;
+		}
+
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
 		SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
