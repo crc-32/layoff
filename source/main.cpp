@@ -161,9 +161,11 @@ void ImguiBindInputs(ImGuiIO& io)
 #include "demo/SdlEyes.hpp"
 #include "demo/Calc.hpp"
 #include "demo/GameDemo.hpp"
+#include "demo/CheatScreen.hpp"
 SdlEyes *demoEyes = nullptr;
 DemoCalc *demoCalc = nullptr;
 DemoGame *demoGame = nullptr;
+CheatScreen *cheatScreen = nullptr;
 
 void LayoffMainWindow() 
 {
@@ -183,11 +185,16 @@ void LayoffMainWindow()
 			if (!demoCalc)
 				demoCalc = new DemoCalc();
 		}
-		if (ImGui::Button("???", ImVec2(511, 0)))
+		if (ImGui::Button("T-Rex", ImVec2(511, 0)))
 		{
 			if (!demoGame)
 				demoGame = new DemoGame();
 		}
+		if (ImGui::Button("Cheat engine", ImVec2(511, 0)))
+		{
+			if (!cheatScreen)
+				cheatScreen = new CheatScreen();
+		}		
 	}
 	ImGui::Spacing();
 	if (ImGui::CollapsingHeader("System", ImGuiTreeNodeFlags_DefaultOpen))
@@ -283,6 +290,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
 		DrewSomething |= WidgetDraw((UiItem**)&demoCalc);
 		DrewSomething |= WidgetDraw((UiItem**)&demoGame);
+		DrewSomething |= WidgetDraw((UiItem**)&cheatScreen);
 
 		ImGui::Render();
 		ImGuiSDL::Render(ImGui::GetDrawData());
