@@ -143,7 +143,6 @@ private:
 
 	struct RamAddr {
 		u64 addr;
-		u64 lastValue;
 		MemoryType type;
 	};
 
@@ -176,14 +175,14 @@ private:
 			for (auto val : Results)
 			{
 				stringstream str;
-				str << "OFF: " << std::uppercase << std::hex << val.addr << std::dec << " - " << val.lastValue << endl;
+				str << std::uppercase << std::hex << val.addr << endl;
 				vResults.push_back(str.str());
 			}
 		vOffsets.clear();
 		for (auto val : Offsets)
 		{
 			stringstream str;
-			str << "OFF: " << std::uppercase << std::hex << val.addr << std::dec << " - " << val.lastValue << endl;
+			str << std::uppercase << std::hex << val.addr << endl;
 			vOffsets.push_back(str.str());
 		}
 	}
@@ -233,7 +232,7 @@ private:
 						memcpy(&realValue, buffer + i, val.size);
 		
 						if (realValue == val.value) 
-							Results.push_back({ .addr = meminfo.addr + offset + i, .lastValue = realValue, .type = (MemoryType) meminfo.type });
+							Results.push_back({ .addr = meminfo.addr + offset + i, .type = (MemoryType) meminfo.type });
 					}
 		
 					offset += bufferSize;
@@ -249,10 +248,9 @@ private:
 
 				dmntchtReadCheatProcessMemory(addr.addr, &value, val.size);
 
-				if (value == val.value) {
-					addr.lastValue = value;
+				if (value == val.value) 
 					newAddresses.push_back(addr);
-				}
+				
 			}
 
 			Results = std::move(newAddresses);
