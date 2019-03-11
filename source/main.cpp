@@ -258,16 +258,16 @@ bool IdleLoop()
 	{		
 		if (HomeLongPressed)
 				return true;
-		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
-		SDL_RenderClear(sdl_render);
-		ImGui::NewFrame();
 		if(ntm->IsActive())
 		{
+			SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
+			SDL_RenderClear(sdl_render);
+			ImGui::NewFrame();
 			ntm->Render();
+			ImGui::Render();
+			ImGuiSDL::Render(ImGui::GetDrawData());
+			SDL_RenderPresent(sdl_render);
 		}
-		ImGui::Render();
-		ImGuiSDL::Render(ImGui::GetDrawData());
-		SDL_RenderPresent(sdl_render);
 
 		//TEST
 		if(!eventActive(notif))
