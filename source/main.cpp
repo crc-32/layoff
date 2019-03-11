@@ -6,7 +6,6 @@
 #include <time.h>
 #include "setsys.hpp"
 #include "NotificationManager.hpp"
-#include "Notification.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
 #define EVENT_NOT_FIRED(x) R_FAILED(eventWait(x,0))
@@ -424,8 +423,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
 		/*if(!ntm->IDInUse("test")){
-			Notification *n = new Notification("test", "Test notif", NULL, 10);
-			ntm->Push(n);
+			ntm->Push("test", "Test notif", "", 10);
 			ntm->ShowLatest();
 		}*/
 		

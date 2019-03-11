@@ -1,4 +1,5 @@
 #include "NotificationManager.hpp"
+#include "UI/imgui_sdl.h"
 
 void NotificationManager::Render()
 {
@@ -8,9 +9,9 @@ void NotificationManager::Render()
     }
 }
 
-void NotificationManager::Push(Notification *notification)
+void NotificationManager::Push(string id, string headerText, string iconPath, u32 timeout)
 {
-    this->notifications.push_front(notification);
+    this->notifications.push_front(new Notification(id, headerText, (iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL, timeout));
 }
 
 void NotificationManager::Pop()

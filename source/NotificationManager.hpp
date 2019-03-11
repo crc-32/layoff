@@ -7,7 +7,7 @@ class NotificationManager
 {
     public:
         void Render();
-        void Push(Notification *notification);
+        void Push(string id, string headerText, string iconPath, u32 timeout);
         void Pop();
         void PopAll();
         void ShowLatest();
