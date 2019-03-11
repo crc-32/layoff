@@ -5,6 +5,8 @@
 #include <switch.h>
 #include <time.h>
 #include "setsys.hpp"
+#include "NotificationManager.hpp"
+#include "Notification.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
 #define EVENT_NOT_FIRED(x) R_FAILED(eventWait(x,0))
@@ -78,6 +80,7 @@ extern "C" {
 
 #include "screenConsole.hpp"
 ScreenConsole *console = nullptr;
+NotificationManager *ntm = nullptr;
 
 bool ActiveMode;
 //Get inputs while blocking the foreground app, the long press home button is not detected in this mode
@@ -253,7 +256,17 @@ bool IdleLoop()
 	while (OverlayAppletMainLoop())
 	{		
 		if (HomeLongPressed)
-			return true;		
+				return true;
+		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
+		SDL_RenderClear(sdl_render);
+		ImGui::NewFrame();
+		if(ntm->IsActive())
+		{
+			ntm->Render();
+		}
+		ImGui::Render();
+		ImGuiSDL::Render(ImGui::GetDrawData());
+		SDL_RenderPresent(sdl_render);
 		svcSleepThread(5e+8); //wait half a second
 	}
 	return false;
@@ -284,8 +297,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 	while (OverlayAppletMainLoop())
 	{       
 		// Battery % checks
-		u64 ctimestamp;
-		timeGetCurrentTime(TimeType_LocalSystemClock, &ctimestamp);
+		u64 ctimestamp = time(NULL);
 		if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
 			psmGetBatteryChargePercentage(&batteryPercentage);
 			ltimestamp = ctimestamp;
@@ -293,17 +305,25 @@ bool LayoffMainLoop(ImGuiIO& io)
 			psmGetBatteryChargePercentage(&batteryPercentage);
 			ltimestamp = ctimestamp;
 		}
+		
 
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
 		SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
+		/*if(!ntm->IDInUse("test")){
+			Notification *n = new Notification("test", "Test notif", NULL, 10);
+			ntm->Push(n);
+			ntm->ShowLatest();
+		}*/
 		
 		if (ActiveMode) //Draw the main window only if we have exclusive input like overlay would do
 			LayoffMainWindow();
 		
 		if (console) 
 			console->Draw();
+
+		ntm->Render();
 		
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
 		DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
@@ -341,6 +361,7 @@ int main(int argc, char* argv[])
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	
 	console = new ScreenConsole();
+	ntm = new NotificationManager();
 
 RESET:
 	if(statusTexTarget)
