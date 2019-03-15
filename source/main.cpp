@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include "UI/UI.hpp"
 #include <switch.h>
 #include <time.h>
@@ -108,7 +109,7 @@ u64 ltimestamp;
 bool HomeLongPressed = false;
 bool HomePressed = false;
 bool PowerPressed = false;
-Event *notif = nullptr;
+Event notif;
 //Settings
 bool IsWirelessEnabled = false;
 bool OverlayAppletMainLoop(void) {
@@ -249,6 +250,34 @@ void LayoffMainWindow()
 	ImGui::End();
 }
 
+void notifEventHandler()
+{
+	if(!eventActive(&notif))
+			fatalSimple(MAKERESULT(255, 321));
+	if(!R_FAILED(eventWait(&notif, 1000000)))
+	{
+		IReceiverNotification n;
+		ovlnIReceiverGetNotification(&n);
+		std::stringstream print;
+		switch (n.type)
+		{
+			case BatteryNotifType:
+				print << "Battery notif:" << to_string(n.content) << "\n";
+				break;
+			case VolumeNotifType:
+				print << "Volume notif:" << to_string(n.content) << "\n";
+				break;
+			case ScreenshotNotifType:
+				print << "Screenshot notif\n";
+				break;
+			default:
+				print << "Unknown notif:" << std::hex << n.type << "\n";
+				break;
+		}
+		console->Print(print.str());
+	}
+}
+
 bool IdleLoop()
 {
 	HomeLongPressed = false;	
@@ -268,13 +297,7 @@ bool IdleLoop()
 			SDL_RenderPresent(sdl_render);
 		}
 
-		//TEST
-		if(!eventActive(notif))
-			fatalSimple(MAKERESULT(255, 321));
-		if(!R_FAILED(eventWait(notif, 5e+8)))
-		{
-			console->Print("Notif Event\n");
-		}
+		notifEventHandler();
 	}
 	return false;
 }
@@ -292,104 +315,6 @@ bool WidgetDraw(UiItem** item)
 	}
 	return result;
 }
-Service irec;
-Result getIRec(Service *out, Service *rcv)
-{
-	IpcCommand c;
-	ipcInitialize(&c); // Get IRec
-	struct rq{
-		u64 magic;
-		u64 cmd_id;
-	} *raw;
-
-	raw = (rq*)serviceIpcPrepareHeader(rcv, &c, sizeof(*raw));
-	raw->magic = SFCI_MAGIC;
-	raw->cmd_id = 0;
-
-	Result rc = serviceIpcDispatch(rcv);
-
-    if (R_SUCCEEDED(rc)) {
-        IpcParsedCommand r;
-        struct rsp{
-            u64 magic;
-            u64 result;
-        } *resp;
-
-        serviceIpcParse(rcv, &r, sizeof(*resp));
-        resp = (rsp*)r.Raw;
-
-		serviceCreateSubservice(out, rcv, &r, 0);
-		return resp->result;
-
-	} else fatalSimple(rc);
-}
-
-Result regIRec(Service *irec)
-{
-	IpcCommand c;
-	ipcInitialize(&c); // Reg IRec
-
-	struct rq{
-		u64 magic;
-		u64 cmd_id;
-	} *raw;
-
-	raw = (rq*)serviceIpcPrepareHeader(irec, &c, sizeof(*raw));
-	raw->magic = SFCI_MAGIC;
-	raw->cmd_id = 0;
-	Result rc = serviceIpcDispatch(irec);
-
-    if (R_SUCCEEDED(rc)) {
-        IpcParsedCommand r;
-        struct rsp{
-            u64 magic;
-            u64 result;
-        } *resp;
-
-        serviceIpcParse(irec, &r, sizeof(*resp));
-        resp = (rsp*)r.Raw;
-		return resp->result;
-	} else fatalSimple(rc);
-}
-
-Result getIRecNotifEvent(Event *out, Service *irec)
-{
-	IpcCommand c;
-	ipcInitialize(&c); // Get Handle
-	struct rq2{
-		u64 magic;
-		u64 cmd_id;
-		char unk[10];
-	} *raw2;
-
-	raw2 = (rq2*)serviceIpcPrepareHeader(irec, &c, sizeof(*raw2));
-	raw2->magic = SFCI_MAGIC;
-	raw2->cmd_id = 0;
-	strcpy(raw2->unk, "overlay\0\0");
-	Result rc = serviceIpcDispatch(irec);
-
-    if (R_SUCCEEDED(rc)) {
-        IpcParsedCommand r;
-        struct rsp{
-            u64 magic;
-            u64 result;
-        } *resp;
-
-        serviceIpcParse(irec, &r, sizeof(*resp));
-        resp = (rsp*)r.Raw;
-		eventLoadRemote(out, r.Handles[0], true);
-		return resp->result;
-	} else fatalSimple(rc);
-}
-
-void rectest()
-{
-	Service s;
-	smGetService(&s, "ovln:rcv");
-	getIRec(&irec, &s);
-	regIRec(&irec);
-	getIRecNotifEvent(notif, &irec);
-}
 
 bool LayoffMainLoop(ImGuiIO& io)
 {
@@ -401,12 +326,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 
 	while (OverlayAppletMainLoop())
 	{       
-		if(!eventActive(notif))//TEST
-			fatalSimple(MAKERESULT(255, 321));
-		if(!R_FAILED(eventWait(notif, 1000000)))
-		{
-			console->Print("Notif Event\n");
-		}
+		notifEventHandler();
 		// Battery % checks
 		u64 ctimestamp = time(NULL);
 		if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
@@ -469,7 +389,8 @@ int main(int argc, char* argv[])
 	SdlInit();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-	rectest();
+	ovlnInitialize();
+	ovlnIReceiverGetEvent(&notif);
 	
 	console = new ScreenConsole();
 	ntm = new NotificationManager();
@@ -499,5 +420,6 @@ QUIT: //does the overlay applet ever close ?
 	delete console;
 	
 	SdlExit();
+	ovlnExit();
 	return 0;
 }
