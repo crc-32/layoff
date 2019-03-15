@@ -9,9 +9,22 @@ void NotificationManager::Render()
     }
 }
 
-void NotificationManager::Push(string id, string headerText, string iconPath, u32 timeout)
+void NotificationManager::Push(string id, string contentText, string iconPath, u32 timeout)
 {
-    this->notifications.push_front(new Notification(id, headerText, (iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL, timeout));
+    if(this->IDInUse(id))
+    {
+        for(size_t i = 0; i < this->notifications.size()-1; i++)
+        {
+            if(this->notifications[i]->GetID() == id){
+                this->notifications[i]->SetContentText(contentText);
+                this->notifications[i]->SetIcon((iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL);
+                break;
+            }
+        }
+    }else{
+        this->notifications.push_front(new Notification(id, contentText, (iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL, timeout));
+    }
+
 }
 
 void NotificationManager::Pop()

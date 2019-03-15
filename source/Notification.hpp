@@ -9,14 +9,26 @@ using namespace std;
 class Notification
 {
     public:
-        Notification(string id, string headerText, Texture *icon, u32 timeout)
+        Notification(string id, string contentText, Texture *icon, u32 timeout)
         {
-            this->headerText = headerText;
+            this->contentText = contentText;
             this->icon = icon;
             this->isVisible = false;
             this->timeout = timeout;
             this->id = id;
             timeCreated = 0;
+        }
+
+        void SetContentText(string contentText)
+        {
+            this->contentText = contentText;
+        }
+
+        void SetIcon(Texture *icon)
+        {
+            if(this->icon)
+                ImGuiSDL::FreeTexture(this->icon);
+            this->icon = icon;
         }
         
         ~Notification()
@@ -41,12 +53,12 @@ class Notification
         {
             if (!isVisible) return false;
             u64 timeNow = time(NULL);
-            if (timeNow - timeCreated >= timeout)
+            if (timeNow - timeCreated >= timeout && timeout != 0)
             {
                 this->Hide();
                 return false;
             }
-            if(!ImGui::Begin(headerText.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs))
+            if(!ImGui::Begin(contentText.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs))
             {
                 ImGui::End();
                 return false;
@@ -59,8 +71,8 @@ class Notification
                 ImGui::SetCursorPos(ImVec2(8, 13));
                 ImGui::Image(icon, ImVec2(64,64));
             }
-            ImGui::SetCursorPos(ImVec2(8+64+4, 45-(ImGui::CalcTextSize(headerText.c_str()).y/2)));
-            ImGui::Text(headerText.c_str());
+            ImGui::SetCursorPos(ImVec2(8+64+4, 45-(ImGui::CalcTextSize(contentText.c_str()).y/2)));
+            ImGui::Text(contentText.c_str());
             ImGui::PopStyleColor();
             ImGui::End();
             return true;
@@ -72,7 +84,7 @@ class Notification
         }
 
     private:
-        string headerText;
+        string contentText;
         Texture *icon;
         bool isVisible;
         u32 timeout;
