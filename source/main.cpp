@@ -259,16 +259,27 @@ void notifEventHandler()
 		IReceiverNotification n;
 		ovlnIReceiverGetNotification(&n);
 		std::stringstream print;
+		std::stringstream nText;
 		switch (n.type)
 		{
 			case BatteryNotifType:
 				print << "Battery notif:" << to_string(n.content) << "\n";
+				nText << "Battery Low: " << to_string(n.content) << "%%";
+				ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
 				break;
 			case VolumeNotifType:
 				print << "Volume notif:" << to_string(n.content) << "\n";
+				ntm->HandleVolume(n.content);
 				break;
 			case ScreenshotNotifType:
 				print << "Screenshot notif\n";
+				nText << "Capture taken";
+				ntm->Push("scrtaken", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
+				break;
+			case VideoNotifType:
+				print << "Video notif\n";
+				nText << "Video capture taken";
+				ntm->Push("vidtaken", nText.str(), "romfs:/notificationIcons/video.png", 3);
 				break;
 			default:
 				print << "Unknown notif:" << std::hex << n.type << "\n";
@@ -278,12 +289,27 @@ void notifEventHandler()
 	}
 }
 
+void updateBattery()
+{
+	u64 ctimestamp = time(NULL);
+	if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last time we checked, or it's the first time
+		psmGetBatteryChargePercentage(&batteryPercentage);
+		ltimestamp = ctimestamp;
+	} else if (!ltimestamp){
+		psmGetBatteryChargePercentage(&batteryPercentage);
+		ltimestamp = ctimestamp;
+	}
+	if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
+		ntm->HideID("batlow");
+}
+
 bool IdleLoop()
 {
 	HomeLongPressed = false;	
 	HomePressed = false;
 	while (OverlayAppletMainLoop())
 	{		
+		updateBattery();
 		if (HomeLongPressed)
 				return true;
 		if(ntm->IsActive())
@@ -328,24 +354,13 @@ bool LayoffMainLoop(ImGuiIO& io)
 	{       
 		notifEventHandler();
 		// Battery % checks
-		u64 ctimestamp = time(NULL);
-		if(ltimestamp && ltimestamp - ctimestamp >= 5) { // When 5 secs passed since the last we checked, or it's the first time
-			psmGetBatteryChargePercentage(&batteryPercentage);
-			ltimestamp = ctimestamp;
-		} else if (!ltimestamp){
-			psmGetBatteryChargePercentage(&batteryPercentage);
-			ltimestamp = ctimestamp;
-		}
+		updateBattery();
 		
 
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
 		SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
-		/*if(!ntm->IDInUse("test")){
-			ntm->Push("test", "Test notif", "", 10);
-			ntm->ShowLatest();
-		}*/
 		
 		if (ActiveMode) //Draw the main window only if we have exclusive input like overlay would do
 			LayoffMainWindow();

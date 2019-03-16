@@ -58,7 +58,7 @@ class Notification
                 this->Hide();
                 return false;
             }
-            if(!ImGui::Begin(contentText.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs))
+            if(!ImGui::Begin(id.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav))
             {
                 ImGui::End();
                 return false;
@@ -85,9 +85,11 @@ class Notification
 
     private:
         string contentText;
-        Texture *icon;
+    
+    protected:
+        string id;
         bool isVisible;
         u32 timeout;
         u64 timeCreated;
-        string id;
+        Texture *icon;
 };
