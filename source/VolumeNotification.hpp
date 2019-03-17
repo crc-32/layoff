@@ -43,12 +43,12 @@ public:
             ImGui::SetCursorPos(ImVec2(8, 13));
             ImGui::Image(icon, ImVec2(64,64));
         }
-        ImGui::SetCursorPos(ImVec2(8+64+4, 45-(36/2)));
+        ImGui::SetCursorPos(ImVec2(8+64+4, 45-(32/2)));
         if(currentStep < 256)
         {
-            ImGui::ProgressBar(((float)currentStep)/15.0f, ImVec2((420-(8+64+4))-8, 36));
+            ImGui::ProgressBar(((float)currentStep)/15.0f, ImVec2((420-(8+64+4))-8, 32), "");
         }else{ // Full muted
-            ImGui::ProgressBar(0.0f/15.0f, ImVec2((420-(8+64+4))-8, 36), "Mute");
+            ImGui::ProgressBar(0.0f/15.0f, ImVec2((420-(8+64+4))-8, 32), "Mute");
         }
         ImGui::PopStyleColor();
         ImGui::End();

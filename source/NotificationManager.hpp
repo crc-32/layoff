@@ -9,7 +9,7 @@ class NotificationManager
     public:
         NotificationManager();
         void Render();
-        void Push(string id, string headerText, string iconPath, u32 timeout);
+        void Push(string id, string contentText, string iconPath, u32 timeout);
         void Pop();
         void PopAll();
         void ShowLatest();

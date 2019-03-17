@@ -262,10 +262,31 @@ void notifEventHandler()
 		std::stringstream nText;
 		switch (n.type)
 		{
-			case BatteryNotifType:
+			case LowBatNotifType:
 				print << "Battery notif:" << to_string(n.content) << "\n";
 				nText << "Battery Low: " << to_string(n.content) << "%%";
 				ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
+				break;
+			case BatteryNotifType:
+				print << "Charge notif\n";
+				ChargerType cType;
+				psmGetChargerType(&cType);
+				if(cType != ChargerType_None)
+				{
+					ntm->HideID("batlow");
+					if(batteryPercentage != 100)
+					{
+						nText << "Charging " << to_string(batteryPercentage) << "%%";
+						ntm->Push("charge", nText.str(), "romfs:/notificationIcons/batCharge.png", 5);
+					}else{
+						nText << "Charged";
+						ntm->Push("charge", nText.str(), "romfs:/notificationIcons/batCharged.png", 5);
+					}
+				}else{
+					ntm->HideID("charge");
+					if(batteryPercentage <= 15)
+						ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
+				}
 				break;
 			case VolumeNotifType:
 				print << "Volume notif:" << to_string(n.content) << "\n";
@@ -301,6 +322,12 @@ void updateBattery()
 	}
 	if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
 		ntm->HideID("batlow");
+	else if (ntm->IDInUse("batlow"))
+	{
+		std::stringstream nText;
+		nText << "Battery Low: " << to_string(batteryPercentage) << "%%";
+		ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
+	}
 }
 
 bool IdleLoop()
