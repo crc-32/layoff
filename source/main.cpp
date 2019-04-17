@@ -5,7 +5,6 @@
 #include "UI/UI.hpp"
 #include <switch.h>
 #include <time.h>
-#include "setsys.hpp"
 #include "NotificationManager.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
@@ -304,11 +303,6 @@ void notifEventHandler()
 		std::stringstream nText;
 		switch (n.type)
 		{
-			case LowBatNotifType:
-				print << "Battery notif:" << to_string(n.content) << "\n";
-				nText << "Battery Low: " << to_string(n.content) << "%%";
-				ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
-				break;
 			case BatteryNotifType:
 				print << "Charge notif\n";
 				ChargerType cType;
