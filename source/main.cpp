@@ -106,7 +106,6 @@ u64 ltimestamp;
 bool HomeLongPressed = false;
 bool HomePressed = false;
 bool PowerPressed = false;
-Event notif;
 
 #include "PowerMenuWindow.hpp"
 PowerMenuWindow *pwrwindow = nullptr;
@@ -292,71 +291,6 @@ void LayoffMainWindow()
 	ImGui::End();
 }
 
-void notifEventHandler()
-{
-	if(!eventActive(&notif))
-			fatalSimple(MAKERESULT(255, 321));
-	if(!R_FAILED(eventWait(&notif, 1000000)))
-	{
-		IReceiverNotification n;
-		ovlnIReceiverGetNotification(&n);
-		std::stringstream print;
-		std::stringstream nText;
-		switch (n.type)
-		{
-			case BatteryNotifType:
-				print << "Charge notif\n";
-				ChargerType cType;
-				psmGetChargerType(&cType);
-				if(cType != ChargerType_None)
-				{
-					ntm->HideID("batlow");
-					if(batteryPercentage != 100)
-					{
-						nText << "Charging " << to_string(batteryPercentage) << "%%";
-						ntm->Push("charge", nText.str(), "romfs:/notificationIcons/batCharge.png", 5);
-					}else{
-						nText << "Charged";
-						ntm->Push("charge", nText.str(), "romfs:/notificationIcons/batCharged.png", 5);
-					}
-				}else{
-					ntm->HideID("charge");
-					if(batteryPercentage <= 15)
-						ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
-				}
-				break;
-			case VolumeNotifType:
-				print << "Volume notif:" << to_string(n.content) << "\n";
-				ntm->HandleVolume(n.content);
-				break;
-			case ScreenshotNotifType:
-				print << "Screenshot notif\n";
-				nText << "Capture taken";
-				ntm->Push("scrtaken", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
-				break;
-			case ScreenshotFailNotifType:
-				print << "Screenshot fail notif\n";
-				nText << "Capture failed";
-				ntm->Push("scrfail", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
-				break;
-			case VideoNotifType:
-				print << "Video notif\n";
-				nText << "Video capture taken";
-				ntm->Push("vidtaken", nText.str(), "romfs:/notificationIcons/video.png", 3);
-				break;
-			case VideoFailNotifType:
-				print << "Video fail notif\n";
-				nText << "Video capture failed";
-				ntm->Push("vidfail", nText.str(), "romfs:/notificationIcons/video.png", 3);
-				break;
-			default:
-				print << "Unknown notif:" << std::hex << n.type << "\n";
-				break;
-		}
-		console->Print(print.str());
-	}
-}
-
 void updateBattery()
 {
 	u64 ctimestamp = time(NULL);
@@ -385,7 +319,7 @@ bool IdleLoop()
 	while (OverlayAppletMainLoop())
 	{		
 		updateBattery();
-		notifEventHandler();
+		ntm->EventHandler(batteryPercentage);
 
 		if(ntm->IsActive())
 		{
@@ -432,10 +366,9 @@ bool LayoffMainLoop(ImGuiIO& io)
 	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
 	while (OverlayAppletMainLoop())
 	{       
-		notifEventHandler();
 		// Battery % checks
 		updateBattery();
-		
+		ntm->EventHandler(batteryPercentage);
 
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
 		SDL_RenderClear(sdl_render);
@@ -511,10 +444,9 @@ int main(int argc, char* argv[])
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 	ovlnInitialize();
-	ovlnIReceiverGetEvent(&notif);
 	
 	console = new ScreenConsole();
-	ntm = new NotificationManager();
+	ntm = new NotificationManager(console);
 
 RESET:
 	if(statusTexTarget)

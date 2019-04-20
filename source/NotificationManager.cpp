@@ -1,9 +1,79 @@
 #include "NotificationManager.hpp"
 #include "UI/imgui_sdl.h"
+#include "screenConsole.hpp"
+#include <string>
+#include <iomanip>
 
-NotificationManager::NotificationManager()
+NotificationManager::NotificationManager(ScreenConsole *console)
 {
     this->volNotif = nullptr;
+    ovlnIReceiverGetEvent(&this->notifEvent);
+    this->console = console;
+}
+
+void NotificationManager::EventHandler(u32 batteryPercentage)
+{
+	if(!eventActive(&this->notifEvent))
+			fatalSimple(MAKERESULT(255, 321));
+	if(!R_FAILED(eventWait(&this->notifEvent, 1000000)))
+	{
+		IReceiverNotification n;
+		ovlnIReceiverGetNotification(&n);
+		std::stringstream print;
+		std::stringstream nText;
+		switch (n.type)
+		{
+			case BatteryNotifType:
+				print << "Charge notif\n";
+				ChargerType cType;
+				psmGetChargerType(&cType);
+				if(cType != ChargerType_None)
+				{
+					this->HideID("batlow");
+					if(batteryPercentage != 100)
+					{
+						nText << "Charging " << to_string(batteryPercentage) << "%%";
+						this->Push("charge", nText.str(), "romfs:/notificationIcons/batCharge.png", 5);
+					}else{
+						nText << "Charged";
+						this->Push("charge", nText.str(), "romfs:/notificationIcons/batCharged.png", 5);
+					}
+				}else{
+					this->HideID("charge");
+					if(batteryPercentage <= 15)
+						this->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
+				}
+				break;
+			case VolumeNotifType:
+				print << "Volume notif:" << to_string(n.content) << "\n";
+				this->HandleVolume(n.content);
+				break;
+			case ScreenshotNotifType:
+				print << "Screenshot notif\n";
+				nText << "Capture taken";
+				this->Push("scrtaken", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
+				break;
+			case ScreenshotFailNotifType:
+				print << "Screenshot fail notif\n";
+				nText << "Capture failed";
+				this->Push("scrfail", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
+				break;
+			case VideoNotifType:
+				print << "Video notif\n";
+				nText << "Video capture taken";
+				this->Push("vidtaken", nText.str(), "romfs:/notificationIcons/video.png", 3);
+				break;
+			case VideoFailNotifType:
+				print << "Video fail notif\n";
+				nText << "Video capture failed";
+				this->Push("vidfail", nText.str(), "romfs:/notificationIcons/video.png", 3);
+				break;
+			default:
+				print << "Unknown notif:" << std::hex << n.type << "\n";
+				break;
+		}
+		console->Print(print.str());
+	}
 }
 
 void NotificationManager::Render()
