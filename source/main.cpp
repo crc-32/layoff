@@ -87,7 +87,6 @@ void SwitchToActiveMode()
 {	
 	appletBeginToWatchShortHomeButtonMessage();
 	ActiveMode = true;
-	console->Print("[Input active mode]\n");
 }
 
 //Get inputs without blocking the foreground app
@@ -99,7 +98,6 @@ void SwitchToPassiveMode()
 	hidsysInitialize();
 	hidsysEnableAppletToGetInput(true); 
 	ActiveMode = false;
-	console->Print("[Input passive mode]\n");
 }
 u32 batteryPercentage = 0;
 u64 ltimestamp;
@@ -109,6 +107,10 @@ bool HomeLongPressed = false;
 bool HomePressed = false;
 bool PowerPressed = false;
 Event notif;
+
+#include "PowerMenuWindow.hpp"
+PowerMenuWindow *pwrwindow = nullptr;
+
 //Settings
 bool IsWirelessEnabled = false;
 float BrightnessLevel = 0;
@@ -286,7 +288,6 @@ void LayoffMainWindow()
 		if (ImGui::SliderFloat("##Brightness", &BrightnessLevel, 0.0f, 1.0f, ""))
 			if (R_FAILED(lblSetCurrentBrightnessSetting(BrightnessLevel)))
 				console->Print("Brightness change failed\n");
-		
 	}
 	ImGui::End();
 }
@@ -370,11 +371,12 @@ bool IdleLoop()
 {
 	HomeLongPressed = false;	
 	HomePressed = false;
+	PowerPressed = false;
 	while (OverlayAppletMainLoop())
 	{		
 		updateBattery();
-		if (HomeLongPressed)
-				return true;
+		notifEventHandler();
+
 		if(ntm->IsActive())
 		{
 			SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
@@ -386,7 +388,10 @@ bool IdleLoop()
 			SDL_RenderPresent(sdl_render);
 		}
 
-		notifEventHandler();
+		if (PowerPressed || HomeLongPressed)
+			return true;
+		
+		svcSleepThread(5e+8); //wait half a second
 	}
 	return false;
 }
@@ -415,7 +420,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 	statusTexTarget = new Texture();
 	statusTexTarget->Source = SDL_CreateTexture(sdl_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 512, 32);
 	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
-
 	while (OverlayAppletMainLoop())
 	{       
 		notifEventHandler();
@@ -428,8 +432,26 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
 		
+		if (pwrwindow)
+		{
+			bool ReturnAtTheEnd = false;
+			if (!pwrwindow->Draw())
+			{
+				ReturnAtTheEnd = pwrwindow->WasIdle;
+				delete pwrwindow;
+				pwrwindow = nullptr;
+			}
+			ImGui::Render();
+			ImGuiSDL::Render(ImGui::GetDrawData());
+			SDL_RenderPresent(sdl_render);		
+			svcSleepThread(33333333); //lock to ~30 fps
+			if (ReturnAtTheEnd)
+				return true;
+			continue;
+		}
+		
 		if (ActiveMode) //Draw the main window only if we have exclusive input like overlay would do
-			LayoffMainWindow();
+			LayoffMainWindow();		
 		
 		if (console) 
 			console->Draw();
@@ -450,14 +472,18 @@ bool LayoffMainLoop(ImGuiIO& io)
 		if (HomeLongPressed || HomePressed)
 			return true;
 		
-		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B)
+		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B){
 			if (!DrewSomething)
 				return true;
 			else if (ActiveMode)
 				SwitchToPassiveMode();
+		}
 		
 		if (!DrewSomething && !ActiveMode)
 			SwitchToActiveMode();
+		
+		if (PowerPressed)
+			pwrwindow = new PowerMenuWindow(false);
 	}
 	return false; //The app should terminate
 }
@@ -492,6 +518,9 @@ RESET:
 		goto QUIT;
 	HomeLongPressed = false;	
 	HomePressed = false;
+	if (PowerPressed && pwrwindow == nullptr)
+		pwrwindow = new PowerMenuWindow(true);
+	PowerPressed = false;
 	SwitchToActiveMode(); //Lock input for the foreground app.
 	
 	console->Print("Entering active mode...\n");
@@ -503,6 +532,8 @@ QUIT: //does the overlay applet ever close ?
 		delete demoEyes;
 	
 	delete console;
+	if (pwrwindow)
+		delete pwrwindow;
 	
 	lblExit();
 	nifmExit();
