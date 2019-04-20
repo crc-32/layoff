@@ -4,7 +4,6 @@
 #include "UI/UI.hpp"
 #include <switch.h>
 #include <time.h>
-#include "setsys.hpp"
 
 #define EVENT_FIRED(x) R_SUCCEEDED(eventWait(x,0))
 #define EVENT_NOT_FIRED(x) R_FAILED(eventWait(x,0))
@@ -181,19 +180,7 @@ void LayoffMainWindow()
 	ImGui::Spacing();
 	if (ImGui::CollapsingHeader("System", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (IsWirelessEnabled)
-		{
-			if (ImGui::Button("Disable wireless", ImVec2(511, 0)))
-			{
-				SetSys::SetWirelessEnableFlag(false);
-				IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
-			}
-		}
-		else if (ImGui::Button("Enable wireless", ImVec2(511, 0)))
-		{
-			SetSys::SetWirelessEnableFlag(true);
-			IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
-		}
+		
 	}
 	ImGui::End();
 }
@@ -231,7 +218,6 @@ bool WidgetDraw(UiItem** item)
 bool LayoffMainLoop(ImGuiIO& io)
 {
 	//Get the wireless status only when opening the menu
-	IsWirelessEnabled = SetSys::GetWirelessEnableFlag();
 	while (OverlayAppletMainLoop())
 	{       
 		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);

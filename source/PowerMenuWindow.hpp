@@ -139,15 +139,30 @@ namespace PayloadReboot{
 		fclose(f);
 		return true;
 	} 
+	
+	// taken from https://github.com/Atmosphere-NX/libstratosphere/blob/master/include/stratosphere/utilities.hpp
+	void PerformShutdownSmc() {
+		SecmonArgs args = {0};
+		args.X[0] = 0xC3000401; /* smcSetConfig */
+		args.X[1] = 65002; /* Exosphere shutdown */
+		args.X[3] = 1; /* Perform shutdown. */
+		svcCallSecureMonitor(&args);
+	}
 }
 
 class PowerMenuWindow
 {
 public:
-	 bool WasIdle;
+	bool WasIdle;
+	bool HasPayload;
 
 	PowerMenuWindow(bool _WasIdle)
 	{
+		FILE *f = fopen("sdmc:/atmosphere/reboot_payload.bin", "rb");
+		HasPayload = f != 0;
+		if (HasPayload)
+			fclose(f);
+		
 		_ActiveMode = ActiveMode;
 		WasIdle = _WasIdle;
 		if (!ActiveMode || WasIdle)
@@ -182,14 +197,18 @@ public:
 		}
 		ImGui::NewLine();
 		ImGui::SetCursorPosX((1280/2)-(500/2));
-
-		if(ImGui::Button("Reboot to payload", ImVec2(500,78))){
-			if (PayloadReboot::Init())
-				PayloadReboot::Reboot();
+		if (HasPayload) 
+		{
+			if(ImGui::Button("Reboot to payload", ImVec2(500,78))){
+				if (PayloadReboot::Init())
+					PayloadReboot::Reboot();
+			}
 		}
+		else 
+			ImGui::Button("Missing payload !", ImVec2(500,78));
 		ImGui::SetCursorPosX((1280/2)-(500/2));
 		if(ImGui::Button("Power off", ImVec2(500,78))){
-            powerShutdown(false);
+            PayloadReboot::PerformShutdownSmc();
         }
 		ImGui::NewLine();
 		ImGui::SetCursorPosX((1280/2)-(500/2));
