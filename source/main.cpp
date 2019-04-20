@@ -334,10 +334,20 @@ void notifEventHandler()
 				nText << "Capture taken";
 				ntm->Push("scrtaken", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
 				break;
+			case ScreenshotFailNotifType:
+				print << "Screenshot fail notif\n";
+				nText << "Capture failed";
+				ntm->Push("scrfail", nText.str(), "romfs:/notificationIcons/screenshot.png", 3);
+				break;
 			case VideoNotifType:
 				print << "Video notif\n";
 				nText << "Video capture taken";
 				ntm->Push("vidtaken", nText.str(), "romfs:/notificationIcons/video.png", 3);
+				break;
+			case VideoFailNotifType:
+				print << "Video fail notif\n";
+				nText << "Video capture failed";
+				ntm->Push("vidfail", nText.str(), "romfs:/notificationIcons/video.png", 3);
 				break;
 			default:
 				print << "Unknown notif:" << std::hex << n.type << "\n";
