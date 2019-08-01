@@ -1,1 +1,1 @@
-LNXNIGHTLY := /z/VM/libnx/nx
+LNXNIGHTLY := /mnt/c/Users/thoma/Documents/libnx/nx

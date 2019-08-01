@@ -13,73 +13,86 @@
 using namespace std;
 
 extern "C" {
-	extern u32 __start__;
-	extern u32 __nx_applet_type;
-	extern __attribute__((weak)) size_t __nx_heap_size;
+    extern u32 __start__;
 
-	__attribute__((weak)) size_t __nx_heap_size = 0x4000000;
-	u32 __nx_applet_type = AppletType_OverlayApplet;
+    u32 __nx_applet_type = AppletType_OverlayApplet;
 
-	void __attribute__((weak)) __nx_win_init(void);
-	void __attribute__((weak)) userAppInit(void);
+    #define INNER_HEAP_SIZE 0x200000
+    size_t nx_inner_heap_size = INNER_HEAP_SIZE;
+    char   nx_inner_heap[INNER_HEAP_SIZE];
 
-	void __attribute__((weak)) __appInit(void)
-	{
-		Result rc;
-		rc = smInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
+    void __libnx_initheap(void);
+    void __appInit(void);
+    void __appExit(void);
 
-		rc = appletInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
-		
-		rc = hidInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
-		
-		rc = hidsysInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(MAKERESULT(255, 11));
+	extern void __nx_win_init(void);
+	extern void __nx_win_exit(void);
+}
 
-		rc = plInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(rc);
+void __appInit(void) {
+    Result rc;
+	rc = smInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
 
-		rc = psmInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(rc);
+	rc = appletInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
 
-		rc = fsInitialize();
-		if (R_FAILED(rc))
-			fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+	rc = npnsInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(255, 10));
+	
+	rc = hidInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+	
+	rc = hidsysInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(255, 11));
 
-		fsdevMountSdmc();
+	rc = plInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(rc);
 
-		if (&userAppInit) userAppInit();
-	}
+	rc = psmInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(rc);
 
-	void __attribute__((weak)) userAppExit(void);
-	void __attribute__((weak)) __nx_win_exit(void);
+	rc = fsInitialize();
+	if (R_FAILED(rc))
+		fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
-	void __attribute__((weak)) __appExit(void)
-	{
-		if (&userAppExit) userAppExit();
-		if (&__nx_win_exit) __nx_win_exit();
+	fsdevMountSdmc();
+}
 
-		fsdevUnmountAll();
-		fsExit();
-		appletExit();
-		hidsysExit();
-		psmExit();
-		hidExit();
-		smExit();
-	}
+void __appExit(void) {
+    fsdevUnmountAll();
+	fsExit();
+	appletExit();
+	hidsysExit();
+	psmExit();
+	hidExit();
+	smExit();
+}
+
+void __libnx_initheap(void) {
+	void*  addr = nx_inner_heap;
+	size_t size = nx_inner_heap_size;
+
+	/* Newlib */
+	extern char* fake_heap_start;
+	extern char* fake_heap_end;
+
+	fake_heap_start = (char*)addr;
+	fake_heap_end   = (char*)addr + size;
 }
 
 #include "screenConsole.hpp"
 ScreenConsole *console = nullptr;
 NotificationManager *ntm = nullptr;
+
+Gfx *gfx;
 
 bool ActiveMode;
 //Get inputs while blocking the foreground app, the long press home button is not detected in this mode
@@ -169,7 +182,7 @@ void ImguiBindInputs(ImGuiIO& io)
 	io.NavInputs[ImGuiNavInput_FocusNext] = kHeld & (KEY_ZR | KEY_R);
 	io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
 }
-Texture *statusTexTarget;
+/*Texture *statusTexTarget;
 void StatusDisplay()
 {
 	//Battery
@@ -210,14 +223,10 @@ void StatusDisplay()
 	ImGui::SetCursorPos(ImVec2(475-(ptextSize.x), 0));
 	ImGui::Text(ptext.c_str());
 	ImGui::Spacing();
-}
-#include "demo/SdlEyes.hpp"
+}*/
 #include "demo/Calc.hpp"
-#include "demo/GameDemo.hpp"
 #include "demo/CheatScreen.hpp"
-SdlEyes *demoEyes = nullptr;
 DemoCalc *demoCalc = nullptr;
-DemoGame *demoGame = nullptr;
 CheatScreen *cheatScreen = nullptr;
 
 void LayoffMainWindow() 
@@ -225,24 +234,14 @@ void LayoffMainWindow()
 	ImGui::Begin("Layoff", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 	ImGui::SetWindowPos(ImVec2(1280 - 512, 0));
 	ImGui::SetWindowSize(ImVec2(512, 720));
-	StatusDisplay();
+	//StatusDisplay();
 	ImGui::Checkbox("Show screenConsole", &console->Display);
 	if (ImGui::CollapsingHeader("Demos"))
 	{
-		if (ImGui::Button("swEyes", ImVec2(511, 0)))
-		{
-			if (!demoEyes)
-				demoEyes = new SdlEyes();
-		}
 		if (ImGui::Button("Calc", ImVec2(511, 0)))
 		{
 			if (!demoCalc)
 				demoCalc = new DemoCalc();
-		}
-		if (ImGui::Button("T-Rex", ImVec2(511, 0)))
-		{
-			if (!demoGame)
-				demoGame = new DemoGame();
 		}
 		if (ImGui::Button("Cheat engine", ImVec2(511, 0)))
 		{
@@ -301,14 +300,14 @@ void updateBattery()
 		psmGetBatteryChargePercentage(&batteryPercentage);
 		ltimestamp = ctimestamp;
 	}
-	if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
+	/*if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
 		ntm->HideID("batlow");
 	else if (ntm->IDInUse("batlow"))
 	{
 		std::stringstream nText;
 		nText << "Battery Low: " << to_string(batteryPercentage) << "%%";
 		ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
-	}
+	}*/
 }
 
 bool IdleLoop()
@@ -319,7 +318,7 @@ bool IdleLoop()
 	while (OverlayAppletMainLoop())
 	{		
 		updateBattery();
-		ntm->EventHandler(batteryPercentage);
+		/*ntm->EventHandler(batteryPercentage);
 
 		if(ntm->IsActive())
 		{
@@ -330,7 +329,7 @@ bool IdleLoop()
 			ImGui::Render();
 			ImGuiSDL::Render(ImGui::GetDrawData());
 			SDL_RenderPresent(sdl_render);
-		}
+		}*/
 
 		if (PowerPressed || HomeLongPressed)
 			return true;
@@ -361,19 +360,20 @@ bool LayoffMainLoop(ImGuiIO& io)
 	UpdateIpAddress();	
 	lblGetCurrentBrightnessSetting(&BrightnessLevel);
 	lblIsAutoBrightnessControlEnabled(&IsAutoBrightnessEnabled);
-	statusTexTarget = new Texture();
+	/*statusTexTarget = new Texture();
 	statusTexTarget->Source = SDL_CreateTexture(sdl_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 512, 32);
 	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
+	*/
 	while (OverlayAppletMainLoop())
 	{       
 		// Battery % checks
 		updateBattery();
-		ntm->EventHandler(batteryPercentage);
+		//ntm->EventHandler(batteryPercentage);
 
-		SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
-		SDL_RenderClear(sdl_render);
+		//SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
+		//SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
-		ImGui::NewFrame();
+		gfx->StartRendering();
 		
 		if (pwrwindow)
 		{
@@ -385,8 +385,9 @@ bool LayoffMainLoop(ImGuiIO& io)
 				pwrwindow = nullptr;
 			}
 			ImGui::Render();
-			ImGuiSDL::Render(ImGui::GetDrawData());
-			SDL_RenderPresent(sdl_render);		
+			//ImGuiSDL::Render(ImGui::GetDrawData());
+			//SDL_RenderPresent(sdl_render);	
+			gfx->EndRendering();	
 			svcSleepThread(33333333); //lock to ~30 fps
 			if (ReturnAtTheEnd)
 				return true;
@@ -399,17 +400,17 @@ bool LayoffMainLoop(ImGuiIO& io)
 		if (console) 
 			console->Draw();
 
-		ntm->Render();
+		//ntm->Render();
 		
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
-		DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
+		//DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
 		DrewSomething |= WidgetDraw((UiItem**)&demoCalc);
-		DrewSomething |= WidgetDraw((UiItem**)&demoGame);
+		//DrewSomething |= WidgetDraw((UiItem**)&demoGame);
 		DrewSomething |= WidgetDraw((UiItem**)&cheatScreen);
 
 		ImGui::Render();
-		ImGuiSDL::Render(ImGui::GetDrawData());
-		SDL_RenderPresent(sdl_render);		
+		//SDL_RenderPresent(sdl_render);
+		gfx->EndRendering();		
 		svcSleepThread(33333333); //lock to ~30 fps
 		
 		if (HomeLongPressed || HomePressed)
@@ -430,31 +431,30 @@ bool LayoffMainLoop(ImGuiIO& io)
 	}
 	return false; //The app should terminate
 }
-
 int main(int argc, char* argv[])
 {    
 	svcSleepThread(5e+9);
-	__nx_win_init(); 
+	__nx_win_init();
 
-	romfsInit();    
-	SdlInit();
+	romfsInit();
+	gfx = new Gfx();
 	nifmInitialize();
 	lblInitialize();
-	
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
 	ovlnInitialize();
 	
 	console = new ScreenConsole();
-	ntm = new NotificationManager(console);
+	//ntm = new NotificationManager(console);
 
 RESET:
-	if(statusTexTarget)
-		ImGuiSDL::FreeTexture(statusTexTarget);
+	/*if(statusTexTarget)
+		ImGuiSDL::FreeTexture(statusTexTarget);*/
 	console->Print("Entering idle mode...\n");
-	SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
+	/*SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	SDL_RenderClear(sdl_render);
-	SDL_RenderPresent(sdl_render);
+	SDL_RenderPresent(sdl_render);*/
+	gfx->StartRendering();
+	gfx->EndRendering();
 	appletEndToWatchShortHomeButtonMessage(); //Unlock input for the foreground app	
 	if (!IdleLoop())
 		goto QUIT;
@@ -470,8 +470,8 @@ RESET:
 		goto RESET;
 
 QUIT: //does the overlay applet ever close ?
-	if (demoEyes)
-		delete demoEyes;
+	/*if (demoEyes)
+		delete demoEyes;*/
 	
 	delete console;
 	if (pwrwindow)
@@ -479,7 +479,8 @@ QUIT: //does the overlay applet ever close ?
 	
 	lblExit();
 	nifmExit();
-	SdlExit();
+	gfx->Exit();
+	__nx_win_exit();
 	ovlnExit();
 	return 0;
 }

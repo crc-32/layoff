@@ -60,15 +60,13 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fexceptions
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:=  -lSDL2_image -lSDL2 -lpng -ljpeg -lbz2 -ljpeg -lz -lnx
-
+LIBS	:=  -lSDL2_image -lSDL2 -lpng -ljpeg -lbz2 -ljpeg -lz -lnx -lwebp
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:= $(CURDIR)/libs $(PORTLIBS) $(LNXNIGHTLY)
-
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

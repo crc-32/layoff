@@ -4,19 +4,50 @@
 
 using namespace std;
 
-SDL_Window* sdl_win;
-SDL_Renderer* sdl_render;
+#define SDLLOG(eCode) { fprintf(stderr,"\nERR:\n%s", SDL_GetError()); fatalSimple(MAKERESULT(255, eCode));}
 
-extern void RemapErr();
+Gfx::Gfx()
+{	
+	width = 1280;
+	height = 720;
 
-#define SDLLOG(eCode) { fprintf(stderr,"\nERR:\n%s", SDL_GetError()); fatalSimple(MAKERESULT(666, eCode));}
+	win = nwindowGetDefault();
+	if(!win)
+	{
+		fatalSimple(MAKERESULT(255,120));
+	}
 
-void SdlInit()
+	framebufferCreate(&fb, win, width, height, PIXEL_FORMAT_RGBA_8888, 2);
+
+	framebufferMakeLinear(&fb);
+
+	imgui_sw::bind_imgui_painting();
+}
+
+void Gfx::StartRendering()
+{
+	pixel_buffer.clear();
+	pixel_buffer.assign(width * height, 0);
+	framebufferBegin(&fb, NULL);
+}
+
+void Gfx::EndRendering()
+{
+	paint_imgui(pixel_buffer.data(), width, height, sw_options);
+	framebufferEnd(&fb);
+}
+
+void Gfx::Exit()
+{
+	framebufferClose(&fb);
+}
+
+/*void SdlInit()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 		SDLLOG(1)
 	
-	sdl_win = SDL_CreateWindow("sdl2_gles2", 0, 0, 1280, 720, 0);
+	sdl_win = SDL_CreateWindow(NULL, 0, 0, 640, 360, 0);
 	if (!sdl_win)
 		SDLLOG(2)
 	
@@ -41,4 +72,4 @@ void SdlExit()
 	SDL_Quit();
 
 	ImGui::DestroyContext();
-}
+}*/
