@@ -3,16 +3,16 @@
 #include <time.h>
 #include <string>
 #include "UI/UI.hpp"
-#include "UI/imgui_sdl.h"
+//#include "UI/imgui_sdl.h"
 using namespace std;
 
 class Notification
 {
     public:
-        Notification(string id, string contentText, Texture *icon, u32 timeout)
+        Notification(string id, string contentText, /*Texture *icon,*/ u32 timeout)
         {
             this->contentText = contentText;
-            this->icon = icon;
+            //this->icon = icon;
             this->isVisible = false;
             this->timeout = timeout;
             this->id = id;
@@ -24,18 +24,18 @@ class Notification
             this->contentText = contentText;
         }
 
-        void SetIcon(Texture *icon)
+        /*void SetIcon(Texture *icon)
         {
             if(this->icon)
                 ImGuiSDL::FreeTexture(this->icon);
             this->icon = icon;
-        }
+        }*/
         
         ~Notification()
         {
-            if(icon){
+            /*if(icon){
                 ImGuiSDL::FreeTexture(icon);
-            }
+            }*/
         }
 
         void Show()
@@ -66,11 +66,11 @@ class Notification
             ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
             ImGui::SetWindowSize(ImVec2(420, 90));
             ImGui::SetWindowPos(ImVec2(0, yPos));
-            if(icon)
+            /*if(icon)
             {
                 ImGui::SetCursorPos(ImVec2(8, 13));
                 ImGui::Image(icon, ImVec2(64,64));
-            }
+            }*/
             ImGui::SetCursorPos(ImVec2(8+64+4, 45-(ImGui::CalcTextSize(contentText.c_str()).y/2)));
             ImGui::Text(contentText.c_str());
             ImGui::PopStyleColor();
@@ -91,5 +91,5 @@ class Notification
         bool isVisible;
         u32 timeout;
         u64 timeCreated;
-        Texture *icon;
+        //Texture *icon;
 };

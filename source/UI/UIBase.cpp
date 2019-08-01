@@ -20,8 +20,9 @@ Gfx::Gfx()
 	framebufferCreate(&fb, win, width, height, PIXEL_FORMAT_RGBA_8888, 2);
 
 	framebufferMakeLinear(&fb);
-
-	imgui_sw::bind_imgui_painting();
+	ImGui::CreateContext();
+	this->io = ImGui::GetIO();
+	imgui_sw::bind_imgui_painting(this->io);
 }
 
 void Gfx::StartRendering()
@@ -40,6 +41,7 @@ void Gfx::EndRendering()
 void Gfx::Exit()
 {
 	framebufferClose(&fb);
+	ImGui::DestroyContext();
 }
 
 /*void SdlInit()

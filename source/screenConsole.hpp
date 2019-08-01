@@ -1,6 +1,6 @@
 #pragma once
 #include "UI/UI.hpp"
-#include "UI/imgui_sdl.h"
+//#include "UI/imgui_sdl.h"
 #include <string>
 
 class ScreenConsole
@@ -8,13 +8,13 @@ class ScreenConsole
 public:
 	ScreenConsole()
 	{
-		dbgTex = ImGuiSDL::LoadTexture("romfs:/trollface.png");
+		//dbgTex = ImGuiSDL::LoadTexture("romfs:/trollface.png");
 	}
 	
 	~ScreenConsole()
 	{
-		ImGuiSDL::FreeTexture(dbgTex);
-		dbgTex = nullptr;
+		//ImGuiSDL::FreeTexture(dbgTex);
+		//dbgTex = nullptr;
 	}
 
 	std::string Text = "";
@@ -33,12 +33,12 @@ public:
 			ImGui::End();
 			return false;
 		}
-		ImGui::Image(dbgTex, dbgTex->Size());
+		//ImGui::Image(dbgTex, dbgTex->Size());
 		ImGui::Text(Text.c_str());
 		ImGui::End();
 		return true;
 	}
 	
 private:
-	Texture *dbgTex;
+	//Texture *dbgTex;
 };

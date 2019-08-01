@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cstdint>
+#include "imgui.h"
 
 namespace imgui_sw {
 
@@ -29,7 +30,7 @@ void make_style_fast();
 void restore_style();
 
 /// Call once a the start of your program.
-void bind_imgui_painting();
+void bind_imgui_painting(ImGuiIO io);
 
 /// The buffer is assumed to follow how ImGui packs pixels, i.e. ABGR by default.
 /// Change with IMGUI_USE_BGRA_PACKED_COLOR.

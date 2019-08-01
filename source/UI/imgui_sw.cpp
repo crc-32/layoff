@@ -674,9 +674,9 @@ void restore_style()
 	style.WindowRounding = default_style.WindowRounding;
 }
 
-void bind_imgui_painting()
+void bind_imgui_painting(ImGuiIO io)
 {
-	ImGuiIO& io = ImGui::GetIO();
+	
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
 	// Load default font (embedded in code):

@@ -33,6 +33,7 @@ class Gfx
 	u32 width;
 	u32 height;
 	public:
+	ImGuiIO io;
 	Gfx();
 	void StartRendering();
 	void EndRendering();

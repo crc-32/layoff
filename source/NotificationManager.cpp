@@ -1,5 +1,5 @@
 #include "NotificationManager.hpp"
-#include "UI/imgui_sdl.h"
+//#include "UI/imgui_sdl.h"
 #include "screenConsole.hpp"
 #include <string>
 #include <iomanip>
@@ -97,13 +97,14 @@ void NotificationManager::Push(string id, string contentText, string iconPath, u
         {
             if(this->notifications[i]->GetID() == id){
                 this->notifications[i]->SetContentText(contentText);
-                this->notifications[i]->SetIcon((iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL);
+                //this->notifications[i]->SetIcon((iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL);
                 this->notifications[i]->Show();
                 break;
             }
         }
     }else{
-        this->notifications.push_front(new Notification(id, contentText, (iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL, timeout));
+        //this->notifications.push_front(new Notification(id, contentText, (iconPath != "") ? ImGuiSDL::LoadTexture(iconPath.c_str()) : NULL, timeout));
+        this->notifications.push_front(new Notification(id, contentText, /*NULL,*/ timeout));
         this->ShowLatest();
     }
 

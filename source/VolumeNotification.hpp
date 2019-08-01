@@ -6,7 +6,7 @@ using namespace std;
 class VolumeNotification : public Notification
 {
 public:
-    VolumeNotification(u16 currentStep) : Notification("volume", "", NULL, 3)
+    VolumeNotification(u16 currentStep) : Notification("volume", "", /*NULL,*/ 3)
     {
         this->setStep(currentStep);
     }
@@ -14,10 +14,10 @@ public:
     void setStep(u16 step)
     {
         this->currentStep = step;
-        if (step != 0 && step < 256)
+        /*if (step != 0 && step < 256)
             this->SetIcon(ImGuiSDL::LoadTexture("romfs:/notificationIcons/fullIcon.png"));
         else
-            this->SetIcon(ImGuiSDL::LoadTexture("romfs:/notificationIcons/muteIcon.png"));
+            this->SetIcon(ImGuiSDL::LoadTexture("romfs:/notificationIcons/muteIcon.png"));*/
         timeCreated = time(NULL);
     }
 
@@ -38,11 +38,11 @@ public:
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
         ImGui::SetWindowSize(ImVec2(420, 90));
         ImGui::SetWindowPos(ImVec2(0, yPos));
-        if(icon)
+        /*if(icon)
         {
             ImGui::SetCursorPos(ImVec2(8, 13));
             ImGui::Image(icon, ImVec2(64,64));
-        }
+        }*/
         ImGui::SetCursorPos(ImVec2(8+64+4, 45-(32/2)));
         if(currentStep < 256)
         {

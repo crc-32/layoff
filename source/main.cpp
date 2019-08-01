@@ -466,7 +466,7 @@ RESET:
 	SwitchToActiveMode(); //Lock input for the foreground app.
 	
 	console->Print("Entering active mode...\n");
-	if (LayoffMainLoop(io))
+	if (LayoffMainLoop(gfx->io))
 		goto RESET;
 
 QUIT: //does the overlay applet ever close ?
