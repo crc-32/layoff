@@ -17,7 +17,7 @@ extern "C" {
 
     u32 __nx_applet_type = AppletType_OverlayApplet;
 
-    #define INNER_HEAP_SIZE 0x200000
+    #define INNER_HEAP_SIZE 0x2000000*2
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
 
@@ -300,14 +300,14 @@ void updateBattery()
 		psmGetBatteryChargePercentage(&batteryPercentage);
 		ltimestamp = ctimestamp;
 	}
-	/*if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
+	if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
 		ntm->HideID("batlow");
 	else if (ntm->IDInUse("batlow"))
 	{
 		std::stringstream nText;
 		nText << "Battery Low: " << to_string(batteryPercentage) << "%%";
 		ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
-	}*/
+	}
 }
 
 bool IdleLoop()
@@ -318,18 +318,15 @@ bool IdleLoop()
 	while (OverlayAppletMainLoop())
 	{		
 		updateBattery();
-		/*ntm->EventHandler(batteryPercentage);
+		ntm->EventHandler(batteryPercentage);
 
 		if(ntm->IsActive())
 		{
-			SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
-			SDL_RenderClear(sdl_render);
 			ImGui::NewFrame();
 			ntm->Render();
 			ImGui::Render();
-			ImGuiSDL::Render(ImGui::GetDrawData());
-			SDL_RenderPresent(sdl_render);
-		}*/
+			gfx->Render();
+		}
 
 		if (PowerPressed || HomeLongPressed)
 			return true;
@@ -368,12 +365,12 @@ bool LayoffMainLoop(ImGuiIO& io)
 	{       
 		// Battery % checks
 		updateBattery();
-		//ntm->EventHandler(batteryPercentage);
+		ntm->EventHandler(batteryPercentage);
 
 		//SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
 		//SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
-		gfx->StartRendering();
+		ImGui::NewFrame();
 		
 		if (pwrwindow)
 		{
@@ -387,7 +384,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 			ImGui::Render();
 			//ImGuiSDL::Render(ImGui::GetDrawData());
 			//SDL_RenderPresent(sdl_render);	
-			gfx->EndRendering();	
+			gfx->Render();	
 			svcSleepThread(33333333); //lock to ~30 fps
 			if (ReturnAtTheEnd)
 				return true;
@@ -400,7 +397,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		if (console) 
 			console->Draw();
 
-		//ntm->Render();
+		ntm->Render();
 		
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
 		//DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
@@ -410,7 +407,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 
 		ImGui::Render();
 		//SDL_RenderPresent(sdl_render);
-		gfx->EndRendering();		
+		gfx->Render();		
 		svcSleepThread(33333333); //lock to ~30 fps
 		
 		if (HomeLongPressed || HomePressed)
@@ -444,7 +441,7 @@ int main(int argc, char* argv[])
 	ovlnInitialize();
 	
 	console = new ScreenConsole();
-	//ntm = new NotificationManager(console);
+	ntm = new NotificationManager(console);
 
 RESET:
 	/*if(statusTexTarget)
@@ -453,8 +450,7 @@ RESET:
 	/*SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
 	SDL_RenderClear(sdl_render);
 	SDL_RenderPresent(sdl_render);*/
-	gfx->StartRendering();
-	gfx->EndRendering();
+	gfx->Clear();
 	appletEndToWatchShortHomeButtonMessage(); //Unlock input for the foreground app	
 	if (!IdleLoop())
 		goto QUIT;
@@ -466,7 +462,7 @@ RESET:
 	SwitchToActiveMode(); //Lock input for the foreground app.
 	
 	console->Print("Entering active mode...\n");
-	if (LayoffMainLoop(gfx->io))
+	if (LayoffMainLoop(ImGui::GetIO()))
 		goto RESET;
 
 QUIT: //does the overlay applet ever close ?

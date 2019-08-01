@@ -4,7 +4,7 @@
 	"title_id_range_min":	"0x010000000000100c",
 	"title_id_range_max":	"0x010000000000100c",
 	"main_thread_stack_size":	"0x00040000",
-	"main_thread_priority":	1,
+	"main_thread_priority":	40,
 	"default_cpu_id":	3,
 	"process_category":	0,
 	"is_retail":	true,
@@ -19,14 +19,15 @@
 	"kernel_capabilities":	[{
 			"type":	"kernel_flags",
 			"value":	{
-				"highest_thread_priority":	1,
-				"lowest_thread_priority":	1,
+				"highest_thread_priority":	59,
+				"lowest_thread_priority":	28,
 				"lowest_cpu_id":	3,
 				"highest_cpu_id":	3
 			}
-		}, {
+		},
+		{
 			"type":	"syscalls",
-			"value":	{
+			"value": {
 				"svcUnknown":	"0x00",
 				"svcSetHeapSize":	"0x01",
 				"svcSetMemoryPermission":	"0x02",
@@ -156,20 +157,21 @@
 				"svcSetResourceLimitLimitValue":	"0x7e",
 				"svcCallSecureMonitor":	"0x7f"
 			}
-		}, {
+		},
+		{
 			"type":	"application_type",
 			"value":	2
 		}, {
 			"type":	"min_kernel_version",
-			"value":	"0x0030"
+			"value":	"0x0060"
 		}, {
 			"type":	"handle_table_size",
 			"value":	1023
 		}, {
 			"type":	"debug_flags",
 			"value":	{
-				"allow_debug":	true,
-				"force_debug":	false
+				"allow_debug":	false,
+				"force_debug":	true
 			}
 		}]
 }

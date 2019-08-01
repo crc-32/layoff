@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <switch.h>
 
 #include "imgui.h"
 
@@ -513,7 +514,7 @@ void paint_draw_cmd(
 	Stats*             stats)
 {
 	const auto texture = reinterpret_cast<const Texture*>(pcmd.TextureId);
-	assert(texture);
+	IM_ASSERT(texture);
 
 	// ImGui uses the first pixel for "white".
 	const ImVec2 white_uv = ImVec2(0.5f / texture->width, 0.5f / texture->height);
@@ -674,7 +675,7 @@ void restore_style()
 	style.WindowRounding = default_style.WindowRounding;
 }
 
-void bind_imgui_painting(ImGuiIO io)
+void bind_imgui_painting(ImGuiIO& io)
 {
 	
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
@@ -689,12 +690,12 @@ void bind_imgui_painting(ImGuiIO io)
 
 static Stats s_stats; // TODO: pass as an argument?
 
-void paint_imgui(uint32_t* pixels, int width_pixels, int height_pixels, const SwOptions& options)
+void paint_imgui(u32* pixels, int width_pixels, int height_pixels, const SwOptions& options)
 {
 	const float width_points = ImGui::GetIO().DisplaySize.x;
 	const float height_points = ImGui::GetIO().DisplaySize.y;
 	const ImVec2 scale{width_pixels / width_points, height_pixels / height_points};
-	PaintTarget target{pixels, width_pixels, height_pixels, scale};
+	PaintTarget target{(u32*) pixels, width_pixels, height_pixels, scale};
 	const ImDrawData* draw_data = ImGui::GetDrawData();
 
 	s_stats = Stats{};
@@ -712,7 +713,7 @@ void unbind_imgui_painting()
 
 bool show_options(SwOptions* io_options)
 {
-	assert(io_options);
+	IM_ASSERT(io_options);
 	bool changed = false;
 	changed |= ImGui::Checkbox("optimize_text", &io_options->optimize_text);
 	changed |= ImGui::Checkbox("optimize_rectangles", &io_options->optimize_rectangles);

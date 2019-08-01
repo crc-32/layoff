@@ -13,6 +13,7 @@
 #pragma once
 
 #include <cstdint>
+#include <switch.h>
 #include "imgui.h"
 
 namespace imgui_sw {
@@ -30,13 +31,13 @@ void make_style_fast();
 void restore_style();
 
 /// Call once a the start of your program.
-void bind_imgui_painting(ImGuiIO io);
+void bind_imgui_painting(ImGuiIO& io);
 
 /// The buffer is assumed to follow how ImGui packs pixels, i.e. ABGR by default.
 /// Change with IMGUI_USE_BGRA_PACKED_COLOR.
 /// If width/height differs from ImGui::GetIO().DisplaySize then
 /// the function scales the UI to fit the given pixel buffer.
-void paint_imgui(uint32_t* pixels, int width_pixels, int height_pixels, const SwOptions& options = {});
+void paint_imgui(u32* pixels, int width_pixels, int height_pixels, const SwOptions& options = {});
 
 /// Free the resources allocated by bind_imgui_painting.
 void unbind_imgui_painting();

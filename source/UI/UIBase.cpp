@@ -1,6 +1,10 @@
 #include "UI.hpp"
 #include <switch.h>
 #include <cstdio>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include "imgui_freetype.h"
+#include "imgui_freetype.hpp"
 
 using namespace std;
 
@@ -17,24 +21,51 @@ Gfx::Gfx()
 		fatalSimple(MAKERESULT(255,120));
 	}
 
-	framebufferCreate(&fb, win, width, height, PIXEL_FORMAT_RGBA_8888, 2);
+	Result rc = framebufferCreate(&fb, win, width, height, PIXEL_FORMAT_RGBA_8888, 2);
+	if (R_FAILED(rc))
+		fatalSimple(rc);
 
-	framebufferMakeLinear(&fb);
+	rc = framebufferMakeLinear(&fb);
+	if (R_FAILED(rc))
+		fatalSimple(rc);
+
 	ImGui::CreateContext();
-	this->io = ImGui::GetIO();
-	imgui_sw::bind_imgui_painting(this->io);
+	ImGuiIO &io = ImGui::GetIO();
+	io.DisplaySize = ImVec2(width, height);
+
+	rc = plInitialize();
+	IM_ASSERT("plInitialize failed" && R_SUCCEEDED(rc));
+
+	PlFontData font;
+    rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
+	IM_ASSERT("plGetSharedFontByType failed" && R_SUCCEEDED(rc));
+
+	io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 25.0f);
+	unsigned int flags = 0;
+	ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+
+	imgui_sw::bind_imgui_painting(io);
 }
 
-void Gfx::StartRendering()
+void Gfx::Render()
 {
-	pixel_buffer.clear();
-	pixel_buffer.assign(width * height, 0);
-	framebufferBegin(&fb, NULL);
+	u32 *pixels = (u32*)framebufferBegin(&fb, NULL);
+	paint_imgui(pixels, width, height, sw_options);
+	framebufferEnd(&fb);
 }
 
-void Gfx::EndRendering()
+void Gfx::Clear()
 {
-	paint_imgui(pixel_buffer.data(), width, height, sw_options);
+	u32 stride;
+	u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
+	for (u32 y = 0; y < this->height; y ++)
+	{
+		for (u32 x = 0; x < this->width; x ++)
+		{
+			u32 pos = y * stride / sizeof(u32) + x;
+			pixels[pos] = 0;
+		}
+	}
 	framebufferEnd(&fb);
 }
 
@@ -43,35 +74,3 @@ void Gfx::Exit()
 	framebufferClose(&fb);
 	ImGui::DestroyContext();
 }
-
-/*void SdlInit()
-{
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-		SDLLOG(1)
-	
-	sdl_win = SDL_CreateWindow(NULL, 0, 0, 640, 360, 0);
-	if (!sdl_win)
-		SDLLOG(2)
-	
-	sdl_render = SDL_CreateRenderer(sdl_win, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (!sdl_render)
-		SDLLOG(3)
-	
-	SDL_SetRenderTarget(sdl_render, NULL);
-	
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("romfs:/opensans.ttf", 40);
-	ImGuiSDL::Initialize(sdl_render, 1280, 720);
-}
-
-void SdlExit()
-{	
-	ImGuiSDL::Deinitialize();
-
-	SDL_DestroyWindow(sdl_win);
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	SDL_Quit();
-
-	ImGui::DestroyContext();
-}*/

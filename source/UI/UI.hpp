@@ -26,16 +26,15 @@ class Gfx
 	NWindow* win;
 	Framebuffer fb;
 
-	std::vector<u32> pixel_buffer;
+	u32 *pixel_buffer;
 
 	imgui_sw::SwOptions sw_options;
 
 	u32 width;
 	u32 height;
 	public:
-	ImGuiIO io;
 	Gfx();
-	void StartRendering();
-	void EndRendering();
+	void Render();
 	void Exit();
+	void Clear();
 };
