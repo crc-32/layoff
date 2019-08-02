@@ -6,16 +6,6 @@
 class ScreenConsole
 {
 public:
-	ScreenConsole()
-	{
-		//dbgTex = ImGuiSDL::LoadTexture("romfs:/trollface.png");
-	}
-	
-	~ScreenConsole()
-	{
-		//ImGuiSDL::FreeTexture(dbgTex);
-		//dbgTex = nullptr;
-	}
 
 	std::string Text = "";
 	
@@ -33,12 +23,8 @@ public:
 			ImGui::End();
 			return false;
 		}
-		//ImGui::Image(dbgTex, dbgTex->Size());
 		ImGui::Text(Text.c_str());
 		ImGui::End();
 		return true;
 	}
-	
-private:
-	//Texture *dbgTex;
 };

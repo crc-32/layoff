@@ -357,18 +357,12 @@ bool LayoffMainLoop(ImGuiIO& io)
 	UpdateIpAddress();	
 	lblGetCurrentBrightnessSetting(&BrightnessLevel);
 	lblIsAutoBrightnessControlEnabled(&IsAutoBrightnessEnabled);
-	/*statusTexTarget = new Texture();
-	statusTexTarget->Source = SDL_CreateTexture(sdl_render, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 512, 32);
-	statusTexTarget->Surface = SDL_CreateRGBSurfaceWithFormat(0, 512, 32, 32, SDL_PIXELFORMAT_RGBA32);
-	*/
 	while (OverlayAppletMainLoop())
 	{       
 		// Battery % checks
 		updateBattery();
 		ntm->EventHandler(batteryPercentage);
 
-		//SDL_SetRenderDrawColor(sdl_render, 0, 0, 0, 0);
-		//SDL_RenderClear(sdl_render);
 		ImguiBindInputs(io);
 		ImGui::NewFrame();
 		
@@ -382,8 +376,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 				pwrwindow = nullptr;
 			}
 			ImGui::Render();
-			//ImGuiSDL::Render(ImGui::GetDrawData());
-			//SDL_RenderPresent(sdl_render);	
+
 			gfx->Render();	
 			if (ReturnAtTheEnd)
 				return true;
@@ -399,9 +392,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ntm->Render();
 		
 		bool DrewSomething = false; //Switch to active mode if the user closed all the widgets		
-		//DrewSomething |= WidgetDraw((UiItem**)&demoEyes);
 		DrewSomething |= WidgetDraw((UiItem**)&demoCalc);
-		//DrewSomething |= WidgetDraw((UiItem**)&demoGame);
 		DrewSomething |= WidgetDraw((UiItem**)&cheatScreen);
 
 		ImGui::Render();
@@ -442,12 +433,7 @@ int main(int argc, char* argv[])
 	ntm = new NotificationManager(console);
 
 RESET:
-	/*if(statusTexTarget)
-		ImGuiSDL::FreeTexture(statusTexTarget);*/
 	console->Print("Entering idle mode...\n");
-	/*SDL_SetRenderDrawColor(sdl_render,0 ,0,0,0);
-	SDL_RenderClear(sdl_render);
-	SDL_RenderPresent(sdl_render);*/
 	gfx->Clear();
 	appletEndToWatchShortHomeButtonMessage(); //Unlock input for the foreground app	
 	if (!IdleLoop())
@@ -464,8 +450,6 @@ RESET:
 		goto RESET;
 
 QUIT: //does the overlay applet ever close ?
-	/*if (demoEyes)
-		delete demoEyes;*/
 	
 	delete console;
 	if (pwrwindow)
