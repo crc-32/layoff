@@ -9,7 +9,7 @@ A replacement for the default Switch overlay (menu when home is held and the pow
 Clone the repository and just `make`, the scripts `makelayeredfs.bat` and `makelayeredfs.sh` generate the folder structure to replace the overlay via atmosphere layeredfs for laziness' sake
 Run `git update-index --assume-unchanged localconfig.mk` to avoid annoyances with the file showing as modified
 
-**To build this branch you need [this libnx fork](https://github.com/exelix11/libnx/tree/layoff)**
+**To build this branch you need [this libnx fork](https://github.com/crc-32/libnx/tree/layoff)**
 
 ## Features and (currently) planned features
   - Custom overlay menu with the built in old overlay's features
