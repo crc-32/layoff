@@ -67,7 +67,7 @@ struct ColorInt
 ColorInt blend(ColorInt target, ColorInt source)
 {
 	ColorInt result;
-	result.a = 0; // Whatever.
+	result.a = source.a + (target.a * (255 - source.a) / 255);
 	result.b = (source.b * source.a + target.b * (255 - source.a)) / 255;
 	result.g = (source.g * source.a + target.g * (255 - source.a)) / 255;
 	result.r = (source.r * source.a + target.r * (255 - source.a)) / 255;

@@ -32,9 +32,11 @@ class Gfx
 
 	u32 width;
 	u32 height;
+	Event vsync;
 	public:
 	Gfx();
 	void Render();
 	void Exit();
 	void Clear();
+	void Clear(u32 *pixels, u32 stride);
 };

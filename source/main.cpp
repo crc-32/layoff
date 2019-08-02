@@ -385,7 +385,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 			//ImGuiSDL::Render(ImGui::GetDrawData());
 			//SDL_RenderPresent(sdl_render);	
 			gfx->Render();	
-			svcSleepThread(33333333); //lock to ~30 fps
 			if (ReturnAtTheEnd)
 				return true;
 			continue;
@@ -408,7 +407,6 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ImGui::Render();
 		//SDL_RenderPresent(sdl_render);
 		gfx->Render();		
-		svcSleepThread(33333333); //lock to ~30 fps
 		
 		if (HomeLongPressed || HomePressed)
 			return true;

@@ -29,6 +29,9 @@ Gfx::Gfx()
 	if (R_FAILED(rc))
 		fatalSimple(rc);
 
+	ViDisplay disp;
+	rc = viGetDisplayVsyncEvent(&disp, &vsync);
+
 	ImGui::CreateContext();
 	ImGuiIO &io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(width, height);
@@ -49,7 +52,10 @@ Gfx::Gfx()
 
 void Gfx::Render()
 {
-	u32 *pixels = (u32*)framebufferBegin(&fb, NULL);
+	eventWait(&vsync, 1e+6);
+	u32 stride;
+	u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
+	this->Clear(pixels, stride);
 	paint_imgui(pixels, width, height, sw_options);
 	framebufferEnd(&fb);
 }
@@ -67,6 +73,18 @@ void Gfx::Clear()
 		}
 	}
 	framebufferEnd(&fb);
+}
+
+void Gfx::Clear(u32 *pixels, u32 stride)
+{
+	for (u32 y = 0; y < this->height; y ++)
+	{
+		for (u32 x = 0; x < this->width; x ++)
+		{
+			u32 pos = y * stride / sizeof(u32) + x;
+			pixels[pos] = 0;
+		}
+	}
 }
 
 void Gfx::Exit()
