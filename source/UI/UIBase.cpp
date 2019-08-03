@@ -10,6 +10,8 @@ using namespace std;
 
 #define SDLLOG(eCode) { fprintf(stderr,"\nERR:\n%s", SDL_GetError()); fatalSimple(MAKERESULT(255, eCode));}
 
+volatile int renderDirty = 0;
+
 Gfx::Gfx()
 {	
 	width = 1280;
@@ -48,43 +50,34 @@ Gfx::Gfx()
 	ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
 
 	imgui_sw::bind_imgui_painting(io);
+	renderDirty = 4;
 }
 
 void Gfx::Render()
 {
-	eventWait(&vsync, 1e+6);
-	u32 stride;
-	u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
-	this->Clear(pixels, stride);
-	paint_imgui(pixels, width, height, sw_options);
-	framebufferEnd(&fb);
+	if(renderDirty > 0)
+	{
+		eventWait(&vsync, 1e+6);
+		u32 stride;
+		u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
+		this->Clear(pixels);
+		paint_imgui(pixels, width, height, sw_options);
+		framebufferEnd(&fb);
+		renderDirty--;
+	}
 }
 
 void Gfx::Clear()
 {
 	u32 stride;
-	u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
-	for (u32 y = 0; y < this->height; y ++)
-	{
-		for (u32 x = 0; x < this->width; x ++)
-		{
-			u32 pos = y * stride / sizeof(u32) + x;
-			pixels[pos] = 0;
-		}
-	}
+	void *pixels = framebufferBegin(&fb, &stride);
+	memset(pixels, 0, sizeof(u32)*width*height);
 	framebufferEnd(&fb);
 }
 
-void Gfx::Clear(u32 *pixels, u32 stride)
+void Gfx::Clear(u32 *pixels)
 {
-	for (u32 y = 0; y < this->height; y ++)
-	{
-		for (u32 x = 0; x < this->width; x ++)
-		{
-			u32 pos = y * stride / sizeof(u32) + x;
-			pixels[pos] = 0;
-		}
-	}
+	memset(pixels, 0, sizeof(u32)*width*height);
 }
 
 void Gfx::Exit()

@@ -22,6 +22,7 @@ class Notification
         void SetContentText(string contentText)
         {
             this->contentText = contentText;
+            renderDirty = 2;
         }
 
         /*void SetIcon(Texture *icon)
@@ -42,39 +43,47 @@ class Notification
         {
             this->isVisible = true;
             timeCreated = time(NULL);
+            renderDirty = 3;
         }
 
         void Hide()
         {
             this->isVisible = false;
+            renderDirty = 3;
         }
 
         bool Draw(float yPos)
         {
             if (!isVisible) return false;
-            u64 timeNow = time(NULL);
-            if (timeNow - timeCreated >= timeout && timeout != 0)
+            if (renderDirty > 0)
             {
-                this->Hide();
-                return false;
-            }
-            if(!ImGui::Begin(id.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav))
-            {
+                u64 timeNow = time(NULL);
+                if (timeNow - timeCreated >= timeout && timeout != 0)
+                {
+                    this->Hide();
+                    return false;
+                }
+                if(renderDirty > 0)
+                {
+                if(!ImGui::Begin(id.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav))
+                {
+                    ImGui::End();
+                    return false;
+                }
+                ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
+                ImGui::SetWindowSize(ImVec2(420, 90));
+                ImGui::SetWindowPos(ImVec2(0, yPos));
+                /*if(icon)
+                {
+                    ImGui::SetCursorPos(ImVec2(8, 13));
+                    ImGui::Image(icon, ImVec2(64,64));
+                }*/
+                ImGui::SetCursorPos(ImVec2(8+64+4, 45-(ImGui::CalcTextSize(contentText.c_str()).y/2)));
+                ImGui::Text(contentText.c_str());
+                ImGui::PopStyleColor();
                 ImGui::End();
-                return false;
+                }
             }
-            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
-            ImGui::SetWindowSize(ImVec2(420, 90));
-            ImGui::SetWindowPos(ImVec2(0, yPos));
-            /*if(icon)
-            {
-                ImGui::SetCursorPos(ImVec2(8, 13));
-                ImGui::Image(icon, ImVec2(64,64));
-            }*/
-            ImGui::SetCursorPos(ImVec2(8+64+4, 45-(ImGui::CalcTextSize(contentText.c_str()).y/2)));
-            ImGui::Text(contentText.c_str());
-            ImGui::PopStyleColor();
-            ImGui::End();
             return true;
         }
 

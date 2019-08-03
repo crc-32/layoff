@@ -100,6 +100,7 @@ void SwitchToActiveMode()
 {	
 	appletBeginToWatchShortHomeButtonMessage();
 	ActiveMode = true;
+	renderDirty = 3;
 }
 
 //Get inputs without blocking the foreground app
@@ -111,6 +112,7 @@ void SwitchToPassiveMode()
 	hidsysInitialize();
 	hidsysEnableAppletToGetInput(true); 
 	ActiveMode = false;
+	renderDirty = 3;
 }
 u32 batteryPercentage = 0;
 u64 ltimestamp;
@@ -166,6 +168,7 @@ void ImguiBindInputs(ImGuiIO& io)
 		hidTouchRead(&touch, 0);
 		io.MousePos = ImVec2(touch.px, touch.py);
 		io.MouseDown[0] = true;
+		renderDirty = 3;
 	}       
 	else io.MouseDown[0] = false;
 	
@@ -181,6 +184,10 @@ void ImguiBindInputs(ImGuiIO& io)
 	io.NavInputs[ImGuiNavInput_Menu] = kHeld & KEY_X;
 	io.NavInputs[ImGuiNavInput_FocusNext] = kHeld & (KEY_ZR | KEY_R);
 	io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
+	if (kHeld != 0)
+	{
+		renderDirty = 3;
+	}
 }
 /*Texture *statusTexTarget;
 void StatusDisplay()
@@ -302,12 +309,12 @@ void updateBattery()
 	}
 	if(batteryPercentage > 15 && ntm->IDInUse("batlow"))
 		ntm->HideID("batlow");
-	else if (ntm->IDInUse("batlow"))
+	/*else if (ntm->IDInUse("batlow"))
 	{
 		std::stringstream nText;
 		nText << "Battery Low: " << to_string(batteryPercentage) << "%%";
 		ntm->Push("batlow", nText.str(), "romfs:/notificationIcons/batLow.png", 0);
-	}
+	}*/
 }
 
 bool IdleLoop()
@@ -320,7 +327,7 @@ bool IdleLoop()
 		updateBattery();
 		ntm->EventHandler(batteryPercentage);
 
-		if(ntm->IsActive())
+		if(ntm->IsActive() && renderDirty > 0)
 		{
 			ImGui::NewFrame();
 			ntm->Render();
@@ -364,7 +371,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		ntm->EventHandler(batteryPercentage);
 
 		ImguiBindInputs(io);
-		ImGui::NewFrame();
+		if( renderDirty > 0 ) ImGui::NewFrame();
 		
 		if (pwrwindow)
 		{
@@ -375,7 +382,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 				delete pwrwindow;
 				pwrwindow = nullptr;
 			}
-			ImGui::Render();
+			if (renderDirty > 0) ImGui::Render();
 
 			gfx->Render();	
 			if (ReturnAtTheEnd)
@@ -383,7 +390,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 			continue;
 		}
 		
-		if (ActiveMode) //Draw the main window only if we have exclusive input like overlay would do
+		if (ActiveMode && renderDirty > 0) //Draw the main window only if we have exclusive input like overlay would do
 			LayoffMainWindow();		
 		
 		if (console) 
@@ -395,7 +402,7 @@ bool LayoffMainLoop(ImGuiIO& io)
 		DrewSomething |= WidgetDraw((UiItem**)&demoCalc);
 		DrewSomething |= WidgetDraw((UiItem**)&cheatScreen);
 
-		ImGui::Render();
+		if(renderDirty > 0) ImGui::Render();
 		//SDL_RenderPresent(sdl_render);
 		gfx->Render();		
 		
@@ -435,6 +442,7 @@ int main(int argc, char* argv[])
 RESET:
 	console->Print("Entering idle mode...\n");
 	gfx->Clear();
+	renderDirty = 3;
 	appletEndToWatchShortHomeButtonMessage(); //Unlock input for the foreground app	
 	if (!IdleLoop())
 		goto QUIT;

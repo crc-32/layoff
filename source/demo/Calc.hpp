@@ -9,6 +9,8 @@ class DemoCalc : public UiItem
 public:
 	bool Draw() override
 	{		
+		if(renderDirty > 0)
+		{
 		if (!ImGui::Begin("Calc", &Running) || !Running)
 		{
 			ImGui::End();
@@ -33,6 +35,7 @@ public:
 		if (ImGui::Button(" = ")) { Equals(); DisplayValue = Tot;  }
 #undef DIGIT
 		ImGui::End();
+		}
 		return true;
 	}
 private:

@@ -126,13 +126,19 @@ void NotificationManager::HandleVolume(u16 step)
 void NotificationManager::Pop()
 {
     if(this->notifications.front())
+    {
+        renderDirty = 3;
         this->notifications.pop_front();
+    }
 }
 
 void NotificationManager::PopAll()
 {
     while(!this->notifications.empty())
+    {
+        renderDirty = 3;
         this->notifications.pop_front();
+    }
 }
 
 void NotificationManager::ShowLatest()

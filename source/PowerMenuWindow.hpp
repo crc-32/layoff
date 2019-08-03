@@ -167,6 +167,7 @@ public:
 		WasIdle = _WasIdle;
 		if (!ActiveMode || WasIdle)
 			SwitchToActiveMode();
+		renderDirty = 3;
 	}
 	
 	~PowerMenuWindow()
@@ -174,49 +175,55 @@ public:
 		PowerPressed = false;
 		if (!_ActiveMode && !WasIdle)
 			SwitchToPassiveMode();
+		renderDirty = 3;
 	}
 
 	bool Draw()
 	{
-		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B) 
-			return false;
-		
-		if (!ImGui::Begin("POWER menu", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration))
+		if (hidKeysDown(CONTROLLER_P1_AUTO) & KEY_B)
 		{
-			ImGui::End();
+			renderDirty = 3;
 			return false;
 		}
-        ImGui::SetWindowFocus("POWER menu");
-        ImGui::SetWindowPos(ImVec2(0,0));
-        ImGui::SetWindowSize(ImVec2(1280,720));
-		ImGui::SetCursorPosY(100);
-		ImGui::SetCursorPosX((1280/2)-(500/2)); // Pos = (Screen size/2) - (Btn size/2) = Center
-		if(ImGui::Button("Sleep Mode", ImVec2(500,78))){
-			sleepConsole();
-			return false;
-		}
-		ImGui::NewLine();
-		ImGui::SetCursorPosX((1280/2)-(500/2));
-		if (HasPayload) 
+		if(renderDirty > 0)
 		{
-			if(ImGui::Button("Reboot to payload", ImVec2(500,78))){
-				if (PayloadReboot::Init())
-					PayloadReboot::Reboot();
+			if (!ImGui::Begin("POWER menu", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration))
+			{
+				ImGui::End();
+				return false;
 			}
-		}
-		else 
-			ImGui::Button("Missing payload !", ImVec2(500,78));
-		ImGui::SetCursorPosX((1280/2)-(500/2));
-		if(ImGui::Button("Power off", ImVec2(500,78))){
-            PayloadReboot::PerformShutdownSmc();
-        }
-		ImGui::NewLine();
-		ImGui::SetCursorPosX((1280/2)-(500/2));
-		if(ImGui::Button("Close", ImVec2(500,78))){
+			ImGui::SetWindowFocus("POWER menu");
+			ImGui::SetWindowPos(ImVec2(0,0));
+			ImGui::SetWindowSize(ImVec2(1280,720));
+			ImGui::SetCursorPosY(100);
+			ImGui::SetCursorPosX((1280/2)-(500/2)); // Pos = (Screen size/2) - (Btn size/2) = Center
+			if(ImGui::Button("Sleep Mode", ImVec2(500,78))){
+				sleepConsole();
+				return false;
+			}
+			ImGui::NewLine();
+			ImGui::SetCursorPosX((1280/2)-(500/2));
+			if (HasPayload) 
+			{
+				if(ImGui::Button("Reboot to payload", ImVec2(500,78))){
+					if (PayloadReboot::Init())
+						PayloadReboot::Reboot();
+				}
+			}
+			else 
+				ImGui::Button("Missing payload !", ImVec2(500,78));
+			ImGui::SetCursorPosX((1280/2)-(500/2));
+			if(ImGui::Button("Power off", ImVec2(500,78))){
+				PayloadReboot::PerformShutdownSmc();
+			}
+			ImGui::NewLine();
+			ImGui::SetCursorPosX((1280/2)-(500/2));
+			if(ImGui::Button("Close", ImVec2(500,78))){
+				ImGui::End();
+				return false;
+			}
 			ImGui::End();
-			return false;
 		}
-		ImGui::End();
 		return true;
 	}
 private:

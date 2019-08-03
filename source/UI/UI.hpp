@@ -21,6 +21,8 @@ public:
 	virtual ~UiItem() {};
 };
 
+extern volatile int renderDirty;
+
 class Gfx
 {
 	NWindow* win;
@@ -38,5 +40,5 @@ class Gfx
 	void Render();
 	void Exit();
 	void Clear();
-	void Clear(u32 *pixels, u32 stride);
+	void Clear(u32 *pixels);
 };

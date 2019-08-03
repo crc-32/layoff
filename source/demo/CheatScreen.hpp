@@ -34,6 +34,8 @@ public:
 	bool Draw()
 	{
 		bool Run = true;
+		if(renderDirty > 0)
+		{
 		if (!ImGui::Begin("Ram editor", &Run))
 		{
 			ImGui::End();
@@ -45,6 +47,7 @@ public:
 			DrawMainMenu();
 		
 		ImGui::End();
+		}
 		return Run;
 	}
 private:

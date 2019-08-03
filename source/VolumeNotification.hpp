@@ -19,6 +19,7 @@ public:
         else
             this->SetIcon(ImGuiSDL::LoadTexture("romfs:/notificationIcons/muteIcon.png"));*/
         timeCreated = time(NULL);
+        renderDirty = 3;
     }
 
     bool Draw(float yPos)
@@ -30,28 +31,32 @@ public:
             this->Hide();
             return false;
         }
-        if(!ImGui::Begin(id.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav))
+        if (renderDirty > 0)
         {
+            if(!ImGui::Begin(id.c_str(), NULL, ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoNav))
+            {
+                ImGui::End();
+                return false;
+            }
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
+            ImGui::SetWindowSize(ImVec2(420, 90));
+            ImGui::SetWindowPos(ImVec2(0, yPos));
+            /*if(icon)
+            {
+                ImGui::SetCursorPos(ImVec2(8, 13));
+                ImGui::Image(icon, ImVec2(64,64));
+            }*/
+            ImGui::SetCursorPos(ImVec2(8+64+4, 45-(32/2)));
+            if(currentStep < 256)
+            {
+                ImGui::ProgressBar(((float)currentStep)/15.0f, ImVec2((420-(8+64+4))-8, 32), "");
+            }else{ // Full muted
+                ImGui::ProgressBar(0.0f/15.0f, ImVec2((420-(8+64+4))-8, 32), "Mute");
+            }
+            ImGui::PopStyleColor();
             ImGui::End();
-            return false;
         }
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,20));
-        ImGui::SetWindowSize(ImVec2(420, 90));
-        ImGui::SetWindowPos(ImVec2(0, yPos));
-        /*if(icon)
-        {
-            ImGui::SetCursorPos(ImVec2(8, 13));
-            ImGui::Image(icon, ImVec2(64,64));
-        }*/
-        ImGui::SetCursorPos(ImVec2(8+64+4, 45-(32/2)));
-        if(currentStep < 256)
-        {
-            ImGui::ProgressBar(((float)currentStep)/15.0f, ImVec2((420-(8+64+4))-8, 32), "");
-        }else{ // Full muted
-            ImGui::ProgressBar(0.0f/15.0f, ImVec2((420-(8+64+4))-8, 32), "Mute");
-        }
-        ImGui::PopStyleColor();
-        ImGui::End();
+        
         return true;
     }
 private:
