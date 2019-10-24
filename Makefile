@@ -12,6 +12,7 @@ include $(TOPDIR)/localconfig.mk
 ifeq ($(LNXNIGHTLY),)
 $(error Please set LNXNIGHTLY to your libnx repository 'nx' folder in the localconfig.mk file (LNXNIGHTLY := <repo path>/nx/))
 endif
+
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
 # BUILD is the directory where object files & intermediate files will be placed
@@ -42,9 +43,9 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI source/dmntcht
+SOURCES		:=	source source/lvgl/src/lv_core source/lvgl/src/lv_draw source/lvgl/src/lv_font source/lvgl/src/lv_hal source/lvgl/src/lv_misc source/lvgl/src/lv_objx source/lvgl/src/lv_themes
 DATA		:=	data
-INCLUDES	:=	include
+INCLUDES	:=	include $(LNXNIGHTLY)/include source/lvgl
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -58,20 +59,21 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ `freetype-config --cflags`
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fexceptions
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs`
+LIBS	:= -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
 LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY)
+
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

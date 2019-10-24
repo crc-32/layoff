@@ -1,44 +1,94 @@
-#pragma once
 #include <switch.h>
-#include <vector>
+#include <lvgl.h>
 
-#include "imgui.h"
-#include "imgui_sw.hpp"
+Framebuffer fb;
+NWindow *win;
 
-#define SCR_W 1280
-#define SCR_H 720
+Thread tick;
+static lv_disp_buf_t disp_buf;
+static lv_color_t buf[LV_HOR_RES_MAX * 10];
 
-//extern SDL_Window* sdl_win;
-//extern SDL_Renderer* sdl_render;
+lv_disp_drv_t disp_drv;
+lv_indev_drv_t indev_drv_touch;
 
-//void SdlInit();
-//void SdlExit();
+void tickThread() {
+    while(true) {
+        lv_tick_inc(10);
+        svcSleepThread(1e+7);
+    }
+}
 
-class UiItem
+void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p)
 {
-public:
-	virtual bool Draw() = 0;
-	virtual ~UiItem() {};
-};
+    u32 stride;
+    u32* framebuf = (u32*) framebufferBegin(&fb, &stride);
 
-extern volatile int renderDirty;
+    int32_t x, y;
+    for(y = area->y1; y <= area->y2; y++) {
+        for(x = area->x1; x <= area->x2; x++) {
+            u32 pos = y * stride / sizeof(u32) + x;
+            u32 pixel =  color_p->ch.alpha << 24 | color_p->ch.blue << 16 | color_p->ch.green << 8 | color_p->ch.red;
+            framebuf[pos] = pixel;
+            color_p++;
+        }
+    }
+    framebufferEnd(&fb);
+    lv_disp_flush_ready(disp);
+}
 
-class Gfx
+bool touchscreen_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
 {
-	NWindow* win;
-	Framebuffer fb;
+    /*Save the state and save the pressed coordinate*/
+    touchPosition touchPos;
+    data->state = (hidTouchCount() > 0) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
+    if(data->state == LV_INDEV_STATE_PR) hidTouchRead(&touchPos, 0);
+   
+    /*Set the coordinates (if released use the last pressed coordinates)*/
+    data->point.x = touchPos.px;
+    data->point.y = touchPos.py;
 
-	u32 *pixel_buffer;
+    return false; /*Return `false` because we are not buffering and no more data to read*/
+}
 
-	imgui_sw::SwOptions sw_options;
+void UIInit(NWindow *window) {
+    /* ==Switch FB init== */
+    win = window;
+    if(!win)
+	{
+		fatalSimple(MAKERESULT(255,120));
+	}
 
-	u32 width;
-	u32 height;
-	Event vsync;
-	public:
-	Gfx();
-	void Render();
-	void Exit();
-	void Clear();
-	void Clear(u32 *pixels);
-};
+    Result rc = framebufferCreate(&fb, win, LV_HOR_RES_MAX, LV_VER_RES_MAX, PIXEL_FORMAT_RGBA_8888, 2);
+	if (R_FAILED(rc))
+		fatalSimple(rc);
+    
+    rc = framebufferMakeLinear(&fb);
+	if (R_FAILED(rc))
+		fatalSimple(rc);
+    
+    /* ==LVGL library init== */
+    lv_init();
+    threadCreate(&tick, (ThreadFunc)tickThread, NULL, NULL, 0x2000, 0x3E, -2);
+    threadStart(&tick);
+
+    lv_style_scr.body.main_color     = LV_COLOR_LIME;
+    lv_style_scr.body.grad_color     = LV_COLOR_LIME;
+    
+    /* ==LVGL disp driver init== */
+    lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.buffer = &disp_buf;
+    lv_disp_drv_register(&disp_drv);
+
+    /* ==LVGL input init */
+    // Touch
+    lv_indev_drv_init(&indev_drv_touch);
+    indev_drv_touch.type = LV_INDEV_TYPE_POINTER;
+    indev_drv_touch.read_cb = touchscreen_read;
+    lv_indev_drv_register(&indev_drv_touch);
+}
+
+void UIUpdate() {
+    lv_task_handler();
+}

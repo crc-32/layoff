@@ -1,6 +1,5 @@
 .vscode/
 build/
-layoff.*
 *.nro
 *.nso
 *.nsp
