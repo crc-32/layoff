@@ -8,3 +8,5 @@ build/
 *.npdm
 npdmtool.exe
 atmosphere/
+Layoff.vcxproj.user
+.vs/

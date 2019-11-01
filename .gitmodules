@@ -5,3 +5,6 @@
 	path = libnx
 	url = https://github.com/crc-32/libnx
 	branch = layoff
+[submodule "libs/libstratosphere"]
+	path = libs/libstratosphere
+	url = https://github.com/Atmosphere-NX/libstratosphere

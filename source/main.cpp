@@ -1,3 +1,8 @@
+
+#if !defined(__SWITCH__)
+#define __attribute__(x)
+#endif
+
 // Include the most common headers from the C standard library
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,8 +60,6 @@ extern "C" {
 
         fsdevMountSdmc();
     }
-
-    void __attribute__((weak)) userAppExit(void);
 
     void __attribute__((weak)) __appExit(void) {
         fsdevUnmountAll();
@@ -128,6 +131,8 @@ bool ActiveLoop() {
     return false;
 }
 
+#include "IPC\IPCThread.hpp"
+
 int main(int argc, char* argv[]) {
     svcSleepThread(5e+9);
     win_init();
@@ -137,6 +142,7 @@ int main(int argc, char* argv[]) {
 
     SwitchToPassiveMode();
     UIInit(nwindowGet());
+	IPC::LaunchThread();
     while (true) {
         if(!IdleLoop()) break;
         HomeLongPressed = false;

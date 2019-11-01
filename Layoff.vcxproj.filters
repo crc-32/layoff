@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\ipc\IPCThread.cpp">
+      <Filter>IPC</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\servers\Notification.cpp">
+      <Filter>IPC\servers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\lv_conf.h" />
+    <ClInclude Include="source\ui\UI.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ui\NWindowCustom.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\ipc\IPCThread.hpp">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\servers\Notification.hpp">
+      <Filter>IPC\servers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="UI">
+      <UniqueIdentifier>{2605e18d-ed39-4317-8112-9b6162c8251e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IPC">
+      <UniqueIdentifier>{c44e8be0-5dd1-4fe4-89ed-e3ff7e3e7451}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IPC\servers">
+      <UniqueIdentifier>{8a017a52-d59b-4646-9519-c08b253a0444}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+    <None Include="config.json" />
+  </ItemGroup>
+</Project>
