@@ -1,1 +1,1 @@
-LNXNIGHTLY := $(CURDIR)/libnx/nx
+LNXNIGHTLY := $(CURDIR)/libs/libnx/nx

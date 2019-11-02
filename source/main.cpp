@@ -4,8 +4,8 @@
 #include <string.h>
 
 #include <switch.h>
-#include "UI/NWindowCustom.hpp"
 #include "UI/UI.hpp"
+#include "UI/NWindowCustom.hpp"
 
 #define INNER_HEAP_SIZE 0x2000000*2
 
@@ -110,7 +110,6 @@ bool IdleLoop() {
     PowerPressed = false;
     while (MessageLoop())
     {
-        UIUpdate();
         if (PowerPressed || HomeLongPressed)
             return true;
         svcSleepThread(5e+7);
@@ -121,6 +120,7 @@ bool IdleLoop() {
 bool ActiveLoop() {
     while (MessageLoop())
     {
+        UIStart();
         UIUpdate();
         if (HomeLongPressed || HomePressed)
             return true;
@@ -138,13 +138,17 @@ int main(int argc, char* argv[]) {
     SwitchToPassiveMode();
     UIInit(nwindowGet());
     while (true) {
-        if(!IdleLoop()) break;
+        /*if(!IdleLoop()) break;
         HomeLongPressed = false;
         HomePressed = false;
         PowerPressed = false;
         SwitchToActiveMode();
 
-        if(!ActiveLoop()) break;
+        if(!ActiveLoop()) break;*/
+        UIStart();
+        ImGui::Text("Hello");
+        UIUpdate();
+        svcSleepThread(5e+5);
     }
     ovlnExit();
     npnsExit();

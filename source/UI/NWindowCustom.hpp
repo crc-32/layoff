@@ -1,5 +1,4 @@
 #include <switch.h>
-#include <lvgl.h>
 
 static ViDisplay g_viDisplay;
 static ViLayer g_viLayer;
@@ -31,9 +30,9 @@ void win_init(void)
                     if (R_FAILED(rc)) fatalSimple(rc);
                     rc = viSetLayerZ(&g_viLayer, 100);
                     if (R_FAILED(rc)) fatalSimple(rc);
-                    rc = viSetLayerSize(&g_viLayer, LV_HOR_RES_MAX*2, LV_VER_RES_MAX*2);
+                    rc = viSetLayerSize(&g_viLayer, HOR_LAYER_SIZE, VERT_LAYER_SIZE);
                     if (R_FAILED(rc)) fatalSimple(rc);
-                    rc = viSetLayerPosition(&g_viLayer, 1920 - LV_HOR_RES_MAX*2, 0);
+                    rc = viSetLayerPosition(&g_viLayer, 1920 - HOR_LAYER_SIZE, 0);
                     if (R_FAILED(rc)) fatalSimple(rc);
                     if (R_SUCCEEDED(rc)) {
                         rc = nwindowCreateFromLayer(&g_defaultWin, &g_viLayer);
