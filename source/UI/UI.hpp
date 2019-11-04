@@ -1,20 +1,9 @@
 #pragma once
 
 #include <imgui/imgui.h>
-#include <imgui/imgui_sw.hpp>
 #include <imgui/imgui_freetype.h>
+#include "rendering/imgui_sw.hpp"
 #include <switch.h>
-
-// Uses layer dimensions logic (docked screen size reference even when in handheld mode)
-#define VERT_LAYER_SIZE 1080
-#define HOR_LAYER_SIZE 650
-// True FB resolution
-#define VERT_RES VERT_LAYER_SIZE/2
-#define HOR_RES HOR_LAYER_SIZE/2
-
-Framebuffer fb;
-NWindow *win;
-Event vsync;
 
 void ImguiBindInputs(ImGuiIO& io)
 {
@@ -43,15 +32,13 @@ void ImguiBindInputs(ImGuiIO& io)
 	io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
 }
 
-void UIInit(NWindow *window) {
-    /* ==Switch FB init== */
-    win = window;
-    if(!win)
-	{
-		fatalSimple(MAKERESULT(255,120));
-	}
+Framebuffer fb;
 
-    Result rc = framebufferCreate(&fb, win, HOR_RES, VERT_RES, PIXEL_FORMAT_RGBA_8888, 2);
+#define DEFAULT_WIN_WIDTH 1280
+#define DEFAULT_WIN_HEIGHT 720
+
+void UIInit(NWindow *win) {
+    Result rc = framebufferCreate(&fb, win, DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT, PIXEL_FORMAT_RGBA_8888, 2);
 	if (R_FAILED(rc))
 		fatalSimple(rc);
     
@@ -59,13 +46,10 @@ void UIInit(NWindow *window) {
 	if (R_FAILED(rc))
 		fatalSimple(rc);
 
-	ViDisplay disp;
-	rc = viGetDisplayVsyncEvent(&disp, &vsync);
-
 	/* ==ImGui init== */
 	ImGui::CreateContext();
 	ImGuiIO &io = ImGui::GetIO();
-	io.DisplaySize = ImVec2(HOR_RES, VERT_RES);
+	io.DisplaySize = ImVec2(DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT);
 
 	/* ==Font init== */
 	rc = plInitialize();
@@ -76,8 +60,7 @@ void UIInit(NWindow *window) {
 	IM_ASSERT("plGetSharedFontByType failed" && R_SUCCEEDED(rc));
 
 	io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 25.0f);
-	unsigned int flags = 0;
-	ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+	ImGuiFreeType::BuildFontAtlas(io.Fonts, 0u);
 
 	imgui_sw::bind_imgui_painting();
 }
@@ -89,11 +72,9 @@ void UIStart() {
 void UIUpdate() {
 	ImGui::Render();
 	ImGuiIO &io = ImGui::GetIO();
-	eventWait(&vsync, 1e+6);
 	ImguiBindInputs(io);
-	u32 stride;
-	u32 *pixels = (u32*)framebufferBegin(&fb, &stride);
-	memset(pixels, 0, sizeof(u32)*HOR_RES*VERT_RES);
-	imgui_sw::paint_imgui(pixels, HOR_RES, VERT_RES);
+	u32 *pixels = (u32*)framebufferBegin(&fb, nullptr);
+	memset(pixels, 0, sizeof(u32) * DEFAULT_WIN_WIDTH * DEFAULT_WIN_HEIGHT);
+	imgui_sw::paint_imgui(pixels, DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT);
 	framebufferEnd(&fb);
 }

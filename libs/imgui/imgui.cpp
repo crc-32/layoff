@@ -3696,6 +3696,7 @@ void ImGui::NewFrame()
     // Check and assert for various common IO and Configuration mistakes
     NewFrameSanityChecks();
 
+#ifdef IMGUI_SETTINGS_AUTOSAVE
     // Load settings on first frame (if not explicitly loaded manually before)
     if (!g.SettingsLoaded)
     {
@@ -3718,6 +3719,7 @@ void ImGui::NewFrame()
             g.SettingsDirtyTimer = 0.0f;
         }
     }
+#endif
 
     g.Time += g.IO.DeltaTime;
     g.FrameScopeActive = true;
@@ -3954,6 +3956,7 @@ void ImGui::Shutdown(ImGuiContext* context)
     if (!g.Initialized)
         return;
 
+#ifdef IMGUI_SETTINGS_AUTOSAVE
     // Save settings (unless we haven't attempted to load them: CreateContext/DestroyContext without a call to NewFrame shouldn't save an empty file)
     if (g.SettingsLoaded && g.IO.IniFilename != NULL)
     {
@@ -3962,6 +3965,7 @@ void ImGui::Shutdown(ImGuiContext* context)
         SaveIniSettingsToDisk(g.IO.IniFilename);
         SetCurrentContext(backup_context);
     }
+#endif
 
     // Clear everything else
     for (int i = 0; i < g.Windows.Size; i++)
@@ -9418,14 +9422,14 @@ ImGuiWindowSettings* ImGui::FindOrCreateWindowSettings(const char* name)
 
 void ImGui::LoadIniSettingsFromDisk(const char* ini_filename)
 {
-    size_t file_data_size = 0;
-    char* file_data = (char*)ImFileLoadToMemory(ini_filename, "rb", &file_data_size);
-    if (!file_data)
-        return;
-    LoadIniSettingsFromMemory(file_data, (size_t)file_data_size);
-    IM_FREE(file_data);
+	size_t file_data_size = 0;
+	char* file_data = (char*)ImFileLoadToMemory(ini_filename, "rb", &file_data_size);
+	if (!file_data)
+		return;
+	LoadIniSettingsFromMemory(file_data, (size_t)file_data_size);
+	IM_FREE(file_data);
 }
-
+	
 ImGuiSettingsHandler* ImGui::FindSettingsHandler(const char* type_name)
 {
     ImGuiContext& g = *GImGui;

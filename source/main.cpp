@@ -5,7 +5,6 @@
 
 #include <switch.h>
 #include "UI/UI.hpp"
-#include "UI/NWindowCustom.hpp"
 
 #define INNER_HEAP_SIZE 0x2000000*2
 
@@ -13,6 +12,9 @@ extern "C" {
     u32 __nx_applet_type = AppletType_OverlayApplet;
     size_t nx_inner_heap_size = INNER_HEAP_SIZE;
     char   nx_inner_heap[INNER_HEAP_SIZE];
+	
+	extern void __nx_win_init(void);
+	extern void __nx_win_exit(void);
 
     void __libnx_initheap(void)
     {
@@ -130,13 +132,13 @@ bool ActiveLoop() {
 
 int main(int argc, char* argv[]) {
     svcSleepThread(5e+9);
-    win_init();
+    __nx_win_init();
 
     romfsInit();
     ovlnInitialize();
 
     SwitchToPassiveMode();
-    UIInit(nwindowGet());
+    UIInit(nwindowGetDefault());
     while (true) {
         /*if(!IdleLoop()) break;
         HomeLongPressed = false;
@@ -152,6 +154,6 @@ int main(int argc, char* argv[]) {
     }
     ovlnExit();
     npnsExit();
-    win_exit();
+	__nx_win_exit();
     return 0;
 }

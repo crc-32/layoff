@@ -43,7 +43,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source libs/imgui/imgui.cpp libs/imgui
+SOURCES		:=	source source/UI/rendering libs/imgui
 DATA		:=	data
 INCLUDES	:=	include $(LNXNIGHTLY)/include libs
 #ROMFS	:=	romfs
