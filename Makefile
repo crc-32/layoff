@@ -43,7 +43,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI/rendering libs/imgui
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui
 DATA		:=	data
 INCLUDES	:=	include $(LNXNIGHTLY)/include libs
 #ROMFS	:=	romfs
@@ -59,7 +59,7 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES) `freetype-config --cflags`
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
