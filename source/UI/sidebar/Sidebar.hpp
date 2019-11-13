@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <switch.h>
+#include <CrossSwitch.h>
 #include "../Window.hpp"
 #include <vector>
 

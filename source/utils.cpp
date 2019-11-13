@@ -4,8 +4,10 @@ namespace layoff::qlaunch {
 
 	Result SendMessage(GeneralChannelMessage message)
 	{
+		Result rc = 0;
+#if __SWITCH__
 		AppletStorage st;
-		auto rc = appletCreateStorage(&st, 1024);
+		rc = appletCreateStorage(&st, 1024);
 		if(R_SUCCEEDED(rc))
 		{
 			SystemAppletMessage sams = {};
@@ -21,6 +23,7 @@ namespace layoff::qlaunch {
 			if(R_SUCCEEDED(rc)) appletPushToGeneralChannel(&st);
 			appletStorageClose(&st);
 		}
+#endif
 		return rc;
 	}
 

@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source\WinStubs">
+      <UniqueIdentifier>{5e29370c-2e8f-4a06-a235-b8f68b3a7ce7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\UI">
+      <UniqueIdentifier>{1798428c-569a-47e4-93ee-623e70298aaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\UI\rendering">
+      <UniqueIdentifier>{8f6312a0-b85b-4164-a367-a374845831be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\UI\sidebar">
+      <UniqueIdentifier>{df4eb65e-27a9-493c-b2fe-644c84f623b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\WinStubs\include">
+      <UniqueIdentifier>{0a8102c2-99a8-4e2f-acc8-2f8a663cc734}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imgui">
+      <UniqueIdentifier>{19a0d794-d2e4-45ec-9669-06c290f514c0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\source\UI\PowerWindow.cpp">
+      <Filter>Source\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UI\rendering\imgui_sw.cpp">
+      <Filter>Source\UI\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UI\sidebar\Sidebar.cpp">
+      <Filter>Source\UI\sidebar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\utils.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\ConsoleStatus.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WinStubs\UI.cpp">
+      <Filter>Source\WinStubs</Filter>
+    </ClCompile>
+    <ClCompile Include="WinStubs\Stubs.h">
+      <Filter>Source\WinStubs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\imgui\imgui_freetype.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\imgui\imgui_widgets.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\imgui\imgui.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\imgui\imgui_demo.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libs\imgui\imgui_draw.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\source\UI\PowerWindow.hpp">
+      <Filter>Source\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\UI.hpp">
+      <Filter>Source\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\Window.hpp">
+      <Filter>Source\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\LogWindow.hpp">
+      <Filter>Source\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\rendering\imgui_sw.hpp">
+      <Filter>Source\UI\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\sidebar\Sidebar.hpp">
+      <Filter>Source\UI\sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\sidebar\SidebarControls.hpp">
+      <Filter>Source\UI\sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\ConsoleStatus.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\utils.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="WinStubs\include\CrossSwitch.h">
+      <Filter>Source\WinStubs\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imgui_freetype.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imgui_freetype.hpp">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imgui_internal.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imstb_rectpack.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imstb_textedit.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imstb_truetype.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imconfig.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\imgui\imgui.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\libs\imgui\LICENSE.txt">
+      <Filter>Imgui</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

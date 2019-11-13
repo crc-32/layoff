@@ -7,7 +7,7 @@
 
 namespace layoff::console
 {
-	ConsoleStatus_t Status;
+	layoff::console::ConsoleStatus_t Status;
 	static u64 LastUpdate = 0;		
 		
 	void RequestStatusUpdate()
@@ -24,6 +24,7 @@ namespace layoff::console
 	
 	static inline void DoStatusUpdate()
 	{
+#if __SWITCH__
 		psmGetBatteryChargePercentage(&Status.BatteryLevel);
 		
 		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
@@ -35,6 +36,8 @@ namespace layoff::console
 
 		timeGetCurrentTime(TimeType_UserSystemClock, &Status.Timestamp);
 		timeToCalendarTimeWithMyRule(Status.Timestamp, &Status.DateTime, nullptr);
+#else
+#endif
 	}
 	
 	void UpdateStatus()

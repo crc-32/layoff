@@ -1,7 +1,7 @@
 //Functions related to the general state of layoff
 #pragma once
 
-#include <switch.h>
+#include <CrossSwitch.h>
 #include "UI/Window.hpp"
 
 extern u64 kDown;

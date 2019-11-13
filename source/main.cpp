@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <switch.h>
+#include <CrossSwitch.h>
 #include "UI/UI.hpp"
 #include "utils.hpp"
 
@@ -13,6 +13,7 @@
 
 using namespace layoff;
 
+#if __SWITCH__
 extern "C" {
     u32 __nx_applet_type = AppletType_OverlayApplet;
 	
@@ -47,8 +48,6 @@ extern "C" {
         fsdevMountSdmc();
     }
 
-    void __attribute__((weak)) userAppExit(void);
-
     void __attribute__((weak)) __appExit(void) {
         fsdevUnmountAll();
         fsExit();
@@ -58,6 +57,7 @@ extern "C" {
         smExit();
     }
 }
+#endif
 
 u64 kHeld, kDown;
 
@@ -183,6 +183,9 @@ static bool IdleLoop() {
 	SwitchToIdleMode();
 	while (MessageLoop())
     {
+#if !__SWITCH__
+		HomeLongPressed = true;
+#endif
         if (PowerPressed || HomeLongPressed)
 		{
 			powerWindow.Visible = PowerPressed;
@@ -232,6 +235,18 @@ static bool ActiveLoop() {
     return false;
 }
 
+static void LayoffMainLoop() 
+{
+	SwitchToIdleMode();
+	while (true)
+	{
+		if (!IdleLoop()) break;
+		SwitchToActiveMode();
+		if (!ActiveLoop()) break;
+	}
+}
+
+#if __SWITCH__
 int main(int argc, char* argv[]) {
     svcSleepThread(5e+9);
     __nx_win_init();
@@ -246,15 +261,10 @@ int main(int argc, char* argv[]) {
 	lblInitialize();
     ovlnInitialize();
 
-    SwitchToIdleMode();
-    UIInit(nwindowGetDefault());
-    while (true)
-	{		
-        if(!IdleLoop()) break;
-        SwitchToActiveMode();
-        if(!ActiveLoop()) break;
-    }
+    UIInit();
+	LayoffMainLoop();
 	
+	UIExit();
     ovlnExit();
 	lblExit();
 	nifmExit();
@@ -265,3 +275,16 @@ int main(int argc, char* argv[]) {
 	__nx_win_exit();
     return 0;
 }
+#else
+#include <Windows.h>
+int WINAPI WinMain(
+	 	   HINSTANCE hInstance,    
+	 	   HINSTANCE hPrevInstance,
+	 	   LPSTR lpCmdLine,        
+	 	   int nCmdShow    )
+{
+	UIInit();
+	LayoffMainLoop();
+	UIExit();
+}
+#endif
