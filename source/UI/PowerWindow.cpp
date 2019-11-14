@@ -1,6 +1,9 @@
 #include "PowerWindow.hpp"
 #include "../utils.hpp"
+#include "../IPC/GeneralChannel.hpp"
+
 using namespace layoff::UI;
+using namespace layoff::ipc;
 
 void PowerWindow::DoUpdate()
 {
