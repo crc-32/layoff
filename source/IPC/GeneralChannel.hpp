@@ -31,4 +31,8 @@ namespace layoff::ipc::qlaunch {
 	Result PowerShutdown();
 	Result PowerSleep();
 	Result PowerReboot();
+
+	Result SignalBrightnessChange();
+	Result SignalAutoBrightnessChange();
+	Result SignalAirplaneChange();
 }

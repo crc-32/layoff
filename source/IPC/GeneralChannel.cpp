@@ -39,4 +39,19 @@ namespace layoff::ipc::qlaunch {
 	{
 		return SendMessage(GeneralChannelMessage::Reboot);
 	}
+
+	Result SignalBrightnessChange()
+	{
+		return SendMessage(GeneralChannelMessage::OverlayBrightValueChanged);
+	}
+
+	Result SignalAutoBrightnessChange()
+	{
+		return SendMessage(GeneralChannelMessage::OverlayAutoBrightnessChanged);
+	}
+
+	Result SignalAirplaneChange()
+	{
+		return SendMessage(GeneralChannelMessage::OverlayAirplaneModeChanged);
+	}
 }
