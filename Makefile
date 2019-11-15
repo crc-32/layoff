@@ -43,7 +43,7 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui source/IPC source/set
 DATA		:=	data
 INCLUDES	:=	include $(LNXNIGHTLY)/include libs
 #ROMFS	:=	romfs
@@ -61,7 +61,7 @@ CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 
 CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
