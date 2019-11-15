@@ -6,7 +6,7 @@
 Framebuffer fb;
 
 ImFont* Font25;
-ImFont* Font35;
+ImFont* Font30;
 
 #define DEFAULT_WIN_WIDTH 1280
 #define DEFAULT_WIN_HEIGHT 720
@@ -38,7 +38,7 @@ void UIInit() {
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight | ImFontAtlasFlags_NoMouseCursors;
 	Font25 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 25.0f);
-	Font35 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 35.0f);
+	Font30 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 30.0f);
 	ImGuiFreeType::BuildFontAtlas(io.Fonts, 0u);
 	
 	plExit();

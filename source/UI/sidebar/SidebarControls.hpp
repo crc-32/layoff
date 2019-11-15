@@ -2,6 +2,7 @@
 
 #include "../../ConsoleStatus.hpp"
 #include "../../set/ConsoleSettings.hpp"
+#include "Sidebar.hpp"
 
 #define CONSOLE_STATUS_SHORTCUT auto st = &layoff::console::Status;
 namespace layoff::UI::sidebar
@@ -10,34 +11,34 @@ namespace layoff::UI::sidebar
 	{
 		CONSOLE_STATUS_SHORTCUT
 
-		if (ImGui::Checkbox("Auto brightness", &st->AutoBrightness))
-			layoff::set::SetAutoBrightness(st->AutoBrightness);
+			ImGui::TextUnformatted("Brightness ");
 
-		ImGui::Spacing();
+		ImGui::SameLine();
 
-		ImGui::Text("Brightness "); ImGui::SameLine();
+		ImGui::PushItemWidth(260);
 		if (ImGui::SliderFloat("##Brightness", &st->BrightnessLevel, 0.0f, 1.0f, ""))
 			layoff::set::SetBrightness(st->BrightnessLevel);
 
-		ImGui::NewLine();
-	}
-	
-	static inline void WirelessControl()
-	{		
-		CONSOLE_STATUS_SHORTCUT
-		
-		if (st->Connected())
-			ImGui::Text("Ip address: %s",st->IpStr);
-		else 
-			ImGui::Text("Not connected");
-		
-		ImGui::Spacing();
-		
-		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless" : "Enable wireless", ImVec2(511, 0)))
-			layoff::set::SetWireless(!st->WirelessEnabled);
+		ImGui::SameLine(Sidebar::W - 100, 0);
 
-		ImGui::NewLine();
+		if (ImGui::Checkbox("Auto", &st->AutoBrightness))
+			layoff::set::SetAutoBrightness(st->AutoBrightness);
 	}
-	
+
+	static inline void WirelessControl()
+	{
+		CONSOLE_STATUS_SHORTCUT
+
+			if (st->Connected())
+				ImGui::Text("Ip: %s", st->IpStr);
+			else
+				ImGui::Text("Not connected");
+
+		ImGui::SameLine(Sidebar::W - 210, 0);
+
+		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless" : "Enable wireless", ImVec2(200, 0)))
+			layoff::set::SetWireless(!st->WirelessEnabled);
+	}
+
 }
 #undef CONSOLE_STATUS_SHORTCUT

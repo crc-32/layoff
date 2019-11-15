@@ -7,7 +7,7 @@
 #define DEFAULT_WIN_HEIGHT 720
 
 extern ImFont* Font25;
-extern ImFont* Font35;
+extern ImFont* Font30;
 
 static inline void ImguiInitialize()
 {
