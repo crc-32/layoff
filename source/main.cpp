@@ -247,7 +247,7 @@ int main(int argc, char* argv[]) {
     ovlnInitialize();
 
     SwitchToIdleMode();
-    UIInit(nwindowGetDefault());
+    UIInit();
     while (true)
 	{		
         if(!IdleLoop()) break;
