@@ -11,7 +11,7 @@ namespace layoff::UI::sidebar
 		CONSOLE_STATUS_SHORTCUT
 
 		if (ImGui::Checkbox("Auto brightness", &st->AutoBrightness))
-			layoff::set::SetAutoBrightness(!st->AutoBrightness);
+			layoff::set::SetAutoBrightness(st->AutoBrightness);
 
 		ImGui::Spacing();
 

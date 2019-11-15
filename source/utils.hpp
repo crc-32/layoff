@@ -32,6 +32,6 @@ namespace layoff {
 	void PrintLn(const std::string& s);
 	void Print(const std::string& s);	
 #else 
-	#define PrintLn(x) {}
-	#define Print(x) {}
+	#define PrintLn(x) do {} while(0)
+	#define Print(x) do {} while(0)
 #endif

@@ -12,7 +12,8 @@ namespace layoff::set
 	{
 		if (R_FAILED(lblSetCurrentBrightnessSetting(value)))
 			Print("Brightness change failed\n");
-		qlaunch::SignalBrightnessChange();
+		else
+			qlaunch::SignalBrightnessChange(value);
 		layoff::console::RequestStatusUpdate();
 	}
 
@@ -27,7 +28,8 @@ namespace layoff::set
 
 		if (R_FAILED(rc))
 			Print("Auto brightness change failed\n");
-		qlaunch::SignalAutoBrightnessChange();
+		else
+			qlaunch::SignalAutoBrightnessChange(value);
 		layoff::console::RequestStatusUpdate();
 	}
 
