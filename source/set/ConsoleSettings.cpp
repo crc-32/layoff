@@ -1,5 +1,5 @@
 #include "ConsoleSettings.hpp"
-#include <switch.h>
+#include <CrossSwitch.h>
 #include "../IPC/GeneralChannel.hpp"
 #include "../ConsoleStatus.hpp"
 #include "../utils.hpp"
@@ -8,6 +8,7 @@ using namespace layoff::ipc;
 
 namespace layoff::set
 {
+#if __SWITCH__
 	void SetBrightness(float value)
 	{
 		if (R_FAILED(lblSetCurrentBrightnessSetting(value)))
@@ -41,4 +42,9 @@ namespace layoff::set
 		//qlaunch::SignalAirplaneChange();
 		layoff::console::RequestStatusUpdate();
 	}
+#else
+	void SetBrightness(float value) {}
+	void SetAutoBrightness(bool value) {}
+	void SetWireless(bool enabled) {}
+#endif
 }

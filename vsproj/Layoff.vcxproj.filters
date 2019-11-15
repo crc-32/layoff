@@ -23,6 +23,12 @@
     <Filter Include="Imgui">
       <UniqueIdentifier>{19a0d794-d2e4-45ec-9669-06c290f514c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\set">
+      <UniqueIdentifier>{4860d9e3-2b49-4e5a-8615-572c8f62d92d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\IPC">
+      <UniqueIdentifier>{aa212692-1f95-4452-98fe-85334a3e39d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\source\UI\PowerWindow.cpp">
@@ -35,9 +41,6 @@
       <Filter>Source\UI\sidebar</Filter>
     </ClCompile>
     <ClCompile Include="..\source\main.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\source\utils.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\source\ConsoleStatus.cpp">
@@ -63,6 +66,15 @@
     </ClCompile>
     <ClCompile Include="..\libs\imgui\imgui_draw.cpp">
       <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\UI\rendering\ImguiExt.cpp">
+      <Filter>Source\UI\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\set\ConsoleSettings.cpp">
+      <Filter>Source\set</Filter>
+    </ClCompile>
+    <ClCompile Include="..\source\IPC\GeneralChannel.cpp">
+      <Filter>Source\IPC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +131,15 @@
     </ClInclude>
     <ClInclude Include="..\libs\imgui\imgui.h">
       <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\UI\rendering\ImguiExt.hpp">
+      <Filter>Source\UI\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\set\ConsoleSettings.hpp">
+      <Filter>Source\set</Filter>
+    </ClInclude>
+    <ClInclude Include="..\source\IPC\GeneralChannel.hpp">
+      <Filter>Source\IPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

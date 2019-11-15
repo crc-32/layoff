@@ -108,11 +108,13 @@
     <ClCompile Include="..\libs\imgui\imgui_freetype.cpp" />
     <ClCompile Include="..\libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\source\ConsoleStatus.cpp" />
+    <ClCompile Include="..\source\IPC\GeneralChannel.cpp" />
     <ClCompile Include="..\source\main.cpp" />
+    <ClCompile Include="..\source\set\ConsoleSettings.cpp" />
     <ClCompile Include="..\source\UI\PowerWindow.cpp" />
+    <ClCompile Include="..\source\UI\rendering\ImguiExt.cpp" />
     <ClCompile Include="..\source\UI\rendering\imgui_sw.cpp" />
     <ClCompile Include="..\source\UI\sidebar\Sidebar.cpp" />
-    <ClCompile Include="..\source\utils.cpp" />
     <ClCompile Include="WinStubs\Stubs.h" />
     <ClCompile Include="WinStubs\UI.cpp" />
   </ItemGroup>
@@ -126,8 +128,11 @@
     <ClInclude Include="..\libs\imgui\imstb_textedit.h" />
     <ClInclude Include="..\libs\imgui\imstb_truetype.h" />
     <ClInclude Include="..\source\ConsoleStatus.hpp" />
+    <ClInclude Include="..\source\IPC\GeneralChannel.hpp" />
+    <ClInclude Include="..\source\set\ConsoleSettings.hpp" />
     <ClInclude Include="..\source\UI\LogWindow.hpp" />
     <ClInclude Include="..\source\UI\PowerWindow.hpp" />
+    <ClInclude Include="..\source\UI\rendering\ImguiExt.hpp" />
     <ClInclude Include="..\source\UI\rendering\imgui_sw.hpp" />
     <ClInclude Include="..\source\UI\sidebar\Sidebar.hpp" />
     <ClInclude Include="..\source\UI\sidebar\SidebarControls.hpp" />

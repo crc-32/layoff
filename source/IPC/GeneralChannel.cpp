@@ -2,6 +2,7 @@
 #include <new>
 
 namespace layoff::ipc::qlaunch {
+
 	/* Credit: XorTroll (https://github.com/XorTroll/uLaunch/blob/master/Common/Include/os/os_HomeMenu.hpp) */
 	static constexpr u32 SAMSMagic = 0x534D4153;
 
@@ -30,6 +31,7 @@ namespace layoff::ipc::qlaunch {
 	template <typename ...T>
 	static inline Result SendMessage(GeneralChannelMessage message, T ...args)
 	{
+#if __SWITCH__
 		static_assert(((sizeof(args) == sizeof(u32)) && ...), "Each argument of SendMessage must have the same size as u32");
 		static_assert(sizeof...(args) < 1012 / 4, "The payload buffer is 1012 bytes long");
 
@@ -52,6 +54,8 @@ namespace layoff::ipc::qlaunch {
 			appletStorageClose(&st);
 		}
 		return rc;
+#endif
+		return 0;
 	}
 
 	Result PowerShutdown()

@@ -1,5 +1,5 @@
 #pragma once
-#include <switch.h>
+#include <CrossSwitch.h>
 
 namespace layoff::ipc::qlaunch {
 	Result PowerShutdown();

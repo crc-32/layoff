@@ -70,6 +70,7 @@ void hidTouchRead(touchPosition* a, int _)
 	a->py = t.py;
 }
 
+ImFont *font25, *font30;
 void UIInit()
 {
 	window = mfb_open_ex("Layoff", DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT, 0);
@@ -85,7 +86,8 @@ void UIInit()
 	ImGuiIO& io = ImGui::GetIO();
 	//ImFontAtlasFlags_NoPowerOfTwoHeight may be needed when/if we switch to hardware rendering
 	io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight | ImFontAtlasFlags_NoMouseCursors;
-	io.Fonts->AddFontFromFileTTF("opensans.ttf", 25.0f);
+	font25 = io.Fonts->AddFontFromFileTTF("opensans.ttf", 25.0f);
+	font30 = io.Fonts->AddFontFromFileTTF("opensans.ttf", 33.0f);
 	ImGuiFreeType::BuildFontAtlas(io.Fonts, 0u);
 
 	imgui_sw::bind_imgui_painting();

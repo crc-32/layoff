@@ -6,6 +6,7 @@
 #define NORETURN
 #define __uint128_t u64 
 #define __int128_t s64
+#define ssize_t u32;
 
 //Get hints from libnx when writing code but don't actually compile using it
 #if __INTELLISENSE__

@@ -21,6 +21,8 @@ static inline void ImguiInitialize()
 	style.WindowRounding = 0.0f;
 }
 
+extern ImFont* font25, * font30;
+
 void UIInit();
 void UIExit();
 void FrameStart();
