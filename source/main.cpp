@@ -10,6 +10,7 @@
 #include "UI/sidebar/Sidebar.hpp"
 #include "UI/PowerWindow.hpp"
 #include "ConsoleStatus.hpp"
+#include "Config.hpp"
 
 using namespace layoff;
 
@@ -237,6 +238,12 @@ int main(int argc, char* argv[]) {
     __nx_win_init();
 
     romfsInit();
+	if(!config::ConfigInit())
+	{
+		#ifdef LAYOFF_LOGGING
+		PrintLn("ERR: Couldn't read layoff ini, using defaults");
+		#endif
+	}
 	
 	timeInitialize();
 	psmInitialize();
