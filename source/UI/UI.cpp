@@ -16,23 +16,23 @@ void UIInit() {
 
     Result rc = framebufferCreate(&fb, win, DEFAULT_WIN_WIDTH, DEFAULT_WIN_HEIGHT, PIXEL_FORMAT_RGBA_8888, 2);
 	if (R_FAILED(rc))
-		fatalSimple(rc);
+		fatalThrow(rc);
     
     rc = framebufferMakeLinear(&fb);
 	if (R_FAILED(rc))
-		fatalSimple(rc);
+		fatalThrow(rc);
 
 	ImguiInitialize();
 
 	/* ==Font init== */
 	rc = plInitialize();
 	if (R_FAILED(rc))
-		fatalSimple(rc);
+		fatalThrow(rc);
 	
 	PlFontData font;
     rc = plGetSharedFontByType(&font, PlSharedFontType_Standard);
 	if (R_FAILED(rc))
-		fatalSimple(rc);
+		fatalThrow(rc);
 	
 	//ImFontAtlasFlags_NoPowerOfTwoHeight may be needed when/if we switch to hardware rendering
 	ImGuiIO& io = ImGui::GetIO();

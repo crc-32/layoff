@@ -32,23 +32,23 @@ extern "C" {
 
         rc = smInitialize();
         if (R_FAILED(rc))
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
+            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_SM));
 
         rc = appletInitialize();
         if (R_FAILED(rc))
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
+            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_AM));
 
         rc = hidInitialize();
 	    if (R_FAILED(rc))
-		    fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
+		    fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_HID));
 
         rc = hidsysInitialize();
             if (R_FAILED(rc))
-                fatalSimple(MAKERESULT(255, 11));
+                fatalThrow(MAKERESULT(255, 11));
 
         rc = fsInitialize();
         if (R_FAILED(rc))
-            fatalSimple(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
+            fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
         fsdevMountSdmc();
     }
@@ -253,8 +253,7 @@ int main(int argc, char* argv[]) {
 	timeInitialize();
 	psmInitialize();
 	npnsInitialize();
-	nifmSetServiceType(NifmServiceType_System);
-	nifmInitialize();
+	nifmInitialize(NifmServiceType_System);
 	lblInitialize();
     ovlnInitialize();
 

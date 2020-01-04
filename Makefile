@@ -43,9 +43,9 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui source/IPC source/IPC/servers source/set
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/set
 DATA		:=	data
-INCLUDES	:=	include $(LNXNIGHTLY)/include libs
+INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/nxExt/include
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -66,13 +66,13 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs` -lstratosphere
+LIBS	:= -lnx `freetype-config --libs` 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY) $(CURDIR)/libs/libstratosphere
+LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY)
 
 
 #---------------------------------------------------------------------------------

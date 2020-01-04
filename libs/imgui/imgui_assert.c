@@ -7,5 +7,5 @@ void assert_fail (const char *__assertion, const char *__file,
     fprintf(f, "Assertion failed: %s at:\n %s:%i\nFunction %s", __assertion, __file, __line, __function);
     fflush(f);
     fclose(f);
-    fatalSimple(MAKERESULT(255, 80));
+    fatalThrow(MAKERESULT(255, 80));
 }

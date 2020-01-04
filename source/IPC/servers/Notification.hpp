@@ -1,31 +1,20 @@
 #pragma once
 #include <switch.h>
-#include <stratosphere.hpp>
-
+#include <nxExt.h>
 namespace IPC {
 	namespace services {
 
-		class NotificationService final : public IServiceObject {
+		class NotificationService {
 		private:
-			enum class CommandId {
-				NotifySimple = 1,
-				NotifyEx = 2
-			};
-		private:
-			Result NotifySimple(InBuffer<s8> Message);
-			Result NotifyEx(InBuffer<u8> MessageData);
-		public:
-			DEFINE_SERVICE_DISPATCH_TABLE{
-				MAKE_SERVICE_COMMAND_META(NotificationService, NotifySimple),
-				MAKE_SERVICE_COMMAND_META(NotificationService, NotifyEx)
+			enum CommandId {
+				NotifySimpleId = 1,
+				NotifyExId = 2
 			};
 
-			struct Notification
-			{
-				u16 MsgLen, TitleLen, ImgLen;
-				u8 Data[];
-			}
-			__attribute__((packed));
+			static Result NotifySimple(const IpcServerRequest* r);
+			static Result NotifyEx(const IpcServerRequest* r);
+		public:
+			static Result HandleRequest(void* arg, const IpcServerRequest* r, u8* out_data, size_t* out_dataSize);
 		};
 
 	}
