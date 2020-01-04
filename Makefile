@@ -43,13 +43,9 @@ endif
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/lvgl/src/lv_core source/lvgl/src/lv_draw source/lvgl/src/lv_font \
-				source/lvgl/src/lv_hal source/lvgl/src/lv_misc source/lvgl/src/lv_objx \
-				source/lvgl/src/lv_themes \
-				source/IPC source/IPC/servers
-
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui source/IPC source/IPC/servers source/set
 DATA		:=	data
-INCLUDES	:=	include $(LNXNIGHTLY)/include source/lvgl libs/libstratosphere/include
+INCLUDES	:=	include $(LNXNIGHTLY)/include libs
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -61,16 +57,16 @@ APP_TITLEID := 010000000000100C
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES)
+			$(ARCH) $(DEFINES) `freetype-config --cflags`
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx -lstratosphere
+LIBS	:= -lnx `freetype-config --libs` -lstratosphere
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

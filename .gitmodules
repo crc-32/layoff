@@ -1,10 +1,10 @@
-[submodule "source/lvgl"]
-	path = source/lvgl
-	url = https://github.com/littlevgl/lvgl.git
-[submodule "libnx"]
-	path = libnx
-	url = https://github.com/crc-32/libnx
+[submodule "libs/libnx"]
+	path = libs/libnx
+	url = https://github.com/crc-32/libnx.git
 	branch = layoff
 [submodule "libs/libstratosphere"]
 	path = libs/libstratosphere
 	url = https://github.com/Atmosphere-NX/libstratosphere
+[submodule "libs/inih"]
+	path = libs/inih
+	url = https://github.com/jtilly/inih.git
