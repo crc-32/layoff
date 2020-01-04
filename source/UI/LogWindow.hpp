@@ -6,7 +6,7 @@
 #include "Window.hpp"
 #include <string>
 
-static std::string LogText = "Test\n";
+static std::string LogText = "";
 
 namespace layoff::UI {
 	
@@ -21,7 +21,7 @@ namespace layoff::UI {
 	
 		void Update() override 
 		{
-			ImGui::Begin("Log window");
+			ImGui::Begin("Log window", &Visible, ImVec2(300, 400));
 			ImGui::Text(LogText.c_str());
 			ImGui::End();
 		}
