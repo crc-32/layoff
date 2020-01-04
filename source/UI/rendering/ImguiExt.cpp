@@ -1,6 +1,6 @@
 #include "ImguiExt.hpp"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui\imgui_internal.h>
+#include <imgui/imgui_internal.h>
 
 using namespace ImGui;
 
