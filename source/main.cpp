@@ -125,7 +125,7 @@ static bool MessageLoop(void) {
 		HomePressed = true;
 	else		
 	{
-		Print("Unknown msg: " + std::to_string(msg));
+		PrintLn("Unknown msg: " + std::to_string(msg));
 		return appletProcessMessage(msg);
 	}
 
