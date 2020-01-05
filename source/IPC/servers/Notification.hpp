@@ -6,11 +6,6 @@ namespace IPC {
 
 		class NotificationService {
 		private:
-			enum CommandId {
-				NotifySimpleId = 1,
-				NotifyExId = 2
-			};
-
 			static Result NotifySimple(const IpcServerRequest* r);
 			static Result NotifyEx(const IpcServerRequest* r);
 		public:

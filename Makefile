@@ -45,7 +45,7 @@ TARGET		:=	layoff
 BUILD		:=	build
 SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/set
 DATA		:=	data
-INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/nxExt/include
+INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/nxExt/include libs/liblayoff/include
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -66,13 +66,13 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs` 
+LIBS	:= -lnx `freetype-config --libs` -llayoff
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY)
+LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY) $(CURDIR)/libs/liblayoff
 
 
 #---------------------------------------------------------------------------------

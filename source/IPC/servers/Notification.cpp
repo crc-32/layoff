@@ -1,6 +1,8 @@
 #include "Notification.hpp"
+#include "../../utils.hpp"
+#include <layoff.h>
 #include <string>
-#include <string.h>
+#include <sstream>
 #include <vector>
 
 namespace IPC {
@@ -8,15 +10,20 @@ namespace IPC {
 	
 		Result NotificationService::NotifySimple(const IpcServerRequest* r)
 		{
-			char cstr[r->data.size + 1] = {0};
-			strncpy(cstr, (char*)r->data.ptr, r->data.size);
-			std::string string(cstr);
-			
+			if (r->data.size >= sizeof(SimpleNotification))
+			{
+				SimpleNotification *notif = (SimpleNotification*)r->data.ptr;
+				PrintLn(notif->message);
+				return 0;
+			}
+			std::stringstream a;
+			a << r->data.size;
+			PrintLn(a.str());
 			//TODO
 			//NotificationsManager::PushSimple(string);
 			//Be sure to use a mutex !
 
-			return 0;
+			return MAKERESULT(255,3);
 		}
 
 		Result NotificationService::NotifyEx(const IpcServerRequest* r)
@@ -43,9 +50,9 @@ namespace IPC {
 			IpcServer* ipcSrv = (IpcServer*)arg;
 			switch(r->data.cmdId)
 			{
-				case CommandId::NotifyExId:
+				case LayoffCmdId_NotifyEx:
 					return MAKERESULT(255, 2);
-				case CommandId::NotifySimpleId:
+				case LayoffCmdId_NotifySimple:
 					return NotifySimple(r);
 				default:
 					return MAKERESULT(255,1);
