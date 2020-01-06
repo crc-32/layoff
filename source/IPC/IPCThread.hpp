@@ -1,5 +1,10 @@
 #pragma once
-#include <nxExt.h>
+namespace ams::result
+{
+	bool CallFatalOnResultAssertion = true;
+}
+
+
 namespace IPC
 {
 	void LaunchThread();

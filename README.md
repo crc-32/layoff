@@ -27,7 +27,3 @@ Then just `make`, the scripts `makelayeredfs.bat` and `makelayeredfs.sh` generat
 
   - [exelix11](https://github.com/exelix11/)
   - [crc-32](https://github.com/crc-32/)
-
-## Special thanks
-
-  - [RetroNX Team](https://github.com/retronx-team) (developed nxExt used in this project for IPC)

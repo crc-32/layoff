@@ -1,47 +1,44 @@
-#include <nxExt.h>
 #include <sstream>
+#include <stratosphere.hpp>
+#include "LayoffService.hpp"
 #include "../utils.hpp"
-#include "IPCThread.hpp"
-#include "servers/Notification.hpp"
 
 Thread notif_thread;
-IpcServer notif_server;
 
-static void IPCMain(void* _arg) 
+namespace {
+    constexpr ams::sm::ServiceName ServiceName = ams::sm::ServiceName::Encode("layoff");
+
+    struct ServerOptions {
+        static constexpr size_t PointerBufferSize = 0x800;
+        static constexpr size_t MaxDomains = 0x40;
+        static constexpr size_t MaxDomainObjects = 0x4000;
+    };
+
+    constexpr size_t MaxServers = 1;
+    constexpr size_t MaxSessions = 61;
+
+    ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions> g_server_manager;
+}
+
+static void IPCMain(void* _arg)
 {
-	Result rc;
-    IpcServer* ipcSrv = (IpcServer*)_arg;
-    while(true)
+    ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions> *server_manager = (ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions>*) _arg;
+    R_ASSERT(server_manager->RegisterServer<services::LayoffService>(ServiceName, MaxSessions));
+    server_manager->LoopProcess();
+}
+
+namespace IPC {
+
+    void LaunchThread() 
     {
-        rc = ipcServerProcess(ipcSrv, &IPC::services::NotificationService::HandleRequest, _arg);
-        if(R_FAILED(rc))
-        {
-            if(rc == KERNELRESULT(Cancelled))
-            {
-                return;
-            }
-            if(rc != KERNELRESULT(ConnectionClosed))
-            {
-                #ifdef LAYOFF_LOGGING
-				std::stringstream msg;
-				msg << "Unhandled Error in IPC thread: " << R_MODULE(rc) << "-" << R_DESCRIPTION(rc);
-				PrintLn(msg.str());
-				#endif
-            }
-        }
+        //From switchbrew: priority is a number 0-0x3F. Lower value means higher priority.
+        //Main thread is 0x2C
+        threadCreate(&notif_thread, &IPCMain, &g_server_manager, NULL, 0x4000, 0x2D, -2);
+        threadStart(&notif_thread);
     }
-}
 
-void IPC::LaunchThread() 
-{
-	//From switchbrew: priority is a number 0-0x3F. Lower value means higher priority.
-	//Main thread is 0x2C
-	ipcServerInit(&notif_server, "layoff:n", 32);
-	threadCreate(&notif_thread, &IPCMain, &notif_server, NULL, 0x4000, 0x2D, -2);
-	threadStart(&notif_thread);
-}
-
-void IPC::RequestAndWaitExit() 
-{
-	threadWaitForExit(&notif_thread);
+    void RequestAndWaitExit() 
+    {
+        threadWaitForExit(&notif_thread);
+    }
 }

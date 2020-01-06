@@ -45,7 +45,7 @@ TARGET		:=	layoff
 BUILD		:=	build
 SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/set
 DATA		:=	data
-INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/nxExt/include libs/liblayoff/include
+INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/Atmosphere-libs/libvapours/include libs/Atmosphere-libs/libstratosphere/include libs/liblayoff/include
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -59,20 +59,20 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
 			$(ARCH) $(DEFINES) `freetype-config --cflags`
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING -DATMOSPHERE_IS_STRATOSPHERE -DATMOSPHERE_BOARD_NINTENDO_SWITCH
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=c++17
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs` -llayoff
+LIBS	:= -lstratosphere -lnx `freetype-config --libs`
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY) $(CURDIR)/libs/liblayoff
+LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY) $(CURDIR)/libs/liblayoff $(CURDIR)/libs/Atmosphere-libs/libstratosphere
 
 
 #---------------------------------------------------------------------------------
