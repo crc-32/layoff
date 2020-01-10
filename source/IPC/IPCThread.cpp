@@ -9,9 +9,9 @@ namespace {
     constexpr ams::sm::ServiceName ServiceName = ams::sm::ServiceName::Encode("layoff");
 
     struct ServerOptions {
-        static constexpr size_t PointerBufferSize = 0x800;
-        static constexpr size_t MaxDomains = 0x40;
-        static constexpr size_t MaxDomainObjects = 0x4000;
+        static constexpr size_t PointerBufferSize = 0;
+        static constexpr size_t MaxDomains = 0;
+        static constexpr size_t MaxDomainObjects = 0;
     };
 
     constexpr size_t MaxServers = 1;
@@ -22,9 +22,8 @@ namespace {
 
 static void IPCMain(void* _arg)
 {
-    ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions> *server_manager = (ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions>*) _arg;
-    R_ASSERT(server_manager->RegisterServer<services::LayoffService>(ServiceName, MaxSessions));
-    server_manager->LoopProcess();
+    R_ASSERT(g_server_manager.RegisterServer<services::LayoffService>(ServiceName, MaxSessions));
+    g_server_manager.LoopProcess();
 }
 
 namespace IPC {
