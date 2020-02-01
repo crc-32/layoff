@@ -1,6 +1,7 @@
 #include <sstream>
 #include <stratosphere.hpp>
 #include "LayoffService.hpp"
+#include "../NotificationManager.hpp"
 #include "../utils.hpp"
 
 Thread notif_thread;
@@ -32,7 +33,7 @@ namespace IPC {
     {
         //From switchbrew: priority is a number 0-0x3F. Lower value means higher priority.
         //Main thread is 0x2C
-        threadCreate(&notif_thread, &IPCMain, &g_server_manager, NULL, 0x4000, 0x2D, -2);
+        threadCreate(&notif_thread, &IPCMain, NULL, NULL, 0x4000, 0x2D, -2);
         threadStart(&notif_thread);
     }
 

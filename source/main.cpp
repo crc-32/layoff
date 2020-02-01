@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
 
 #include <switch.h>
 #include "UI/UI.hpp"
@@ -16,6 +17,7 @@
 #include "UI/PowerWindow.hpp"
 #include "ConsoleStatus.hpp"
 #include "Config.hpp"
+#include "NotificationManager.hpp"
 
 using namespace layoff;
 
@@ -64,7 +66,7 @@ extern "C" {
 }
 
 u64 kHeld, kDown;
-
+NotificationManager *layoff::nman = nullptr;
 static inline void ImguiBindInputs()
 {	
 	ImGuiIO &io = ImGui::GetIO();
@@ -132,6 +134,33 @@ static bool MessageLoop(void) {
 	return true;
 }
 
+// TODO
+/*static void NotifThread(void* _arg) {
+	Result rc = ovlnInitialize();
+	if (R_FAILED(rc)) {
+		ovlnExit();
+		fatalThrow(rc);
+	}
+
+	Event notEv;
+	rc = ovlnIReceiverGetEvent(&notEv);
+	if (R_FAILED(rc)) {
+		fatalThrow(rc);
+	}
+	while(true) {
+		if (!R_FAILED(eventWait(&notEv, 1000000))) {
+			IReceiverNotification notif;
+			ovlnIReceiverGetNotification(&notif);
+			std::stringstream nlog;
+			nlog << "SysNotif: " << std::hex << notif.type;
+			PrintLn(nlog.str());
+		}else{
+			break;
+		}
+	}
+	fatalThrow(MAKERESULT(255, 10));
+}*/
+
 void layoff::SwitchToActiveMode()
 {	
 	if (mode == OverlayMode::Active) return;
@@ -193,6 +222,9 @@ static bool IdleLoop() {
 			mainWindow.Visible = HomeLongPressed;
             return true;
 		}
+		FrameStart();
+		nman->Update();
+		FrameEnd();
         svcSleepThread(3e+8); // 3/10 of a second
     }
     return false;
@@ -209,7 +241,7 @@ static bool ActiveLoop() {
         
 		bool AnyWindowRendered = false;
 		FrameStart();
-		
+		nman->Update();
 		if (AnyWindowRendered = powerWindow.ShouldRender())
 			powerWindow.Update();
 		//The foreground window has to come before the sidebar as it can optionally stay open (but not do any process) when switching to idle mode
@@ -239,7 +271,7 @@ static bool ActiveLoop() {
 #include "IPC/IPCThread.hpp"
 
 int main(int argc, char* argv[]) {
-    svcSleepThread(5e+9);
+    svcSleepThread(30e+9);
     __nx_win_init();
 
     romfsInit();
@@ -255,19 +287,25 @@ int main(int argc, char* argv[]) {
 	npnsInitialize();
 	nifmInitialize(NifmServiceType_System);
 	lblInitialize();
-    ovlnInitialize();
 
     SwitchToIdleMode();
     UIInit();
+
+	nman = new NotificationManager();
 	IPC::LaunchThread();
+
+	//TODO
+	/*Thread nThread;
+	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
+	threadStart(&nThread);*/
+
     while (true)
 	{		
         if(!IdleLoop()) break;
         SwitchToActiveMode();
         if(!ActiveLoop()) break;
     }
-	
-    ovlnExit();
+
 	lblExit();
 	nifmExit();
     npnsExit();

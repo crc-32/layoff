@@ -2,6 +2,8 @@
 #include <stratosphere.hpp>
 #include "../utils.hpp"
 #include <layoff.h>
+#include "../ConsoleStatus.hpp"
+#include <sstream>
 
 namespace services {
 
@@ -16,7 +18,11 @@ namespace services {
         public:
             ams::Result NotifySimple(SimpleNotification notification) {
                 // TODO
-                PrintLn(notification.message);
+                layoff::console::UpdateStatus();
+                auto s = &layoff::console::Status.Timestamp;
+                std::stringstream timestamp;
+                timestamp << s;
+                layoff::nman->PushNotif(notification.message, timestamp.str(), notification.identifier);
                 return ams::ResultSuccess();
             }
 

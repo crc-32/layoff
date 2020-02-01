@@ -1,5 +1,6 @@
 //Functions related to the general state of layoff
 #pragma once
+#include "NotificationManager.hpp"
 
 #include <switch.h>
 #include "UI/Window.hpp"
@@ -25,6 +26,8 @@ namespace layoff {
 
 	void SwitchToActiveMode();
 	void SwitchToPassiveMode();
+
+	extern NotificationManager *nman;
 }
 
 #if LAYOFF_LOGGING
