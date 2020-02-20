@@ -1,31 +1,55 @@
 #include "NotificationManager.hpp"
 #include <sstream>
 #include <algorithm>
+#include <atomic>
+#include "utils.hpp"
+#include <time.h>
 
-namespace layoff {
-    void NotificationManager::PushNotif(std::string content, std::string notifIdentifier, std::string ipcIdentifier) {
-        std::stringstream fullid;
-        fullid << notifIdentifier << "-" << ipcIdentifier;
-        std::string fid = fullid.str();
+namespace layoff::notif {
+	static std::atomic<s64> lastTs = 0;
+	static std::vector<Notification> notifications;
+	static Mutex notifMutex;
 
-        this->notifications.insert_or_assign(fid, new UI::Notification(content, fid, 4, false));
-    }
+	void PushSimple(const std::string& content, const std::string& author)
+	{
+		Push({ content, author, {}, time(NULL) });
+	}
 
-    void NotificationManager::PopNotif(std::string notifIdentifier, std::string ipcIdentifier) {
-        std::stringstream fullid;
-        fullid << notifIdentifier << "-" << ipcIdentifier;
-        std::string fid = fullid.str();
-        delete this->notifications[fid];
-        this->notifications.erase(fid);
-    }
+	void Push(Notification&& notif)
+	{
+		auto ts = notif.ts;
+		PrintLn(notif.message + " " + notif.author + " " + std::to_string(notif.ts));
+		LockNotifs().list.push_back(std::move(notif));
+		lastTs = ts;
+	}
 
-    void NotificationManager::Update() {
-        for( auto const& [key, val] : notifications )
-        {
-            if (!val->Update()) {
-                delete val;
-                notifications.erase(key);
-            }
-        }
-    }
+	s64 LastNotifTs()
+	{
+		return lastTs;
+	}
+
+	NotifLock LockNotifs()
+	{
+		return NotifLock(notifications);
+	}
+
+	NotifLock::NotifLock(std::vector<Notification>& l) : list(l)
+	{
+		mutexLock(&notifMutex);
+	}
+
+	NotifLock::~NotifLock()
+	{
+		mutexUnlock(&notifMutex);
+	}
+	
+	void ClearHistory()
+	{
+		LockNotifs().list.clear();
+	}
+
+	void Initialize()
+	{
+		mutexInit(&notifMutex);
+	}
 }

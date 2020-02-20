@@ -16,7 +16,7 @@ namespace {
     };
 
     constexpr size_t MaxServers = 1;
-    constexpr size_t MaxSessions = 61;
+    constexpr size_t MaxSessions = 30;
 
     ams::sf::hipc::ServerManager<MaxServers, ServerOptions, MaxSessions> g_server_manager;
 }

@@ -26,8 +26,6 @@ namespace layoff {
 
 	void SwitchToActiveMode();
 	void SwitchToPassiveMode();
-
-	extern NotificationManager *nman;
 }
 
 #if LAYOFF_LOGGING

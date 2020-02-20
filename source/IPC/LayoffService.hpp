@@ -5,6 +5,8 @@
 #include "../ConsoleStatus.hpp"
 #include <sstream>
 
+#include "../NotificationManager.hpp"
+
 namespace services {
 
     class LayoffService : public ams::sf::IServiceObject {
@@ -17,13 +19,8 @@ namespace services {
 
         public:
             ams::Result NotifySimple(SimpleNotification notification) {
-                // TODO
-                layoff::console::UpdateStatus();
-                auto s = &layoff::console::Status.Timestamp;
-                std::stringstream timestamp;
-                timestamp << s;
-                layoff::nman->PushNotif(notification.message, timestamp.str(), notification.identifier);
-                return ams::ResultSuccess();
+				layoff::notif::PushSimple(notification.message, notification.identifier);
+				return ams::ResultSuccess();
             }
 
             ams::Result NotifyEx() {

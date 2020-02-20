@@ -1,8 +1,3 @@
-
-#if !defined(__SWITCH__)
-#define __attribute__(x)
-#endif
-
 // Include the most common headers from the C standard library
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +12,7 @@
 #include "UI/PowerWindow.hpp"
 #include "ConsoleStatus.hpp"
 #include "Config.hpp"
-#include "NotificationManager.hpp"
+#include "UI/NotificationWindow.hpp"
 
 using namespace layoff;
 
@@ -66,7 +61,6 @@ extern "C" {
 }
 
 u64 kHeld, kDown;
-NotificationManager *layoff::nman = nullptr;
 static inline void ImguiBindInputs()
 {	
 	ImGuiIO &io = ImGui::GetIO();
@@ -195,6 +189,7 @@ static void SwitchToIdleMode()
 static UI::Sidebar mainWindow;
 static UI::PowerWindow powerWindow;
 static UI::WinPtr foregroundWin = nullptr;
+static UI::NotificationWindow notifWin;
 
 #if LAYOFF_LOGGING
 #include "UI/LogWindow.hpp"
@@ -203,6 +198,7 @@ static UI::LogWindow logWin;
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
+	PrintLn("Entering idle loop");
 	ClearFramebuffer();
 	ClearEvents();
 	
@@ -222,16 +218,20 @@ static bool IdleLoop() {
 			mainWindow.Visible = HomeLongPressed;
             return true;
 		}
-		FrameStart();
-		nman->Update();
-		FrameEnd();
-        svcSleepThread(3e+8); // 3/10 of a second
+		if (notifWin.ShouldRender())
+		{
+			FrameStart();
+			notifWin.Update();
+			FrameEnd();
+		}
+		svcSleepThread(3e+8); // 3/10 of a second
     }
     return false;
 }
 
 //The active loop will draw either the power menu, sidebar or the active window.
 static bool ActiveLoop() {
+	PrintLn("Entering active loop");
 	ClearEvents();
     while (MessageLoop())
     {					
@@ -241,19 +241,21 @@ static bool ActiveLoop() {
         
 		bool AnyWindowRendered = false;
 		FrameStart();
-		nman->Update();
+
 		if (AnyWindowRendered = powerWindow.ShouldRender())
 			powerWindow.Update();
 		//The foreground window has to come before the sidebar as it can optionally stay open (but not do any process) when switching to idle mode
 		else if (foregroundWin && (AnyWindowRendered = foregroundWin->ShouldRender()))
 				foregroundWin->Update();
 		else if (AnyWindowRendered = mainWindow.ShouldRender())
-		{
-			if (mode == OverlayMode::Idle)
-				SwitchToActiveMode();	
 			mainWindow.Update();
+
+		if (notifWin.ShouldRender())
+		{
+			AnyWindowRendered = true;
+			notifWin.Update();
 		}
-		
+
 		#if LAYOFF_LOGGING
 			logWin.Update();
 		#endif
@@ -271,7 +273,7 @@ static bool ActiveLoop() {
 #include "IPC/IPCThread.hpp"
 
 int main(int argc, char* argv[]) {
-    svcSleepThread(30e+9);
+    svcSleepThread(10e+9);
     __nx_win_init();
 
     romfsInit();
@@ -291,7 +293,7 @@ int main(int argc, char* argv[]) {
     SwitchToIdleMode();
     UIInit();
 
-	nman = new NotificationManager();
+	notif::Initialize();
 	IPC::LaunchThread();
 
 	//TODO
