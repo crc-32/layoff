@@ -1,0 +1,5 @@
+﻿#define PACKED 
+#define __attribute__(x) 
+#define NX_INLINE static inline
+#define NX_CONSTEXPR contexpr
+#define u32 uint32_t

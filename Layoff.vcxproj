@@ -22,6 +22,7 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -35,7 +36,7 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -75,23 +76,58 @@
     <NMakeReBuildCommandLine>make clean &amp;&amp; make</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
-  <ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExecutablePath>
+    </ExecutablePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)libs\libnx\nx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\Atmosphere-libs\libmesosphere\include;$(ProjectDir)libs\Atmosphere-libs\libvapours\include;$(ProjectDir)libs\Atmosphere-libs\libstratosphere\include;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
+    <NMakePreprocessorDefinitions>$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>$(ProjectDir)cpp.hint;</NMakeForcedIncludes>
+    <AdditionalOptions>-std=c++17</AdditionalOptions>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\libnx\nx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\Atmosphere-libs\libmesosphere\include;$(ProjectDir)libs\Atmosphere-libs\libvapours\include;$(ProjectDir)libs\Atmosphere-libs\libstratosphere\include;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\ipc\IPCThread.cpp" />
-    <ClCompile Include="source\IPC\servers\Notification.cpp" />
-    <ClCompile Include="source\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\ipc\IPCThread.hpp" />
-    <ClInclude Include="source\IPC\servers\Notification.hpp" />
-    <ClInclude Include="source\lv_conf.h" />
-    <ClInclude Include="source\ui\NWindowCustom.hpp" />
-    <ClInclude Include="source\ui\UI.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="config.json" />
+    <None Include="cpp.hint" />
     <None Include="Makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Config.cpp" />
+    <ClCompile Include="source\ConsoleStatus.cpp" />
+    <ClCompile Include="source\IPC\GeneralChannel.cpp" />
+    <ClCompile Include="source\IPC\IPCThread.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\NotificationManager.cpp" />
+    <ClCompile Include="source\set\ConsoleSettings.cpp" />
+    <ClCompile Include="source\UI\NotificationWindow.cpp" />
+    <ClCompile Include="source\UI\PowerWindow.cpp" />
+    <ClCompile Include="source\UI\rendering\ImguiExt.cpp" />
+    <ClCompile Include="source\UI\rendering\imgui_sw.cpp" />
+    <ClCompile Include="source\UI\sidebar\Sidebar.cpp" />
+    <ClCompile Include="source\UI\UI.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Config.hpp" />
+    <ClInclude Include="source\ConsoleStatus.hpp" />
+    <ClInclude Include="source\IPC\GeneralChannel.hpp" />
+    <ClInclude Include="source\IPC\IPCThread.hpp" />
+    <ClInclude Include="source\IPC\LayoffService.hpp" />
+    <ClInclude Include="source\NotificationManager.hpp" />
+    <ClInclude Include="source\set\ConsoleSettings.hpp" />
+    <ClInclude Include="source\UI\LogWindow.hpp" />
+    <ClInclude Include="source\UI\NotificationWindow.hpp" />
+    <ClInclude Include="source\UI\PowerWindow.hpp" />
+    <ClInclude Include="source\UI\rendering\ImguiExt.hpp" />
+    <ClInclude Include="source\UI\rendering\imgui_sw.hpp" />
+    <ClInclude Include="source\UI\sidebar\Sidebar.hpp" />
+    <ClInclude Include="source\UI\sidebar\SidebarControls.hpp" />
+    <ClInclude Include="source\UI\UI.hpp" />
+    <ClInclude Include="source\UI\Window.hpp" />
+    <ClInclude Include="source\utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

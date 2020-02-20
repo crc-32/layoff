@@ -8,10 +8,6 @@ endif
 
 TOPDIR ?= $(CURDIR)
 include $(DEVKITPRO)/libnx/switch_rules
-include $(TOPDIR)/localconfig.mk
-ifeq ($(LNXNIGHTLY),)
-$(error Please set LNXNIGHTLY to your libnx repository 'nx' folder in the localconfig.mk file (LNXNIGHTLY := <repo path>/nx/))
-endif
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -45,7 +41,7 @@ TARGET		:=	layoff
 BUILD		:=	build
 SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/set
 DATA		:=	data
-INCLUDES	:=	include $(LNXNIGHTLY)/include libs libs/Atmosphere-libs/libvapours/include libs/Atmosphere-libs/libstratosphere/include libs/liblayoff/include
+INCLUDES	:=	include libs/libnx/nx/include libs libs/Atmosphere-libs/libvapours/include libs/Atmosphere-libs/libstratosphere/include libs/liblayoff/include
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -72,7 +68,7 @@ LIBS	:= -lstratosphere -lnx `freetype-config --libs`
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LNXNIGHTLY) $(CURDIR)/libs/liblayoff $(CURDIR)/libs/Atmosphere-libs/libstratosphere
+LIBDIRS	:= $(PORTLIBS) $(CURDIR)/libs/libnx/nx $(CURDIR)/libs/liblayoff $(CURDIR)/libs/Atmosphere-libs/libstratosphere
 
 
 #---------------------------------------------------------------------------------
