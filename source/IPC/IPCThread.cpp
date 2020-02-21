@@ -3,6 +3,7 @@
 #include "LayoffService.hpp"
 #include "../NotificationManager.hpp"
 #include "../utils.hpp"
+#include "Clients.hpp"
 
 Thread notif_thread;
 
@@ -27,12 +28,13 @@ static void IPCMain(void* _arg)
     g_server_manager.LoopProcess();
 }
 
-namespace IPC {
+namespace layoff::IPC {
 
     void LaunchThread() 
     {
         //From switchbrew: priority is a number 0-0x3F. Lower value means higher priority.
         //Main thread is 0x2C
+		InitClients();
         threadCreate(&notif_thread, &IPCMain, NULL, NULL, 0x4000, 0x2D, -2);
         threadStart(&notif_thread);
     }

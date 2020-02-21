@@ -15,7 +15,7 @@ namespace layoff::UI::sidebar
 
 		ImGui::SameLine();
 
-		ImGui::PushItemWidth(260);
+		ImGui::PushItemWidth(250);
 		if (ImGui::SliderFloat("##Brightness", &st->BrightnessLevel, 0.0f, 1.0f, ""))
 			layoff::set::SetBrightness(st->BrightnessLevel);
 

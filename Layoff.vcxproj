@@ -98,12 +98,14 @@
   <ItemGroup>
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\ConsoleStatus.cpp" />
+    <ClCompile Include="source\IPC\Clients.cpp" />
     <ClCompile Include="source\IPC\GeneralChannel.cpp" />
     <ClCompile Include="source\IPC\IPCThread.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\NotificationManager.cpp" />
     <ClCompile Include="source\set\ConsoleSettings.cpp" />
     <ClCompile Include="source\UI\NotificationWindow.cpp" />
+    <ClCompile Include="source\UI\panels\IPCControl.cpp" />
     <ClCompile Include="source\UI\PowerWindow.cpp" />
     <ClCompile Include="source\UI\rendering\ImguiExt.cpp" />
     <ClCompile Include="source\UI\rendering\imgui_sw.cpp" />
@@ -113,13 +115,19 @@
   <ItemGroup>
     <ClInclude Include="source\Config.hpp" />
     <ClInclude Include="source\ConsoleStatus.hpp" />
+    <ClInclude Include="source\IPC\Clients.hpp" />
+    <ClInclude Include="source\IPC\ErrorCodes.h" />
     <ClInclude Include="source\IPC\GeneralChannel.hpp" />
+    <ClInclude Include="source\IPC\IPCLock.hpp" />
     <ClInclude Include="source\IPC\IPCThread.hpp" />
     <ClInclude Include="source\IPC\LayoffService.hpp" />
     <ClInclude Include="source\NotificationManager.hpp" />
     <ClInclude Include="source\set\ConsoleSettings.hpp" />
     <ClInclude Include="source\UI\LogWindow.hpp" />
     <ClInclude Include="source\UI\NotificationWindow.hpp" />
+    <ClInclude Include="source\UI\panels\ButtonList.hpp" />
+    <ClInclude Include="source\UI\panels\IPCControl.hpp" />
+    <ClInclude Include="source\UI\panels\TextPanel.hpp" />
     <ClInclude Include="source\UI\PowerWindow.hpp" />
     <ClInclude Include="source\UI\rendering\ImguiExt.hpp" />
     <ClInclude Include="source\UI\rendering\imgui_sw.hpp" />

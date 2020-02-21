@@ -4,8 +4,7 @@ namespace ams::result
 	bool CallFatalOnResultAssertion = true;
 }
 
-
-namespace IPC
+namespace layoff::IPC
 {
 	void LaunchThread();
 	void RequestAndWaitExit();

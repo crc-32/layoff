@@ -27,9 +27,9 @@ namespace layoff::console
 		psmGetBatteryChargePercentage(&Status.BatteryLevel);
 		
 		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
-		nifmGetCurrentIpAddress(&Status.IpAddress);	
+		nifmGetCurrentIpAddress(&Status.IpAddress);
 		IpAddrToString(Status.IpAddress, Status.IpStr);
-				
+
 		lblGetCurrentBrightnessSetting(&Status.BrightnessLevel);
 		lblIsAutoBrightnessControlEnabled(&Status.AutoBrightness);	
 

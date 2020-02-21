@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
-#include <map>
 #include <vector>
 #include <switch.h>
+
+#include "IPC/IPCLock.hpp"
 
 namespace layoff::notif {
   
@@ -24,16 +25,7 @@ namespace layoff::notif {
 	void Push(Notification&& notif);
 	s64 LastNotifTs();
 
-	struct NotifLock
-	{
-		std::vector<Notification>& list;
-
-		NotifLock(std::vector<Notification>& l); //Locks the notification mutex
-		~NotifLock(); //Unlocks the mutex
-
-		NotifLock(NotifLock& other) = delete;
-		NotifLock& operator=(NotifLock other) = delete;
-	};
+	using NotifLock = layoff::IPC::ObjLock<std::vector<Notification>>;
 
 	NotifLock LockNotifs();
 	void ClearHistory();

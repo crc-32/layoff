@@ -17,8 +17,8 @@ inline void NotificationWindow::UpdateCache()
 
 	auto&& n = notif::LockNotifs();
 	
-	auto it = n.list.rbegin();
-	while (it != n.list.rend() && it->ts + NotifScreenTime > ts) {
+	auto it = n.obj.rbegin();
+	while (it != n.obj.rend() && it->ts + NotifScreenTime > ts) {
 		notifCache.push_back(*it);
 		it++;
 	}

@@ -112,6 +112,8 @@ OverlayMode layoff::GetCurrentMode() {return mode;}
 static bool MessageLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
+
+	PrintLn("Received message " + std::to_string(msg));
 	
 	if (msg == 0x17)
 		PowerPressed = true;
@@ -198,7 +200,6 @@ static UI::LogWindow logWin;
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
-	PrintLn("Entering idle loop");
 	ClearFramebuffer();
 	ClearEvents();
 	
@@ -231,8 +232,8 @@ static bool IdleLoop() {
 
 //The active loop will draw either the power menu, sidebar or the active window.
 static bool ActiveLoop() {
-	PrintLn("Entering active loop");
 	ClearEvents();
+	console::RequestStatusUpdate();
     while (MessageLoop())
     {					
 		console::UpdateStatus();
@@ -271,9 +272,11 @@ static bool ActiveLoop() {
 }
 
 #include "IPC/IPCThread.hpp"
+#include <time.h>
 
 int main(int argc, char* argv[]) {
-    svcSleepThread(10e+9);
+	//Waiting too little here breaks the power button messages, at least on 9.1 
+    svcSleepThread(20e+9);
     __nx_win_init();
 
     romfsInit();
@@ -300,6 +303,7 @@ int main(int argc, char* argv[]) {
 	/*Thread nThread;
 	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
 	threadStart(&nThread);*/
+	srand(time(NULL));
 
     while (true)
 	{		

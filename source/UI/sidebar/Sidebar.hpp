@@ -22,14 +22,14 @@ namespace layoff::UI {
 		bool HighFreqUpdate() override;		
 		bool ShouldRender() override;
 		
+		void FocusSidebar();
+
 		~Sidebar() override {	}
 	private: 
 		void PushStyling();		
 		void PopStyiling();
 		
 		void DoUpdate();
-			
-		std::vector<WinPtr> Windows;
 	};
 
 }
