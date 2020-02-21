@@ -8,7 +8,9 @@
 namespace layoff::console
 {
 	ConsoleStatus_t Status;
-	static u64 LastUpdate = 0;		
+	static time_t LastUpdate = 0;
+
+	static const time_t MinRefreshWaitSecs = 5;
 		
 	void RequestStatusUpdate()
 	{
@@ -26,6 +28,9 @@ namespace layoff::console
 	{
 		psmGetBatteryChargePercentage(&Status.BatteryLevel);
 		
+		Status.connectionStatus = NifmInternetConnectionStatus_ConnectingUnknown1;
+		nifmGetInternetConnectionStatus(&Status.connectionType, &Status.ConnectionStrenght, &Status.connectionStatus);
+
 		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
 		nifmGetCurrentIpAddress(&Status.IpAddress);
 		IpAddrToString(Status.IpAddress, Status.IpStr);
@@ -39,7 +44,7 @@ namespace layoff::console
 	
 	void UpdateStatus()
 	{
-		if (time(NULL) - LastUpdate <= 5) return;
+		if (time(NULL) - LastUpdate <= MinRefreshWaitSecs) return;
 		LastUpdate = time(NULL);		
 		
 		DoStatusUpdate();

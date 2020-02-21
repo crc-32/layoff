@@ -1,4 +1,5 @@
 #pragma once
+#include <imgui/imgui.h>
 
 #include "../../ConsoleStatus.hpp"
 #include "../../set/ConsoleSettings.hpp"
@@ -29,10 +30,10 @@ namespace layoff::UI::sidebar
 	{
 		CONSOLE_STATUS_SHORTCUT
 
-			if (st->Connected())
-				ImGui::Text("Ip: %s", st->IpStr);
-			else
-				ImGui::Text("Not connected");
+		if (st->Connected())
+			ImGui::Text("Ip: %s", st->IpStr);
+		else
+			ImGui::Text("Offline");
 
 		ImGui::SameLine(Sidebar::W - 210, 0);
 

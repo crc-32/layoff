@@ -234,6 +234,7 @@ static bool IdleLoop() {
 static bool ActiveLoop() {
 	ClearEvents();
 	console::RequestStatusUpdate();
+	SwitchToActiveMode();
     while (MessageLoop())
     {					
 		console::UpdateStatus();
@@ -251,11 +252,9 @@ static bool ActiveLoop() {
 		else if (AnyWindowRendered = mainWindow.ShouldRender())
 			mainWindow.Update();
 
+		//notifWin doesn't set AnyWindowRendered or else the B button is not enough to close the overlay 
 		if (notifWin.ShouldRender())
-		{
-			AnyWindowRendered = true;
 			notifWin.Update();
-		}
 
 		#if LAYOFF_LOGGING
 			logWin.Update();
@@ -308,7 +307,6 @@ int main(int argc, char* argv[]) {
     while (true)
 	{		
         if(!IdleLoop()) break;
-        SwitchToActiveMode();
         if(!ActiveLoop()) break;
     }
 

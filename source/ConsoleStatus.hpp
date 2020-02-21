@@ -9,9 +9,17 @@ namespace layoff::console
 		u32 BatteryLevel = 0;
 		
 		bool WirelessEnabled = false;		
+		NifmInternetConnectionType connectionType;
+		NifmInternetConnectionStatus connectionStatus;
+		u32 ConnectionStrenght;
 		u32 IpAddress;
+
 		char IpStr[16];
-		constexpr bool Connected() { return IpAddress != 0; }
+		constexpr bool Connected()
+		{
+			return IpAddress!= 0 && connectionStatus == NifmInternetConnectionStatus_Connected &&
+				(WirelessEnabled || connectionType == NifmInternetConnectionType_Ethernet); 
+		}
 		
 		float BrightnessLevel = 0;
 		bool AutoBrightness = false;

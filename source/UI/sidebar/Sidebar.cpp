@@ -1,14 +1,13 @@
 #include "Sidebar.hpp"
+#include "SidebarControls.hpp"
 
 #include "../rendering/ImguiExt.hpp"
 #include "../../utils.hpp"
-#include "SidebarControls.hpp"
-#include <string>
 #include "../UI.hpp"
-
 #include "../../IPC/Clients.hpp"
 
 #include <imgui/imgui_internal.h>
+#include <string>
 
 using namespace layoff;
 using namespace layoff::UI;
@@ -60,8 +59,23 @@ inline void Sidebar::DoUpdate()
 {
 	auto s = &console::Status.DateTime;
 	ImGui::PushFont(Font30);
-	ImGui::Text("%d:%d   %d/%d", s->hour, s->minute, s->day, s->month);
+	ImGui::Text("%d:%d   %d/%d   ", s->hour, s->minute, s->day, s->month);
 	ImGui::SameLine();
+	
+	//TODO: replace these with images
+	if (!console::Status.Connected())
+		ImGui::Text("[Offline]");
+	else if (console::Status.connectionType == NifmInternetConnectionType_Ethernet)
+		ImGui::Text("[Ethernet]");
+	else if (console::Status.connectionType == NifmInternetConnectionType_WiFi)
+	{ 
+		char bars[] = "---";
+		for (u32 i = 0; i < console::Status.ConnectionStrenght && i < 3; i++)
+			bars[i] = '|';
+		ImGui::Text("[Wifi %s]", bars);
+	}
+	ImGui::SameLine();
+	
 	ImGui::TextRight("%d%%", console::Status.BatteryLevel);
 	ImGui::PopFont();
 	ImGui::Spacing();
