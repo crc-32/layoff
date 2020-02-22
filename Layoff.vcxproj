@@ -79,7 +79,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExecutablePath>
     </ExecutablePath>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)libs\libnx\nx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\Atmosphere-libs\libmesosphere\include;$(ProjectDir)libs\Atmosphere-libs\libvapours\include;$(ProjectDir)libs\Atmosphere-libs\libstratosphere\include;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\devkitPro\libnx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\Atmosphere-libs\libmesosphere\include;$(ProjectDir)libs\Atmosphere-libs\libvapours\include;$(ProjectDir)libs\Atmosphere-libs\libstratosphere\include;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
     <NMakePreprocessorDefinitions>LAYOFF_LOGGING;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <NMakeForcedIncludes>$(ProjectDir)cpp.hint;</NMakeForcedIncludes>
     <AdditionalOptions>-std=c++17</AdditionalOptions>
