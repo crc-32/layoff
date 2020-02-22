@@ -3,25 +3,41 @@
 
 namespace layoff::IPC {
 
-	template<typename T>
-	struct ObjLock
+	struct ScopeLock
 	{
-		ObjLock(T& o, Mutex& m) : obj(o), mutex(m)
+		ScopeLock(Mutex& m) : mutex(m)
 		{
 			mutexLock(&mutex);
 		}
 
-		~ObjLock()
+		virtual ~ScopeLock()
 		{
 			mutexUnlock(&mutex);
+		}
+
+		ScopeLock(ScopeLock& other) = delete;
+		ScopeLock& operator=(ScopeLock other) = delete;
+	private:
+		Mutex& mutex;
+	};
+
+	template<typename T>
+	struct ObjLock : private ScopeLock
+	{
+		ObjLock(T& o, Mutex& m) : ScopeLock(m), obj(o)
+		{
+
+		}
+
+		~ObjLock()
+		{
+
 		}
 		
 		T& obj;
 
 		ObjLock(ObjLock& other) = delete;
 		ObjLock& operator=(ObjLock other) = delete;
-	private:
-		Mutex& mutex;
 	};
 
 }

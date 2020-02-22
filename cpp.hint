@@ -7,3 +7,4 @@
 #define u8 uint8_t
 #deinfe serviceDispatchIn(...)
 #define serviceDispatch(...)
+#define _Static_assert(x,y)

@@ -9,13 +9,15 @@ namespace layoff::UI {
 	class NotificationWindow : public Window
 	{
 	public:
-		const u32 MaxNotifWidth = 330;
-		const u32 NotifScreenTime = 8;
+		static const u32 MaxNotifWidth = 330;
+		static const u32 NotifScreenTime = 8;
 
 		void RequestClose() override { }
 
 		void Update() override;
 		bool ShouldRender() override;
+
+		void Update(bool IsVolumeOpened);
 
 		~NotificationWindow() override { }
 	private:
@@ -23,7 +25,6 @@ namespace layoff::UI {
 		inline void PopStyiling();
 
 		std::vector<notif::Notification> notifCache;
-		s64 cacheTs = 0;
 		inline void UpdateCache();
 	};
 

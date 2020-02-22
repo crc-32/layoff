@@ -11,19 +11,24 @@ extern "C" {
 #endif
 
 	typedef enum {
-		BatteryNotifType = 0xb90b,
-		LowBatNotifType = 0xba0b,
-		VolumeNotifType = 0xe803,
-		ScreenshotNotifType = 0x441f,
-		ScreenshotFailNotifType = 0x431f,
-		ScreenshotUnkNotifType = 0x411f,
-		VideoNotifType = 0xa41f,
-		VideoFailNotifType = 0xa61f
-	} IReceiverNotifType;
+		OvlnNotificationType_Battery = 0x0bb9,	//Received when power is (un)plugged, Payload[0] is battery %
+		OvlnNotificationType_LowBat = 0x0bba,
+		OvlnNotificationType_Volume = 0x03e8,  //Payload[0] is volume value 0 to F, Payload[4] is 1 if + button, 2 if - 
+		OvlnNotificationType_Screenshot = 0x1f44,
+		OvlnNotificationType_ScreenshotFail = 0x1f43,
+		OvlnNotificationType_ScreenshotUnk = 0x1f41,
+		OvlnNotificationType_Video = 0x1fa4,
+		OvlnNotificationType_VideoFail = 0x1fa6
+	} OvlnNotificationType;
 
 	typedef struct {
-		u8 data[0x88];
-	} OvlnNotificationWithTick;
+		u32 Type;
+		u32 Unknown; //Seems to always be 8
+		u8 Payload[0x78]; //Not sure if this is all payload, towards the end there seems to be more data
+		u64 Tick; 
+	} PACKED OvlnNotificationWithTick;
+
+	_Static_assert(sizeof(OvlnNotificationWithTick) == 0x88, "");
 
 	Result ovlnInitialize();
 	void ovlnExit();

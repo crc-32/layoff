@@ -5,13 +5,14 @@
 #include <string>
 #include "../NotificationManager.hpp"
 #include <time.h>
+#include "VolumeWindow.hpp"
 
 using namespace layoff;
 using namespace layoff::UI;
 
 inline void NotificationWindow::UpdateCache()
 {
-	if (notif::LastNotifTs() == cacheTs) return;
+	if (!notif::HasNewNotifs()) return;
 	notifCache.clear();
 	s64 ts = time(NULL);
 
@@ -25,17 +26,19 @@ inline void NotificationWindow::UpdateCache()
 
 	//Oldest notifs end up at the end of the cache
 	PrintLn("TODO: play a sound here");
-
-	cacheTs = notif::LastNotifTs();
 }
 
-void NotificationWindow::Update()
+void NotificationWindow::Update() { Update(false); }
+
+void NotificationWindow::Update(bool IsVolumeOpened)
 {
 	s64 ts = time(NULL);
 
 	PushStyling();
 
 	ImVec2 pos = {0,0};
+	if (IsVolumeOpened)
+		pos.y = VolumeWindow::Size.y;
 
 	int RemoveIndex = -1;
 	int i = 0;

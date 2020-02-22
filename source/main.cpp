@@ -5,14 +5,15 @@
 #include <sstream>
 
 #include <switch.h>
-#include "UI/UI.hpp"
 #include "utils.hpp"
+#include "Config.hpp"
+#include "ConsoleStatus.hpp"
 
+#include "UI/UI.hpp"
 #include "UI/sidebar/Sidebar.hpp"
 #include "UI/PowerWindow.hpp"
-#include "ConsoleStatus.hpp"
-#include "Config.hpp"
 #include "UI/NotificationWindow.hpp"
+#include "UI/VolumeWindow.hpp"
 
 #include "IPC/ServiceWrappers/npns.h"
 #include "IPC/ServiceWrappers/ovln.h"
@@ -115,9 +116,7 @@ OverlayMode layoff::GetCurrentMode() {return mode;}
 static bool MessageLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
-
-	PrintLn("Received message " + std::to_string(msg));
-	
+		
 	if (msg == 0x17)
 		PowerPressed = true;
 	else if (msg == 0x15)
@@ -131,42 +130,6 @@ static bool MessageLoop(void) {
 	}
 
 	return true;
-}
-
-static void NotifThread(void* _arg) {
-	Result rc = ovlnInitialize();
-	if (R_FAILED(rc)) {
-		PrintLn("ovlnInit: " + R_STRING(rc));
-		return;
-	}
-
-	Event notEv;
-	rc = ovlnIReceiverGetReceiveEventHandle(&notEv);
-	if (R_FAILED(rc)) {
-		ovlnExit();
-		PrintLn("ovlnEvent: " + R_STRING(rc));
-		return;
-	}
-	while(true) {
-		rc = eventWait(&notEv, UINT64_MAX);
-
-		if (R_FAILED(rc))
-		{
-			PrintLn("ovln eventWait failed");
-			break;
-		}
-		else
-		{
-			OvlnNotificationWithTick notif;
-			ovlnIReceiverReceiveWithTick(&notif);
-			PrintLn("GotNotification !");
-			PrintHex((u8*)&notif, sizeof(notif));
-		}
-	}
-	
-	ovlnExit();
-	PrintLn("Exiting ovln notif thread");
-	return;
 }
 
 void layoff::SwitchToActiveMode()
@@ -204,14 +167,78 @@ static UI::Sidebar mainWindow;
 static UI::PowerWindow powerWindow;
 static UI::WinPtr foregroundWin = nullptr;
 static UI::NotificationWindow notifWin;
+static UI::VolumeWindow volumeWin;
 
 #if LAYOFF_LOGGING
 #include "debug/DebugControls.hpp"
 #endif
 
+static void NotifThread(void* _arg) {
+	Result rc = ovlnInitialize();
+	if (R_FAILED(rc)) {
+		PrintLn("ovlnInit: " + R_STRING(rc));
+		return;
+	}
+
+	Event notEv;
+	rc = ovlnIReceiverGetReceiveEventHandle(&notEv);
+	if (R_FAILED(rc)) {
+		ovlnExit();
+		PrintLn("ovlnEvent: " + R_STRING(rc));
+		return;
+	}
+	while (true) {
+		rc = eventWait(&notEv, UINT64_MAX);
+
+		if (R_FAILED(rc))
+		{
+			PrintLn("ovln eventWait failed");
+			break;
+		}
+		else
+		{
+			OvlnNotificationWithTick notif;
+
+			if (R_FAILED(ovlnIReceiverReceiveWithTick(&notif)))
+				continue;
+
+			switch (notif.Type)
+			{
+			case OvlnNotificationType_Battery:
+				console::RequestStatusUpdate();
+				break;
+			case OvlnNotificationType_LowBat:
+				notif::PushSimple("Low battery !", "Layoff");
+				break;
+			case OvlnNotificationType_Volume:
+				volumeWin.Signal(notif.Payload[0]);
+				break;
+			case OvlnNotificationType_Screenshot:
+				notif::PushSimple("Screenshot saved !", "Layoff");
+				break;
+			case OvlnNotificationType_ScreenshotFail:
+				notif::PushSimple("Couldn't save the screenshot.", "Layoff");
+				break;
+			case OvlnNotificationType_Video:
+				notif::PushSimple("Recording saved !", "Layoff");
+				break;
+			case OvlnNotificationType_VideoFail:
+				notif::PushSimple("Recording saved !", "Layoff");
+				break;
+			default:
+				PrintLn("Got unknown notification " + std::to_string(notif.Type));
+				PrintHex((u8*)&notif, sizeof(notif));
+			}			
+		}
+	}
+
+	ovlnExit();
+	PrintLn("Exiting ovln notif thread");
+	return;
+}
+
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
-	ClearFramebuffer();
 	ClearEvents();
 	
 	//Close all the current windows 
@@ -222,6 +249,8 @@ static bool IdleLoop() {
 		foregroundWin->RequestClose();
     
 	SwitchToIdleMode();
+	//As this is likely being called after the active loop we assume we have to clear the framebuffer
+	bool previousFrameRendered = true;
 	while (MessageLoop())
     {
         if (PowerPressed || HomeLongPressed)
@@ -230,13 +259,30 @@ static bool IdleLoop() {
 			mainWindow.Visible = HomeLongPressed;
             return true;
 		}
-		if (notifWin.ShouldRender())
+
+		const bool notif = notifWin.ShouldRender();
+		const bool volume = volumeWin.ShouldRender();
+		const bool shouldRender = notif || volume;
+		const bool userCanInteract = volume;
+
+		if (shouldRender)
 		{
 			FrameStart();
-			notifWin.Update();
+			if (volume)
+				volumeWin.Update();
+			if (notif)
+				notifWin.Update(volume);
 			FrameEnd();
+			previousFrameRendered = shouldRender;
 		}
-		svcSleepThread(3e+8); // 3/10 of a second
+		else if (previousFrameRendered)
+		{
+			//If we're leaving the active loop or just finished rendering
+			ClearFramebuffer();
+			previousFrameRendered = false;
+		}
+		
+		svcSleepThread(userCanInteract ? (1e+9 / 15) : 3e+8); // ~15 FPS if we're rendering something the user can interact with, 1/3 of a sec otherwise
     }
     return false;
 }
@@ -257,15 +303,18 @@ static bool ActiveLoop() {
 
 		if (AnyWindowRendered = powerWindow.ShouldRender())
 			powerWindow.Update();
-		//The foreground window has to come before the sidebar as it can optionally stay open (but not do any process) when switching to idle mode
+		//The foreground window has to come before the sidebar as it can optionally stay open when switching to idle mode (but update it's not called)
 		else if (foregroundWin && (AnyWindowRendered = foregroundWin->ShouldRender()))
 				foregroundWin->Update();
 		else if (AnyWindowRendered = mainWindow.ShouldRender())
 			mainWindow.Update();
 
-		//notifWin doesn't set AnyWindowRendered or else the B button is not enough to close the overlay 
+		//These are shown as overlay and don't need to prevent transitioning to the idle loop, so don't set AnyWindowRendered
+		bool volume = volumeWin.ShouldRender();
+		if (volume)
+			volumeWin.Update();
 		if (notifWin.ShouldRender())
-			notifWin.Update();
+			notifWin.Update(volume);
 
 		#if LAYOFF_LOGGING
 			debug::Instance.Update();
@@ -286,7 +335,7 @@ static bool ActiveLoop() {
 
 int main(int argc, char* argv[]) {
 	//Waiting too little here breaks the power button messages, at least on 9.1 
-    svcSleepThread(20e+9);
+    svcSleepThread(15e+9);
     __nx_win_init();
 
     romfsInit();
@@ -305,7 +354,6 @@ int main(int argc, char* argv[]) {
 	notif::Initialize();
 	IPC::LaunchThread();
 
-	//TODO
 	Thread nThread;
 	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
 	threadStart(&nThread);

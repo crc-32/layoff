@@ -26,7 +26,7 @@ namespace layoff::debug {
 	
 		void Update() override 
 		{
-			ScopeLock lock(this);
+			layoff::IPC::ScopeLock lock(mutex);
 
 			ImGui::Begin("Log window", &Visible, ImVec2(300, 400));
 			ImGui::Text(LogText.c_str());
@@ -43,19 +43,19 @@ namespace layoff::debug {
 
 		void PrintLine(const std::string& text)
 		{
-			ScopeLock lock(this);
+			layoff::IPC::ScopeLock lock(mutex);
 			LogText += text + "\n";
 		}
 
 		void Print(const std::string& text)
 		{
-			ScopeLock lock(this);
+			layoff::IPC::ScopeLock lock(mutex);
 			LogText += text;
 		}
 
 		void SetHexBuf(const u8* data, u32 len)
 		{
-			ScopeLock lock(this);
+			layoff::IPC::ScopeLock lock(mutex);
 			if (data)
 				HexBuf = std::vector<u8>(data, data + len);
 			else
@@ -71,16 +71,6 @@ namespace layoff::debug {
 		std::vector<u8> HexBuf;
 		MemoryEditor mem_edit_1;
 		Mutex mutex;
-
-		class ScopeLock 
-		{
-		public:
-			ScopeLock(DebugWindows* t) : ref(t) { mutexLock(&ref->mutex); }
-			~ScopeLock() { mutexUnlock(&ref->mutex); }
-		private:
-			DebugWindows* ref;
-		};
-
 	};
 
 	static DebugWindows Instance;

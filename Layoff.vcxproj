@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -113,6 +113,7 @@
     <ClCompile Include="source\UI\rendering\imgui_sw.cpp" />
     <ClCompile Include="source\UI\sidebar\Sidebar.cpp" />
     <ClCompile Include="source\UI\UI.cpp" />
+    <ClCompile Include="source\UI\VolumeWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Config.hpp" />
@@ -139,6 +140,7 @@
     <ClInclude Include="source\UI\sidebar\Sidebar.hpp" />
     <ClInclude Include="source\UI\sidebar\SidebarControls.hpp" />
     <ClInclude Include="source\UI\UI.hpp" />
+    <ClInclude Include="source\UI\VolumeWindow.hpp" />
     <ClInclude Include="source\UI\Window.hpp" />
     <ClInclude Include="source\utils.hpp" />
   </ItemGroup>

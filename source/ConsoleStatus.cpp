@@ -2,13 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <atomic>
 
 #include "ConsoleStatus.hpp"
 
 namespace layoff::console
 {
 	ConsoleStatus_t Status;
-	static time_t LastUpdate = 0;
+	static std::atomic<time_t> LastUpdate = 0;
 
 	static const time_t MinRefreshWaitSecs = 5;
 		

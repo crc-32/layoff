@@ -6,7 +6,7 @@
 #include <time.h>
 
 namespace layoff::notif {
-	static std::atomic<s64> lastTs = 0;
+	static std::atomic<bool> newNotifs;
 	static std::vector<Notification> notifications;
 	static Mutex notifMutex;
 
@@ -18,14 +18,17 @@ namespace layoff::notif {
 	void Push(Notification&& notif)
 	{
 		auto ts = notif.ts;
-		PrintLn(notif.message + " " + notif.author + " " + std::to_string(notif.ts));
+		PrintLn(notif.message + " " + notif.author + " " + std::to_string(ts));
 		LockNotifs().obj.push_back(std::move(notif));
-		lastTs = ts;
+		newNotifs = true;
 	}
 
-	s64 LastNotifTs()
+	bool HasNewNotifs()
 	{
-		return lastTs;
+		bool res = newNotifs;
+		if (res) 
+			newNotifs = false;
+		return res;
 	}
 
 	NotifLock LockNotifs()

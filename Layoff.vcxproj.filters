@@ -75,6 +75,9 @@
     <ClCompile Include="source\IPC\ServiceWrappers\npns.c">
       <Filter>IPC\ServiceWrappers</Filter>
     </ClCompile>
+    <ClCompile Include="source\UI\VolumeWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ConsoleStatus.hpp" />
@@ -146,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="source\IPC\ServiceWrappers\npns.h">
       <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\VolumeWindow.hpp">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -23,7 +23,7 @@ namespace layoff::notif {
 	
 	void PushSimple(const std::string& content, const std::string& author);
 	void Push(Notification&& notif);
-	s64 LastNotifTs();
+	bool HasNewNotifs();
 
 	using NotifLock = layoff::IPC::ObjLock<std::vector<Notification>>;
 
