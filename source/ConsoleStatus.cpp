@@ -27,13 +27,16 @@ namespace layoff::console
 	static inline void DoStatusUpdate()
 	{
 		psmGetBatteryChargePercentage(&Status.BatteryLevel);
+		psmGetChargerType(&Status.chargerType);
 		
 		Status.connectionStatus = NifmInternetConnectionStatus_ConnectingUnknown1;
-		nifmGetInternetConnectionStatus(&Status.connectionType, &Status.ConnectionStrenght, &Status.connectionStatus);
-
-		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
-		nifmGetCurrentIpAddress(&Status.IpAddress);
-		IpAddrToString(Status.IpAddress, Status.IpStr);
+		if (R_FAILED(nifmGetInternetConnectionStatus(&Status.connectionType, &Status.ConnectionStrenght, &Status.connectionStatus)))
+			Status.IpAddress = 0;
+		else {
+			nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
+			nifmGetCurrentIpAddress(&Status.IpAddress);
+			IpAddrToString(Status.IpAddress, Status.IpStr);
+		}
 
 		lblGetCurrentBrightnessSetting(&Status.BrightnessLevel);
 		lblIsAutoBrightnessControlEnabled(&Status.AutoBrightness);	

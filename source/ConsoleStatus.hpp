@@ -6,6 +6,7 @@ namespace layoff::console
 {
 	struct ConsoleStatus_t
 	{		
+		ChargerType chargerType;
 		u32 BatteryLevel = 0;
 		
 		bool WirelessEnabled = false;		

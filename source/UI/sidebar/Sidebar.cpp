@@ -76,7 +76,7 @@ inline void Sidebar::DoUpdate()
 	}
 	ImGui::SameLine();
 	
-	ImGui::TextRight("%d%%", console::Status.BatteryLevel);
+	ImGui::TextRight("%d%%%s", console::Status.BatteryLevel, console::Status.chargerType == ChargerType_None ? "" : "+");
 	ImGui::PopFont();
 	ImGui::Spacing();
 
