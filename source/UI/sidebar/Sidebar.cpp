@@ -59,7 +59,7 @@ inline void Sidebar::DoUpdate()
 {
 	auto s = &console::Status.DateTime;
 	ImGui::PushFont(Font30);
-	ImGui::Text("%d:%d   %d/%d   ", s->hour, s->minute, s->day, s->month);
+	ImGui::Text("%d:%02d   %d/%d   ", s->hour, s->minute, s->day, s->month);
 	ImGui::SameLine();
 	
 	//TODO: replace these with images
