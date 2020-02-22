@@ -34,10 +34,10 @@ namespace layoff::console
 		if (R_FAILED(nifmGetInternetConnectionStatus(&Status.connectionType, &Status.ConnectionStrenght, &Status.connectionStatus)))
 			Status.IpAddress = 0;
 		else {
-			nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
 			nifmGetCurrentIpAddress(&Status.IpAddress);
 			IpAddrToString(Status.IpAddress, Status.IpStr);
 		}
+		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
 
 		lblGetCurrentBrightnessSetting(&Status.BrightnessLevel);
 		lblIsAutoBrightnessControlEnabled(&Status.AutoBrightness);	
