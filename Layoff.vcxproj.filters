@@ -19,6 +19,9 @@
     <Filter Include="UI\panels">
       <UniqueIdentifier>{208916c9-2943-430f-a431-ab1953755ebf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{742561b4-9513-48c4-a702-b3afc593cbf1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -78,9 +81,6 @@
     <ClInclude Include="source\UI\Window.hpp">
       <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="source\UI\LogWindow.hpp">
-      <Filter>UI</Filter>
-    </ClInclude>
     <ClInclude Include="source\UI\sidebar\Sidebar.hpp">
       <Filter>UI\sidebar</Filter>
     </ClInclude>
@@ -125,6 +125,12 @@
     </ClInclude>
     <ClInclude Include="source\UI\panels\ButtonList.hpp">
       <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\debug\imgui_memory_editor.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="source\debug\DebugControls.hpp">
+      <Filter>debug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -32,7 +32,9 @@ namespace layoff {
 	#include <string>
 	void PrintLn(const std::string& s);
 	void Print(const std::string& s);	
+	void PrintHex(const u8* data, u32 len);
 #else 
 	#define PrintLn(x) do {} while(0)
 	#define Print(x) do {} while(0)
+	#define PrintHex(x,y) do {} while(0)
 #endif

@@ -194,8 +194,7 @@ static UI::WinPtr foregroundWin = nullptr;
 static UI::NotificationWindow notifWin;
 
 #if LAYOFF_LOGGING
-#include "UI/LogWindow.hpp"
-static UI::LogWindow logWin;
+#include "debug/DebugControls.hpp"
 #endif
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
@@ -257,7 +256,7 @@ static bool ActiveLoop() {
 			notifWin.Update();
 
 		#if LAYOFF_LOGGING
-			logWin.Update();
+			debug::Instance.Update();
 		#endif
 		
         FrameEnd();		
