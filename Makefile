@@ -39,9 +39,9 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering source/UI/panels libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/set
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering source/UI/panels libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/IPC/ServiceWrappers source/set
 DATA		:=	data
-INCLUDES	:=	include libs/libnx/nx/include libs libs/Atmosphere-libs/libvapours/include libs/Atmosphere-libs/libstratosphere/include libs/liblayoff/include
+INCLUDES	:=	include libs libs/Atmosphere-libs/libvapours/include libs/Atmosphere-libs/libstratosphere/include libs/liblayoff/include
 #ROMFS	:=	romfs
 
 APP_TITLE := overlayDisp
@@ -68,7 +68,7 @@ LIBS	:= -lstratosphere -lnx `freetype-config --libs`
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(CURDIR)/libs/libnx/nx $(CURDIR)/libs/liblayoff $(CURDIR)/libs/Atmosphere-libs/libstratosphere
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/libs/liblayoff $(CURDIR)/libs/Atmosphere-libs/libstratosphere
 
 
 #---------------------------------------------------------------------------------

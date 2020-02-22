@@ -33,8 +33,10 @@ namespace layoff {
 	void PrintLn(const std::string& s);
 	void Print(const std::string& s);	
 	void PrintHex(const u8* data, u32 len);
+	#define R_STRING(rc) (std::to_string(R_MODULE(rc)) + "-" + std::to_string(R_DESCRIPTION(rc))) 
 #else 
 	#define PrintLn(x) do {} while(0)
 	#define Print(x) do {} while(0)
 	#define PrintHex(x,y) do {} while(0)
+	#define R_STRING(rc) ("") 
 #endif

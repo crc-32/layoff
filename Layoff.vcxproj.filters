@@ -22,6 +22,9 @@
     <Filter Include="debug">
       <UniqueIdentifier>{742561b4-9513-48c4-a702-b3afc593cbf1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IPC\ServiceWrappers">
+      <UniqueIdentifier>{5199f9b9-bb60-4ec0-acad-500e1220e04a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -65,6 +68,12 @@
     </ClCompile>
     <ClCompile Include="source\UI\panels\IPCControl.cpp">
       <Filter>UI\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\ovln.c">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\npns.c">
+      <Filter>IPC\ServiceWrappers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -131,6 +140,12 @@
     </ClInclude>
     <ClInclude Include="source\debug\DebugControls.hpp">
       <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\ovln.h">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\npns.h">
+      <Filter>IPC\ServiceWrappers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

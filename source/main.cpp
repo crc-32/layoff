@@ -14,6 +14,9 @@
 #include "Config.hpp"
 #include "UI/NotificationWindow.hpp"
 
+#include "IPC/ServiceWrappers/npns.h"
+#include "IPC/ServiceWrappers/ovln.h"
+
 using namespace layoff;
 
 extern "C" {
@@ -130,32 +133,41 @@ static bool MessageLoop(void) {
 	return true;
 }
 
-// TODO
-/*static void NotifThread(void* _arg) {
+static void NotifThread(void* _arg) {
 	Result rc = ovlnInitialize();
 	if (R_FAILED(rc)) {
-		ovlnExit();
-		fatalThrow(rc);
+		PrintLn("ovlnInit: " + R_STRING(rc));
+		return;
 	}
 
 	Event notEv;
-	rc = ovlnIReceiverGetEvent(&notEv);
+	rc = ovlnIReceiverGetReceiveEventHandle(&notEv);
 	if (R_FAILED(rc)) {
-		fatalThrow(rc);
+		ovlnExit();
+		PrintLn("ovlnEvent: " + R_STRING(rc));
+		return;
 	}
 	while(true) {
-		if (!R_FAILED(eventWait(&notEv, 1000000))) {
-			IReceiverNotification notif;
-			ovlnIReceiverGetNotification(&notif);
-			std::stringstream nlog;
-			nlog << "SysNotif: " << std::hex << notif.type;
-			PrintLn(nlog.str());
-		}else{
+		rc = eventWait(&notEv, UINT64_MAX);
+
+		if (R_FAILED(rc))
+		{
+			PrintLn("ovln eventWait failed");
 			break;
 		}
+		else
+		{
+			OvlnNotificationWithTick notif;
+			ovlnIReceiverReceiveWithTick(&notif);
+			PrintLn("GotNotification !");
+			PrintHex((u8*)&notif, sizeof(notif));
+		}
 	}
-	fatalThrow(MAKERESULT(255, 10));
-}*/
+	
+	ovlnExit();
+	PrintLn("Exiting ovln notif thread");
+	return;
+}
 
 void layoff::SwitchToActiveMode()
 {	
@@ -279,11 +291,7 @@ int main(int argc, char* argv[]) {
 
     romfsInit();
 	if(!config::ConfigInit())
-	{
-		#ifdef LAYOFF_LOGGING
 		PrintLn("ERR: Couldn't read layoff ini, using defaults");
-		#endif
-	}
 	
 	timeInitialize();
 	psmInitialize();
@@ -298,9 +306,9 @@ int main(int argc, char* argv[]) {
 	IPC::LaunchThread();
 
 	//TODO
-	/*Thread nThread;
+	Thread nThread;
 	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
-	threadStart(&nThread);*/
+	threadStart(&nThread);
 	srand(time(NULL));
 
     while (true)
