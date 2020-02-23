@@ -17,15 +17,19 @@ namespace layoff::IPC {
 
 		Client() 
 		{
-			PrintLn("This shouldn't get called");
+			//Is needed for std::map<> in GCC but should not be called manually
+			PrintLn("Client::Client()");
 		}
 
-		Client(const LayoffIdentifier& id, const char* name);
+		Client(LayoffIdentifier id);
 		~Client();
+
+		void SetName(const LayoffName& name);
+
 		Client& operator= (Client&&) = default;
 		Client(Client&&) = default;
 
-		char name[16];
+		LayoffName name;
 		LayoffIdentifier ID;
 		
 		LayoffUIEvent LastUIEvent = { 0 };
@@ -33,11 +37,12 @@ namespace layoff::IPC {
 		std::map<LayoffIdentifier, UI::IPC::ControlPtr> Panels;
 	};
 
-	LayoffIdentifier CreateClient(const char name[16]);
-	Result RemoveClient(const LayoffIdentifier& ID);
+	LayoffIdentifier CreateClient();
+	Result RemoveClient(LayoffIdentifier ID);
+	Result SetClientName(LayoffIdentifier ID, const LayoffName& name);
 
-	Result AddUIPanel(const LayoffUIHeader& header, const u8* data, u32 len);
-	Result GetClientUIEvent(const LayoffIdentifier& ID, LayoffUIEvent* evt);
+	Result AddUIPanel(LayoffIdentifier ID, const LayoffUIHeader& header, const u8* data, u32 len);
+	Result GetClientUIEvent(LayoffIdentifier ID, LayoffUIEvent* evt);
 	
 	using ClientsLock = layoff::IPC::ObjLock<std::map<LayoffIdentifier, Client>>;
 	ClientsLock LockClients();

@@ -13,10 +13,9 @@ namespace layoff::IPC {
 		mutexInit(&clientMutex);
 	}
 
-	Client::Client(const LayoffIdentifier& id, const char* name) : ID(id)
+	Client::Client(LayoffIdentifier id) : ID(id)
 	{
-		memcpy(this->name, name, 15);
-		this->name[15] = 0;
+		memset(&name, 0, sizeof(LayoffName));
 	}
 
 	Client::~Client()
@@ -24,12 +23,17 @@ namespace layoff::IPC {
 
 	}
 
+	void Client::SetName(const LayoffName& name)
+	{
+		memcpy(&this->name, &name, sizeof(LayoffName) - 1);
+	}
+
 	ClientsLock LockClients()
 	{
 		return ClientsLock(__clients, clientMutex);
 	}
 
-	LayoffIdentifier CreateClient(const char name[16])
+	LayoffIdentifier CreateClient()
 	{
 		auto&& clients = LockClients();
 
@@ -37,27 +41,33 @@ namespace layoff::IPC {
 		do
 			ID = 1 + rand() % INT32_MAX;
 		while (!ID || clients.obj.count(ID));
-
-		PrintLn("Client connected w ID " + std::to_string(ID));
-
-		clients.obj.emplace(ID, Client(ID, name));
+		
+		clients.obj.emplace(ID, Client(ID));
 		return ID;
 	}
 
-	Result RemoveClient(const LayoffIdentifier& ID)
+	Result RemoveClient(LayoffIdentifier ID)
 	{
 		auto&& clients = LockClients();
 
 		if (!clients.obj.count(ID))
 			return ERR_CLIENT_NOT_REGISTERED;
 
-		PrintLn("Client removed ID " + std::to_string(ID));
-
 		clients.obj.erase(ID);
 		return 0;
 	}
 
-	Result GetClientUIEvent(const LayoffIdentifier& ID, LayoffUIEvent* evt)
+	Result SetClientName(LayoffIdentifier ID, const LayoffName& name)
+	{
+		auto&& clients = LockClients();
+
+		if (!clients.obj.count(ID))
+			return ERR_CLIENT_NOT_REGISTERED;
+
+		clients.obj[ID].SetName(name);
+	}
+
+	Result GetClientUIEvent(LayoffIdentifier ID, LayoffUIEvent* evt)
 	{
 		auto&& clients = LockClients();
 
@@ -69,17 +79,17 @@ namespace layoff::IPC {
 		return 0;
 	}
 
-	Result AddUIPanel(const LayoffUIHeader& header, const u8* data, u32 len)
+	Result AddUIPanel(LayoffIdentifier id, const LayoffUIHeader& header, const u8* data, u32 len)
 	{
 		if (header.panelID == 0)
 			return ERR_INVALID_ID;
 
 		auto&& clients = LockClients();
-		if (!clients.obj.count(header.client))
+		if (!clients.obj.count(id))
 			return ERR_CLIENT_NOT_REGISTERED;
 
 		Result rc = 0;
-		auto& cli = clients.obj[header.client];
+		auto& cli = clients.obj[id];
 
 		auto&& control = UI::IPC::ParseControl(header, data, len, &rc);
 

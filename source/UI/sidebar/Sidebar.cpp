@@ -88,7 +88,7 @@ inline void Sidebar::DoUpdate()
 		for (auto& cli : clients.obj)
 		{
 			if (cli.second.Panels.size() == 0) continue;
-			if (ImGui::CollapsingHeader(cli.second.name, ImGuiTreeNodeFlags_DefaultOpen)) {
+			if (ImGui::CollapsingHeader(cli.second.name.str, ImGuiTreeNodeFlags_DefaultOpen)) {
 
 				for (auto& control : cli.second.Panels)
 				{

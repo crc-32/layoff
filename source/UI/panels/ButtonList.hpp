@@ -15,7 +15,7 @@ namespace layoff::UI::IPC {
 		{
 			ID = id;
 			for (auto& n : names)
-				n.name[sizeof(n.name) - 1] = 0;
+				n.str[sizeof(n.str) - 1] = 0;
 		}
 
 		void Update() override
@@ -23,7 +23,7 @@ namespace layoff::UI::IPC {
 			int i = 0;
 			for (auto& n : names)
 			{
-				if (ImGui::Button(n.name, { layoff::UI::Sidebar::W - 10, 0 }))
+				if (ImGui::Button(n.str, { layoff::UI::Sidebar::W - 10, 0 }))
 				{
 					lastPress = i;
 					ImGui::FocusWindow(ImGui::GetCurrentWindow());

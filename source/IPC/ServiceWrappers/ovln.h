@@ -20,10 +20,6 @@ extern "C" {
 		OvlnNotificationType_ScreenshotUnk = 0x1f41,
 		OvlnNotificationType_Video = 0x1fa4,
 		OvlnNotificationType_VideoFail = 0x1fa6
-		/*
-			Unknown:
-				8001 (0x1f41)
-		*/
 	} OvlnNotificationType;
 
 	typedef struct {
