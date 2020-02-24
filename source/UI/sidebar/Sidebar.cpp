@@ -19,15 +19,37 @@ void Sidebar::RequestClose()
 
 void Sidebar::Update()
 {
+	BackgroundWindow();
+
 	PushStyling();
 	DoUpdate();
 	PopStyiling();
 }
 
-void Sidebar::FocusSidebar() 
+void Sidebar::BackgroundWindow() 
 {
-	ImGui::FocusWindow(ImGui::FindWindowByName("sidebar"));
-	ImGui::SetNavID(ImGui::FindWindowByName("sidebar")->ID, 0);
+	//This is used to detect taps on empty parts of the screen and close the overlay
+	auto sz = ImVec2{ DEFAULT_WIN_WIDTH - Sidebar::W, 720 };
+
+	ImGui::Begin("bgWin", 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoFocusOnAppearing);
+	ImGui::SetWindowPos({ 0, 0 });
+	ImGui::SetWindowSize(sz);
+
+	ImGui::SetCursorPos({ 0, 0 });
+	ImGui::PushStyleColor(ImGuiCol_Button, { 0,0,0,0 });
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, { 0,0,0,0 });
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, { 0,0,0,0 });
+
+	if (ImGui::Button("##close", sz))
+		Visible = false;
+
+	ImGui::PopStyleColor(3);
+	ImGui::End();
+}
+
+void Sidebar::Focus() 
+{
+	ImGui::SelectItem(true, ImGui::GetID("###WirelessBtn"));
 }
 
 bool Sidebar::HighFreqUpdate()
@@ -104,8 +126,8 @@ inline void Sidebar::DoUpdate()
 
 	if (BackPressed())
 	{
-		if (ImGui::IsItemFocused())
-			FocusSidebar();
+		if (ImGui::IsItemFocused()) //Misleading name, checks if the last item is focused, here it means the WidgetsArea
+			Focus();
 		else
 			Visible = false;
 	}
@@ -113,6 +135,9 @@ inline void Sidebar::DoUpdate()
 	ImGui::NewLine();
 
 	sidebar::WirelessControl();
+	if (ImGui::IsWindowAppearing() || !ImGui::IsAnyItemFocused())
+		Focus();
+
 	ImGui::Spacing();
 	sidebar::BrightnessControl();
 }

@@ -21,8 +21,6 @@ namespace layoff::UI {
 		void Update() override;
 		bool HighFreqUpdate() override;		
 		bool ShouldRender() override;
-		
-		void FocusSidebar();
 
 		~Sidebar() override {	}
 	private: 
@@ -30,6 +28,10 @@ namespace layoff::UI {
 		void PopStyiling();
 		
 		void DoUpdate();
+		
+		void Focus();
+
+		void BackgroundWindow();
 	};
 
 }

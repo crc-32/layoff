@@ -2,8 +2,10 @@
 #include "../utils.hpp"
 #include "../IPC/GeneralChannel.hpp"
 
+#include <imgui/imgui_internal.h>
+
 using namespace layoff::UI;
-using namespace layoff::ipc;
+using namespace layoff::IPC;
 
 void PowerWindow::DoUpdate()
 {
@@ -15,6 +17,8 @@ void PowerWindow::DoUpdate()
 		Visible = false;
 		return;
 	}
+	if (!ImGui::IsAnyItemFocused())
+		ImGui::SelectItem();
 	
 	ImGui::NewLine();
 	ImGui::SetCursorPosX((1280/2)-(500/2));

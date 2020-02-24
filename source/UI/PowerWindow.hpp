@@ -29,7 +29,7 @@ namespace layoff::UI {
 		{
 			return Visible;
 		}
-		
+
 		~PowerWindow() override 
 		{
 			
@@ -49,7 +49,7 @@ namespace layoff::UI {
 		
 		//Implemented in .cpp cause requires a lot of code
 		void DoUpdate();
-		
+
 		bool PayloadInitFail = false;
 	};
 

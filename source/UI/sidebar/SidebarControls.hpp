@@ -37,7 +37,7 @@ namespace layoff::UI::sidebar
 
 		ImGui::SameLine(Sidebar::W - 210, 0);
 
-		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless" : "Enable wireless", ImVec2(200, 0)))
+		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless###WirelessBtn" : "Enable wireless###WirelessBtn", ImVec2(200, 0)))
 			layoff::set::SetWireless(!st->WirelessEnabled);
 	}
 
