@@ -13,18 +13,13 @@ using namespace layoff::UI;
 inline void NotificationWindow::UpdateCache()
 {
 	if (!notif::HasNewNotifs()) return;
-	notifCache.clear();
-	s64 ts = time(NULL);
 
-	auto&& n = notif::LockNotifs();
-	
-	auto it = n.obj.rbegin();
-	while (it != n.obj.rend() && it->ts + NotifScreenTime > ts) {
-		notifCache.push_back(*it);
-		it++;
-	}
-
+	auto&& n = notif::LockNotifs();	
 	//Oldest notifs end up at the end of the cache
+	notifCache.insert(notifCache.begin(), n.obj.rbegin(), n.obj.rend());
+
+	n.obj.clear();
+
 	PrintLn("TODO: play a sound here");
 }
 
@@ -41,10 +36,10 @@ void NotificationWindow::Update(bool IsVolumeOpened)
 		pos.y = VolumeWindow::Size.y;
 
 	int RemoveIndex = -1;
-	int i = 0;
 	char subWinName[20] = "win";
-	for (const auto& n : notifCache)
+	for (int i = 0; i < notifCache.size() && i < 4; i++)
 	{
+		const auto n = notifCache[i];
 		if (n.ts + NotifScreenTime < ts)
 		{
 			RemoveIndex = i;
@@ -68,7 +63,6 @@ void NotificationWindow::Update(bool IsVolumeOpened)
 		auto sz = ImGui::GetWindowSize();
 		pos = { 0, sz.y + pos.y + 1 };
 		ImGui::End();
-		i++;
 	}
 
 	if (RemoveIndex >= 0)
