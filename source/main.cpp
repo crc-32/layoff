@@ -15,6 +15,7 @@
 #include "UI/NotificationWindow.hpp"
 #include "UI/VolumeWindow.hpp"
 
+#include "IPC/GeneralChannel.hpp"
 #include "IPC/ServiceWrappers/npns.h"
 #include "IPC/ServiceWrappers/ovln.h"
 
@@ -291,8 +292,9 @@ static bool IdleLoop() {
 static bool ActiveLoop() {
 	ClearEvents();
 	console::RequestStatusUpdate();
+	IPC::qlaunch::SignalOverlayOpened();
 	SwitchToActiveMode();
-    while (MessageLoop())
+	while (MessageLoop())
     {					
 		console::UpdateStatus();
 		
@@ -323,7 +325,10 @@ static bool ActiveLoop() {
         FrameEnd();		
         
 		if (!AnyWindowRendered || HomeLongPressed || HomePressed)
+		{
+			IPC::qlaunch::SignalOverlayClosed();
 			return true;
+		}
 		
 		svcSleepThread(1e+9 / 25); //25 fps-ish
 	}
