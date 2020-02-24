@@ -48,9 +48,6 @@
     <ClCompile Include="source\UI\rendering\imgui_sw.cpp">
       <Filter>UI\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="source\UI\rendering\ImguiExt.cpp">
-      <Filter>UI\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="source\set\ConsoleSettings.cpp">
       <Filter>set</Filter>
     </ClCompile>
@@ -78,6 +75,9 @@
     <ClCompile Include="source\UI\VolumeWindow.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_user.cpp">
+      <Filter>UI\rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ConsoleStatus.hpp" />
@@ -98,9 +98,6 @@
     </ClInclude>
     <ClInclude Include="source\UI\sidebar\SidebarControls.hpp">
       <Filter>UI\sidebar</Filter>
-    </ClInclude>
-    <ClInclude Include="source\UI\rendering\ImguiExt.hpp">
-      <Filter>UI\rendering</Filter>
     </ClInclude>
     <ClInclude Include="source\UI\rendering\imgui_sw.hpp">
       <Filter>UI\rendering</Filter>
@@ -152,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="source\UI\VolumeWindow.hpp">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\imgui_user.h">
+      <Filter>UI\rendering</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

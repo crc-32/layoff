@@ -96,6 +96,7 @@
     <None Include="Makefile" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="libs\imgui\imgui_user.cpp" />
     <ClCompile Include="source\Config.cpp" />
     <ClCompile Include="source\ConsoleStatus.cpp" />
     <ClCompile Include="source\IPC\Clients.cpp" />
@@ -109,13 +110,13 @@
     <ClCompile Include="source\UI\NotificationWindow.cpp" />
     <ClCompile Include="source\UI\panels\IPCControl.cpp" />
     <ClCompile Include="source\UI\PowerWindow.cpp" />
-    <ClCompile Include="source\UI\rendering\ImguiExt.cpp" />
     <ClCompile Include="source\UI\rendering\imgui_sw.cpp" />
     <ClCompile Include="source\UI\sidebar\Sidebar.cpp" />
     <ClCompile Include="source\UI\UI.cpp" />
     <ClCompile Include="source\UI\VolumeWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="libs\imgui\imgui_user.h" />
     <ClInclude Include="source\Config.hpp" />
     <ClInclude Include="source\ConsoleStatus.hpp" />
     <ClInclude Include="source\debug\imgui_memory_editor.h" />
@@ -135,7 +136,6 @@
     <ClInclude Include="source\UI\panels\IPCControl.hpp" />
     <ClInclude Include="source\UI\panels\TextPanel.hpp" />
     <ClInclude Include="source\UI\PowerWindow.hpp" />
-    <ClInclude Include="source\UI\rendering\ImguiExt.hpp" />
     <ClInclude Include="source\UI\rendering\imgui_sw.hpp" />
     <ClInclude Include="source\UI\sidebar\Sidebar.hpp" />
     <ClInclude Include="source\UI\sidebar\SidebarControls.hpp" />

@@ -1,7 +1,6 @@
 #include "Sidebar.hpp"
 #include "SidebarControls.hpp"
 
-#include "../rendering/ImguiExt.hpp"
 #include "../../utils.hpp"
 #include "../UI.hpp"
 #include "../../IPC/Clients.hpp"
