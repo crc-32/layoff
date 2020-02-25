@@ -115,7 +115,7 @@ inline void Sidebar::DoUpdate()
 				{
 					control.second->Update();
 					if (control.second->SignalEvent())
-						cli.second.LastUIEvent = control.second->GetEvent();
+						layoff::IPC::PushEvent(cli.second, control.second->GetEvent());
 				}
 			}
 		}

@@ -37,7 +37,7 @@ void NotificationWindow::Update(bool IsVolumeOpened)
 
 	int RemoveIndex = -1;
 	char subWinName[20] = "win";
-	for (int i = 0; i < notifCache.size() && i < 4; i++)
+	for (u32 i = 0; i < notifCache.size() && i < 4; i++)
 	{
 		const auto n = notifCache[i];
 		if (n.ts + NotifScreenTime < ts)

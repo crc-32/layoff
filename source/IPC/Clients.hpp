@@ -1,10 +1,12 @@
 #pragma once
 #include <switch.h>
 #include <layoff.h>
-#include "IPCLock.hpp"
 #include <map>
-#include "../UI/panels/IPCControl.hpp"
+
+#include "ServiceWrappers/overlay.h"
+#include "IPCLock.hpp"
 #include "../utils.hpp"
+#include "../UI/panels/IPCControl.hpp"
 
 namespace layoff::IPC {
 
@@ -32,17 +34,14 @@ namespace layoff::IPC {
 		LayoffName name;
 		LayoffIdentifier ID;
 		
-		LayoffUIEvent LastUIEvent = { 0 };
-
 		std::map<LayoffIdentifier, UI::IPC::ControlPtr> Panels;
 	};
 
-	LayoffIdentifier CreateClient();
-	Result RemoveClient(LayoffIdentifier ID);
-	Result SetClientName(LayoffIdentifier ID, const LayoffName& name);
+	//Adds, removes or renames clients according to the IPC request
+	void ClientAction(const IPCClient& cli);
 
-	Result AddUIPanel(LayoffIdentifier ID, const LayoffUIHeader& header, const u8* data, u32 len);
-	Result GetClientUIEvent(LayoffIdentifier ID, LayoffUIEvent* evt);
+	void AddUIPanel(const IPCUIPush& header, const u8* data);
+	void PushEvent(const Client& cli, const LayoffUIEvent& header);
 	
 	using ClientsLock = layoff::IPC::ObjLock<std::map<LayoffIdentifier, Client>>;
 	ClientsLock LockClients();

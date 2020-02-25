@@ -12,3 +12,4 @@ Layoff.vcxproj.user
 .vs/
 *.cache
 *.log
+*.user

@@ -19,5 +19,5 @@ namespace layoff::UI::IPC {
 
 	using ControlPtr = std::unique_ptr<Control>;
 
-	ControlPtr ParseControl(const LayoffUIHeader& header, const u8* data, const u32 len, Result* rc);
+	ControlPtr ParseControl(const LayoffUIHeader& header, const u8* data, const u32 len);
 }

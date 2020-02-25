@@ -4,9 +4,10 @@
 #include <switch.h>
 #include "../../IPC/IPCLock.hpp"
 #include "../../IPC/ErrorCodes.h"
+#include "../../utils.hpp"
 
 namespace layoff::UI::IPC {
-	ControlPtr ParseControl(const LayoffUIHeader& header, const u8* data, const u32 len, Result* rc)
+	ControlPtr ParseControl(const LayoffUIHeader& header, const u8* data, const u32 len)
 	{
 		//TODO consider text encoding support
 		
@@ -20,11 +21,11 @@ namespace layoff::UI::IPC {
 				return std::make_unique<ButtonList>(lst->data, lst->ButtonCount, header.panelID);
 			}
 			default:
+			{
 				if (header.kind != LayoffUIKind_None)
-					*rc = ERR_UNKNOWN_UI_TYPE;
+					PrintLn("Unknown UI panel type;");
 				return nullptr;
+			}
 		}
 	}
-
-
 }

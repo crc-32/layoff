@@ -78,6 +78,9 @@
     <ClCompile Include="libs\imgui\imgui_user.cpp">
       <Filter>UI\rendering</Filter>
     </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\overlay.c">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\ConsoleStatus.hpp" />
@@ -106,9 +109,6 @@
       <Filter>set</Filter>
     </ClInclude>
     <ClInclude Include="source\IPC\IPCThread.hpp">
-      <Filter>IPC</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IPC\LayoffService.hpp">
       <Filter>IPC</Filter>
     </ClInclude>
     <ClInclude Include="source\IPC\GeneralChannel.hpp">
@@ -152,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="libs\imgui\imgui_user.h">
       <Filter>UI\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\overlay.h">
+      <Filter>IPC\ServiceWrappers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

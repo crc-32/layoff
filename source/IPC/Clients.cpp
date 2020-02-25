@@ -1,7 +1,7 @@
-#include "Clients.hpp"
-#include "../UI/panels/IPCControl.hpp"
-#include "ErrorCodes.h"
 #include <cstring>
+#include "Clients.hpp"
+#include "ErrorCodes.h"
+#include "../UI/panels/IPCControl.hpp"
 
 namespace layoff::IPC {
 
@@ -33,71 +33,61 @@ namespace layoff::IPC {
 		return ClientsLock(__clients, clientMutex);
 	}
 
-	LayoffIdentifier CreateClient()
+	void ClientAction(const IPCClient& cli)
 	{
 		auto&& clients = LockClients();
 
-		LayoffIdentifier ID = 0;
-		do
-			ID = 1 + rand() % INT32_MAX;
-		while (!ID || clients.obj.count(ID));
-		
-		clients.obj.emplace(ID, Client(ID));
-		return ID;
+		if (cli.action == OverlayAction_Connected)
+		{
+			if (clients.obj.count(cli.id)) //rename client
+				clients.obj[cli.id].SetName(cli.name); 
+			else //insert client
+			{
+				Client client(cli.id);
+				client.SetName(cli.name);
+				clients.obj.emplace(cli.id, std::move(client));
+			}
+		}
+		else if (cli.action == OverlayAction_Disconnected)
+		{
+			if (clients.obj.count(cli.id))
+				clients.obj.erase(cli.id);
+			else
+				Print("Cannot remove not registered client !");
+		}
+		else PrintLn("Unknown overlay action: " + std::to_string(cli.action));
 	}
 
-	Result RemoveClient(LayoffIdentifier ID)
+	void AddUIPanel(const IPCUIPush& header, const u8* data) 
 	{
-		auto&& clients = LockClients();
-
-		if (!clients.obj.count(ID))
-			return ERR_CLIENT_NOT_REGISTERED;
-
-		clients.obj.erase(ID);
-		return 0;
-	}
-
-	Result SetClientName(LayoffIdentifier ID, const LayoffName& name)
-	{
-		auto&& clients = LockClients();
-
-		if (!clients.obj.count(ID))
-			return ERR_CLIENT_NOT_REGISTERED;
-
-		clients.obj[ID].SetName(name);
-	}
-
-	Result GetClientUIEvent(LayoffIdentifier ID, LayoffUIEvent* evt)
-	{
-		auto&& clients = LockClients();
-
-		if (!clients.obj.count(ID))
-			return ERR_CLIENT_NOT_REGISTERED;
-
-		*evt = clients.obj[ID].LastUIEvent;
-		clients.obj[ID].LastUIEvent = { 0 };
-		return 0;
-	}
-
-	Result AddUIPanel(LayoffIdentifier id, const LayoffUIHeader& header, const u8* data, u32 len)
-	{
-		if (header.panelID == 0)
-			return ERR_INVALID_ID;
+		if (header.header.panelID == 0)
+		{
+			PrintLn("Invalid UI panel id");
+			return;
+		}
 
 		auto&& clients = LockClients();
-		if (!clients.obj.count(id))
-			return ERR_CLIENT_NOT_REGISTERED;
+		if (!clients.obj.count(header.client))
+		{
+			PrintLn("Invalid UI client id");
+			return;
+		}
 
-		Result rc = 0;
-		auto& cli = clients.obj[id];
+		auto& cli = clients.obj[header.client];
 
-		auto&& control = UI::IPC::ParseControl(header, data, len, &rc);
+		auto&& control = UI::IPC::ParseControl(header.header, data, header.BufferLen);
 
-		if (!control && cli.Panels.count(header.panelID))
-			cli.Panels.erase(header.panelID);
+		if (!control && cli.Panels.count(header.header.panelID))
+			cli.Panels.erase(header.header.panelID);
 		else if (control)
-			cli.Panels[header.panelID] = std::move(control);
+			cli.Panels[header.header.panelID] = std::move(control);
+	}
 
-		return rc;
+	void PushEvent(const Client& cli, const LayoffUIEvent& event) 
+	{
+		IPCUIEvent evt;
+		evt.Client = cli.ID;
+		evt.evt = event;
+		overlayPushUiStateChange(&evt);
 	}
 }

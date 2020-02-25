@@ -37,15 +37,12 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   of a homebrew executable (.nro). This is intended to be used for sysmodules.
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
-TARGET		:=	layoff
+TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering source/UI/panels libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/IPC/ServiceWrappers source/set
+SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=	include libs libs/liblayoff/include
+INCLUDES	:=	include ../libs/Atmosphere-libs/libvapours/include ../libs/Atmosphere-libs/libstratosphere/include ../libs/liblayoff/include
 #ROMFS	:=	romfs
-
-APP_TITLE := overlayDisp
-APP_TITLEID := 010000000000100C
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -53,22 +50,22 @@ APP_TITLEID := 010000000000100C
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 
 CFLAGS	:=	-g -Wall -O2 -ffunction-sections \
-			$(ARCH) $(DEFINES) `freetype-config --cflags`
+			$(ARCH) $(DEFINES)
 
-CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLAYOFF_LOGGING
+CFLAGS	+=	$(INCLUDE) -D__SWITCH__ -DLIBNX_NO_DEPRECATION -DLAYOFF_LOGGING -DATMOSPHERE_IS_STRATOSPHERE -DATMOSPHERE_BOARD_NINTENDO_SWITCH
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++17
 
 ASFLAGS	:=	-g $(ARCH)
 LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-LIBS	:= -lnx `freetype-config --libs`
+LIBS	:= -lstratosphere -lnx
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/libs/liblayoff
+LIBDIRS	:= $(PORTLIBS) $(LIBNX) $(CURDIR)/../libs/Atmosphere-libs/libstratosphere
 
 
 #---------------------------------------------------------------------------------

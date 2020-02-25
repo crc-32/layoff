@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{9E9A22E6-B532-438E-8F94-863FE5FA7947}</ProjectGuid>
+    <RootNamespace>service</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NMakeForcedIncludes>$(SolutionDir)cpp.hint</NMakeForcedIncludes>
+    <AdditionalOptions>/std:c++17</AdditionalOptions>
+    <IncludePath>$(VC_IncludePath);C:\devkitPro\libnx\include;$(SolutionDir)libs\Atmosphere-libs\libmesosphere\include;$(SolutionDir)libs\Atmosphere-libs\libvapours\include;$(SolutionDir)libs\Atmosphere-libs\libstratosphere\include;$(SolutionDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+    <None Include="service.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\Clients.hpp" />
+    <ClInclude Include="source\IPCLock.hpp" />
+    <ClInclude Include="source\layoff_service.hpp" />
+    <ClInclude Include="source\OverlayServiceTypes.h" />
+    <ClInclude Include="source\overlay_service.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Clients.cpp" />
+    <ClCompile Include="source\layoff_service_impl.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\overlay_service.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

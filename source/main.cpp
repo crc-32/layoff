@@ -303,12 +303,12 @@ static bool ActiveLoop() {
 		bool AnyWindowRendered = false;
 		FrameStart();
 
-		if (AnyWindowRendered = powerWindow.ShouldRender())
+		if ((AnyWindowRendered = powerWindow.ShouldRender()))
 			powerWindow.Update();
 		//The foreground window has to come before the sidebar as it can optionally stay open when switching to idle mode (but update it's not called)
 		else if (foregroundWin && (AnyWindowRendered = foregroundWin->ShouldRender()))
 				foregroundWin->Update();
-		else if (AnyWindowRendered = mainWindow.ShouldRender())
+		else if ((AnyWindowRendered = mainWindow.ShouldRender()))
 			mainWindow.Update();
 
 		//These are shown as overlay and don't need to prevent transitioning to the idle loop, so don't set AnyWindowRendered
@@ -370,6 +370,7 @@ int main(int argc, char* argv[]) {
         if(!ActiveLoop()) break;
     }
 
+	IPC::RequestAndWaitExit();
 	lblExit();
 	nifmExit();
     npnsExit();
