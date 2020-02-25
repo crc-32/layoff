@@ -28,5 +28,4 @@ namespace layoff::notif {
 	using NotifLock = layoff::IPC::ObjLock<std::vector<Notification>>;
 
 	NotifLock LockNotifs();
-	void ClearHistory();
 }

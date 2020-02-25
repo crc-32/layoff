@@ -19,12 +19,15 @@ namespace layoff::notif {
 	{
 		auto ts = notif.ts;
 		PrintLn(notif.message + " " + notif.author + " " + std::to_string(ts));
-		LockNotifs().obj.push_back(std::move(notif));
+		auto&& lock = LockNotifs();
+		lock.obj.push_back(std::move(notif));
 		newNotifs = true;
 	}
 
 	bool HasNewNotifs()
 	{
+		auto&& lock = LockNotifs();
+
 		bool res = newNotifs;
 		if (res) 
 			newNotifs = false;
@@ -34,11 +37,6 @@ namespace layoff::notif {
 	NotifLock LockNotifs()
 	{
 		return NotifLock(notifications, notifMutex);
-	}
-	
-	void ClearHistory()
-	{
-		LockNotifs().obj.clear();
 	}
 
 	void Initialize()
