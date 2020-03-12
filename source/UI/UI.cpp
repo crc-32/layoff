@@ -1,5 +1,4 @@
 #include "UI.hpp"
-#include <imgui/imgui_freetype.h>
 #include "rendering/imgui_sw.hpp"
 #include <switch.h>
 
@@ -36,11 +35,15 @@ void UIInit() {
 	
 	//ImFontAtlasFlags_NoPowerOfTwoHeight may be needed when/if we switch to hardware rendering
 	ImGuiIO& io = ImGui::GetIO();
+
 	io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight | ImFontAtlasFlags_NoMouseCursors;
-	Font25 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 25.0f);
-	Font30 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 30.0f);
-	ImGuiFreeType::BuildFontAtlas(io.Fonts, 0u);
-	
+
+	ImFontConfig cfg{};
+	cfg.FontDataOwnedByAtlas = false;
+
+	Font25 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 25.0f, &cfg);
+	Font30 = io.Fonts->AddFontFromMemoryTTF((void*)font.address, font.size, 30.0f, &cfg);
+
 	plExit();
 
 	imgui_sw::bind_imgui_painting();
