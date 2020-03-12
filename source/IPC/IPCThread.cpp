@@ -33,8 +33,6 @@ namespace
 			if (R_VALUE(rc) == KERNELRESULT(TimedOut)) continue;
 			ASSERTRESULT(rc, "eventWait");
 
-			PrintLn("Event fired");
-
 			overlayLock();
 
 			IPCQUeueStatus status = {};

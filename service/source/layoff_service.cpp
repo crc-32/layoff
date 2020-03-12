@@ -1,14 +1,15 @@
-#include <stratosphere.hpp>
+#include <cstring>
+
 #include "layoff_service.hpp"
-#include "Clients.hpp"
-#include "overlay_service.hpp"
 #include "../../source/IPC/ErrorCodes.h"
+#include "Clients.hpp"
+
+#include "overlay_service.hpp"
 
 namespace services {
-
 	LayoffService::LayoffService()
 	{
-		id = layoff::IPC::CreateClient();
+		id = layoff::IPC::clients::CreateIdentifier(this);
 	}
 
 	LayoffService::~LayoffService()
@@ -18,21 +19,32 @@ namespace services {
 		action.action = OverlayAction_Disconnected;
 		OverlayService::ClientAction(std::move(action));
 		
-		layoff::IPC::RemoveClient(id);
+		if (eventActive(&UiEvent))
+			eventClose(&UiEvent);
+		layoff::IPC::clients::FreeIdentifier(id);
+	}
+
+	void LayoffService::PushUIEventData(const LayoffUIEvent& evt)
+	{
+		LastUIEvent = evt;
+		if (eventActive(&UiEvent))
+			eventFire(&UiEvent);
 	}
 
 	ams::Result LayoffService::SetClientName(LayoffName clientName) {		
-		ams::Result rc = layoff::IPC::SetClientName(id, clientName);
-		if (rc.IsFailure())
-			return rc;
+		name = clientName;
+		name.str[sizeof(name) - 1] = '\0';
+
+		if (std::strlen(name.str) < 1)
+			return ERR_INVALID_NAME;
 
 		IPCClient action;
 		action.id = id;
 		action.action = OverlayAction_Connected;
-		std::memcpy(&action.name, &clientName, sizeof(LayoffName));
+		std::memcpy(&action.name, &name, sizeof(LayoffName));
 		OverlayService::ClientAction(std::move(action));
 
-		return rc;
+		return ams::ResultSuccess();
 	}
 
 	ams::Result LayoffService::NotifySimple(SimpleNotification notification) {
@@ -57,13 +69,23 @@ namespace services {
 		return ams::ResultSuccess();
 	}
 
-	ams::Result LayoffService::AcquireUiEvent(sf::OutCopyHandle evt) {
-		return layoff::IPC::GetClientUIEventHandle(id, evt.GetHandlePointer());
+	ams::Result LayoffService::AcquireUiEvent(sf::OutCopyHandle out_evt) {
+		if (!eventActive(&UiEvent))
+		{
+			ams::Result rc = eventCreate(&UiEvent, true);
+			if (rc.IsFailure())
+				return rc;
+		}
+
+		*out_evt = UiEvent.revent;
+		return ams::ResultSuccess();
 	}
 
 	ams::Result LayoffService::GetLastUiEvent(sf::Out<LayoffUIEvent> evt)
 	{
-		return layoff::IPC::GetClientUIEvent(id, evt.GetPointer());
+		*evt = LastUIEvent;
+		LastUIEvent = {};
+		return ams::ResultSuccess();
 	}
 
 }

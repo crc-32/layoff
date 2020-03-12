@@ -82,5 +82,7 @@ int main(int argc, char** argv)
 
 	g_server_manager.LoopProcess();
 
+	services::OverlayService::FinalizeStatics();
+
 	return 0;
 }

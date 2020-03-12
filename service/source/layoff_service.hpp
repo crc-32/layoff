@@ -19,7 +19,13 @@ namespace services {
 		};
 
 		LayoffIdentifier id;
+		LayoffName name;
+		Event UiEvent;
+		LayoffUIEvent LastUIEvent = {};
+
 	public:
+		void PushUIEventData(const LayoffUIEvent& evt);
+
 		LayoffService();
 		~LayoffService();
 

@@ -39,9 +39,8 @@ namespace services {
 		static std::queue<SimpleNotification> notifQueue;
 	public:
 		static void InitializeStatics();
+		static void FinalizeStatics();
 
-		OverlayService();
-		~OverlayService();
 	//Signaling
 		static void PrintLn(const std::string&& str);
 		static void ClientAction(const IPCClient&& cli);

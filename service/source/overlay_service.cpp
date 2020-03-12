@@ -21,12 +21,7 @@ namespace services
 		mutexInit(&mutex);
 	}
 
-	OverlayService::OverlayService()
-	{
-		
-	}
-
-	OverlayService::~OverlayService()
+	void OverlayService::FinalizeStatics() 
 	{
 		eventClose(&newData);
 	}
@@ -126,8 +121,7 @@ namespace services
 
 	ams::Result OverlayService::PushUIStateChange(IPCUIEvent evt)
 	{
-		layoff::IPC::ScopeLock lock(mutex);
-		return layoff::IPC::SignalClientUIEvent(evt.Client, evt.evt);
+		return layoff::IPC::clients::PushUIEventData(evt.Client, evt.evt);
 	}
 
 	void OverlayService::PrintLn(const std::string&& str)

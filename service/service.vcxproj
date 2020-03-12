@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Clients.cpp" />
-    <ClCompile Include="source\layoff_service_impl.cpp" />
+    <ClCompile Include="source\layoff_service.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\overlay_service.cpp" />
   </ItemGroup>
