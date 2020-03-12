@@ -26,13 +26,6 @@ struct Stats
 	double gradient_textured_rectangle_pixels = 0;
 };
 
-struct Texture
-{
-	const uint8_t* pixels; // 8-bit.
-	int            width;
-	int            height;
-};
-
 struct PaintTarget
 {
 	uint32_t* pixels;
@@ -49,6 +42,19 @@ struct ColorInt
 
 	ColorInt() = default;
 
+	ColorInt(uint8_t x)
+	{
+		a = r = g = b = x;
+	}
+
+	ColorInt(ImVec4 vec)
+	{
+		r = vec.x;
+		g = vec.y;
+		b = vec.z;
+		a = vec.w;
+	}
+
 	explicit ColorInt(uint32_t x)
 	{
 		a = (x >> IM_COL32_A_SHIFT) & 0xFFu;
@@ -57,9 +63,14 @@ struct ColorInt
 		r = (x >> IM_COL32_R_SHIFT) & 0xFFu;
 	}
 
+	ImVec4 toVec4() const
+	{
+		return { r,g,b,a };
+	}
+
 	uint32_t toUint32() const
 	{
-		return (a << 24u) | (b << 16u) | (g << 8u) | r;
+		return (a << IM_COL32_A_SHIFT) | (b << IM_COL32_B_SHIFT) | (g << IM_COL32_G_SHIFT) | (r << IM_COL32_R_SHIFT);
 	}
 };
 
@@ -200,9 +211,9 @@ float barycentric(const ImVec2& a, const ImVec2& b, const ImVec2& point)
 	return (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x);
 }
 
-inline uint8_t sample_texture(const Texture& texture, const ImVec2& uv)
+inline ColorInt sample_texture_grayscale(const Texture& texture, const ImVec2& uv)
 {
-	int tx = static_cast<int>(uv.x * (texture.width  - 1.0f) + 0.5f);
+	int tx = static_cast<int>(uv.x * (texture.width - 1.0f) + 0.5f);
 	int ty = static_cast<int>(uv.y * (texture.height - 1.0f) + 0.5f);
 
 	// Clamp to inside of texture:
@@ -211,7 +222,23 @@ inline uint8_t sample_texture(const Texture& texture, const ImVec2& uv)
 	ty = std::max(ty, 0);
 	ty = std::min(ty, texture.height - 1);
 
-	return texture.pixels[ty * texture.width + tx];
+	uint8_t val = texture.pixels[ty * texture.width + tx];
+
+	return ColorInt(val);
+}
+
+inline ColorInt sample_texture_RGBA(const Texture& texture, const ImVec2& uv)
+{
+	int tx = static_cast<int>(uv.x * (texture.width - 1.0f) + 0.5f);
+	int ty = static_cast<int>(uv.y * (texture.height - 1.0f) + 0.5f);
+
+	// Clamp to inside of texture:
+	tx = std::max(tx, 0);
+	tx = std::min(tx, texture.width - 1);
+	ty = std::max(ty, 0);
+	ty = std::min(ty, texture.height - 1);
+
+	return ColorInt(((uint32_t*)texture.pixels)[ty * texture.width + tx]);
 }
 
 void paint_uniform_rectangle(
@@ -303,23 +330,25 @@ void paint_uniform_textured_rectangle(
 	};
 	ImVec2 current_uv = uv_topleft;
 
+	const bool RGBA = texture.format == TextureFormat::RGBA;
+
 	for (int y = min_y_i; y < max_y_i; ++y, current_uv.y += delta_uv_per_pixel.y) {
 		current_uv.x = uv_topleft.x;
 		for (int x = min_x_i; x < max_x_i; ++x, current_uv.x += delta_uv_per_pixel.x) {
 			uint32_t& target_pixel = target.pixels[y * target.width + x];
-			const uint8_t texel = sample_texture(texture, current_uv);
+			
+			const ColorInt texel = RGBA ? sample_texture_RGBA(texture, current_uv) : sample_texture_grayscale(texture, current_uv);
 
 			// The font texture is all black or all white, so optimize for this:
-			if (texel == 0) { continue; }
-			if (texel == 255) {
+			if (texel.a == 0) { continue; }
+			if (!RGBA && texel.a == 255) {
 				target_pixel = min_v.col;
 				continue;
 			}
 
 			// Other textured rectangles
-			ColorInt source_color = ColorInt(min_v.col);
-			source_color.a = source_color.a * texel / 255;
-			target_pixel = blend(ColorInt(target_pixel), source_color).toUint32();
+			//source_color.a = source_color.a * texel.a / 255;
+			target_pixel = blend(ColorInt(target_pixel), texel).toUint32();
 		}
 	}
 }
@@ -432,6 +461,8 @@ void paint_triangle(
 	uint32_t last_target_pixel = 0;
 	uint32_t last_output = blend(ColorInt(last_target_pixel), ColorInt(v0.col)).toUint32();
 
+	const bool TexRGBA = texture && texture->format == TextureFormat::RGBA;
+
 	for (int y = min_y_i; y < max_y_i; ++y) {
 		auto bary = bary_current_row;
 
@@ -485,7 +516,13 @@ void paint_triangle(
 			if (texture) {
 				stats->textured_triangle_pixels += 1;
 				const ImVec2 uv = w0 * v0.uv + w1 * v1.uv + w2 * v2.uv;
-				src_color.w *= sample_texture(*texture, uv) / 255.0f;
+				if (!TexRGBA)
+					src_color.w *= sample_texture_grayscale(*texture, uv).a / 255.0f;
+				else
+				{
+					auto col = blend(src_color, sample_texture_RGBA(*texture, uv));
+					src_color = col.toVec4();
+				}
 			}
 
 			if (src_color.w <= 0.0f) { continue; } // Transparent.
@@ -682,7 +719,7 @@ void bind_imgui_painting()
 	uint8_t* tex_data;
 	int font_width, font_height;
 	io.Fonts->GetTexDataAsAlpha8(&tex_data, &font_width, &font_height);
-	const auto texture = new Texture{tex_data, font_width, font_height};
+	const auto texture = new Texture{TextureFormat::Grayscale, tex_data, font_width, font_height};
 	io.Fonts->TexID = texture;
 }
 

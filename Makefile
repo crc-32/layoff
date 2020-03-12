@@ -39,7 +39,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	layoff
 BUILD		:=	build
-SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering source/UI/panels libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/IPC/ServiceWrappers source/set
+SOURCES		:=	source source/UI source/UI/sidebar source/UI/rendering source/UI/panels source/UI/images libs/imgui libs/nxExt/src source/IPC source/IPC/servers source/IPC/ServiceWrappers source/set
 DATA		:=	data
 INCLUDES	:=	include libs libs/liblayoff/include
 #ROMFS	:=	romfs

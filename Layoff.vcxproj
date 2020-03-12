@@ -59,6 +59,8 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\NotificationManager.cpp" />
     <ClCompile Include="source\set\ConsoleSettings.cpp" />
+    <ClCompile Include="source\UI\images\Image.cpp" />
+    <ClCompile Include="source\UI\images\stb_image.c" />
     <ClCompile Include="source\UI\NotificationWindow.cpp" />
     <ClCompile Include="source\UI\panels\IPCControl.cpp" />
     <ClCompile Include="source\UI\PowerWindow.cpp" />
@@ -83,6 +85,8 @@
     <ClInclude Include="source\IPC\ServiceWrappers\ovln.h" />
     <ClInclude Include="source\NotificationManager.hpp" />
     <ClInclude Include="source\set\ConsoleSettings.hpp" />
+    <ClInclude Include="source\UI\images\Image.hpp" />
+    <ClInclude Include="source\UI\images\stb_image.h" />
     <ClInclude Include="source\UI\NotificationWindow.hpp" />
     <ClInclude Include="source\UI\panels\ButtonList.hpp" />
     <ClInclude Include="source\UI\panels\IPCControl.hpp" />

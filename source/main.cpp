@@ -52,6 +52,10 @@ extern "C" {
         if (R_FAILED(rc))
             fatalThrow(MAKERESULT(Module_Libnx, LibnxError_InitFail_FS));
 
+		rc = romfsInit();
+		if (R_FAILED(rc))
+			fatalThrow(MAKERESULT(255,12));
+
         fsdevMountSdmc();
     }
 
@@ -343,7 +347,6 @@ int main(int argc, char* argv[]) {
     svcSleepThread(15e+9);
     __nx_win_init();
 
-    romfsInit();
 	if(!config::ConfigInit())
 		PrintLn("ERR: Couldn't read layoff ini, using defaults");
 	

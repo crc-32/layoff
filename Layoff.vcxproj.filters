@@ -25,6 +25,9 @@
     <Filter Include="IPC\ServiceWrappers">
       <UniqueIdentifier>{5199f9b9-bb60-4ec0-acad-500e1220e04a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI\images">
+      <UniqueIdentifier>{93fc6673-5b74-4cd9-9d91-01a695439cf7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
@@ -80,6 +83,12 @@
     </ClCompile>
     <ClCompile Include="source\IPC\ServiceWrappers\overlay.c">
       <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\images\stb_image.c">
+      <Filter>UI\images</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\images\Image.cpp">
+      <Filter>UI\images</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +164,12 @@
     </ClInclude>
     <ClInclude Include="source\IPC\ServiceWrappers\overlay.h">
       <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\images\Image.hpp">
+      <Filter>UI\images</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\images\stb_image.h">
+      <Filter>UI\images</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

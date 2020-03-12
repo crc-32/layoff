@@ -22,6 +22,20 @@ struct SwOptions
 	bool optimize_rectangles = true; // No reason to turn this off.
 };
 
+enum class TextureFormat : int
+{
+	Grayscale = 1,
+	RGBA = 4
+};
+
+struct Texture
+{
+	TextureFormat  format = TextureFormat::Grayscale;
+	const uint8_t* pixels; // 8-bit.
+	int            width;
+	int            height;
+};
+
 /// Optional: tweak ImGui style to make it render faster.
 void make_style_fast();
 

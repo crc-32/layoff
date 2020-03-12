@@ -8,6 +8,8 @@
 
 #include "imgui_memory_editor.h"
 
+#include "../UI/images/Image.hpp"
+
 namespace layoff::debug {
 	
 	class DebugWindows : public layoff::UI::Window
@@ -16,6 +18,7 @@ namespace layoff::debug {
 		DebugWindows()
 		{
 			mutexInit(&mutex);
+			trollface = layoff::UI::images::FromFile("romfs:/trollface.png");
 		}
 
 		bool Visible = true;
@@ -29,6 +32,10 @@ namespace layoff::debug {
 			layoff::IPC::ScopeLock lock(mutex);
 
 			ImGui::Begin("Log window", &Visible, ImVec2(300, 400));
+			
+			if (trollface->GetBuffer())
+				ImGui::Image(trollface->GetID(), trollface->GetSize());
+			
 			ImGui::Text(LogText.c_str());
 			ImGui::End();
 
@@ -71,6 +78,8 @@ namespace layoff::debug {
 		std::vector<u8> HexBuf;
 		MemoryEditor mem_edit_1;
 		Mutex mutex;
+
+		layoff::UI::ImagePtr trollface = nullptr;
 	};
 
 	static DebugWindows Instance;
