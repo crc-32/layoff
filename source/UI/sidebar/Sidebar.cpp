@@ -134,7 +134,7 @@ inline void Sidebar::DoUpdate()
 	ImGui::NewLine();
 
 	sidebar::WirelessControl();
-	if (ImGui::IsWindowAppearing() || !ImGui::IsAnyItemFocused())
+	if (ImGui::IsWindowAppearing())
 		Focus();
 
 	ImGui::Spacing();

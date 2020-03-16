@@ -213,6 +213,7 @@ static void NotifThread(void* _arg) {
 				break;
 			case OvlnNotificationType_Volume:
 				volumeWin.Signal(notif.Payload[0]);
+				PrintHex((u8*)&notif, sizeof(notif)); //TODO remove this
 				break;
 			case OvlnNotificationType_Screenshot:
 				notif::PushSimple("Screenshot saved !", "Layoff");
@@ -283,7 +284,7 @@ static bool IdleLoop() {
 			previousFrameRendered = false;
 		}
 		
-		svcSleepThread(userCanInteract ? (1e+9 / 15) : 3e+8); // ~15 FPS if we're rendering something the user can interact with, 1/3 of a sec otherwise
+		svcSleepThread(userCanInteract ? (1e+9 / 10) : 3e+8); // ~10 FPS if we're rendering something the user can interact with, 1/3 of a sec otherwise
     }
     return false;
 }

@@ -156,5 +156,14 @@
     <ClInclude Include="source\IPC\ServiceWrappers\overlay.h">
       <Filter>IPC\ServiceWrappers</Filter>
     </ClInclude>
+    <ClInclude Include="source\UI\panels\ComboBox.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\RadioButtonList.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\CheckBoxList.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

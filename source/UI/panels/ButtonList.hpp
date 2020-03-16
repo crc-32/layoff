@@ -18,14 +18,14 @@ namespace layoff::UI::IPC {
 				n.str[sizeof(n.str) - 1] = 0;
 		}
 
-		void Update() override
+		virtual void Update() override
 		{
 			int i = 0;
 			for (auto& n : names)
 			{
 				if (ImGui::Button(n.str, { layoff::UI::Sidebar::W - 10, 0 }))
 				{
-					lastPress = i;
+					eventData = i;
 					ImGui::FocusWindow(ImGui::GetCurrentWindow());
 				}
 				i++;
@@ -34,16 +34,18 @@ namespace layoff::UI::IPC {
 
 		bool SignalEvent() const override
 		{
-			return lastPress != -1;;
+			return eventData != UINT64_MAX;
 		}
 
 		LayoffUIEvent GetEvent()
 		{
 			if (SignalEvent())
 			{
-				LayoffUIEvent val = { ID };
-				val.data1 = lastPress;
-				lastPress = -1;
+				LayoffUIEvent val = { };
+				val.panel = ID;
+				val.data1 = eventData;
+				val.data2 = 0;
+				eventData = UINT64_MAX;
 				return val;
 			}
 			else
@@ -51,10 +53,8 @@ namespace layoff::UI::IPC {
 		}
 
 		~ButtonList() override { }
-	private:
+	protected:
 		std::vector<LayoffName> names;
-		int lastPress = -1;
+		u64 eventData = UINT64_MAX;
 	};
-
-	using ControlPtr = std::unique_ptr<Control>;
 }

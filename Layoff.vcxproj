@@ -85,7 +85,10 @@
     <ClInclude Include="source\set\ConsoleSettings.hpp" />
     <ClInclude Include="source\UI\NotificationWindow.hpp" />
     <ClInclude Include="source\UI\panels\ButtonList.hpp" />
+    <ClInclude Include="source\UI\panels\CheckBoxList.hpp" />
+    <ClInclude Include="source\UI\panels\ComboBox.hpp" />
     <ClInclude Include="source\UI\panels\IPCControl.hpp" />
+    <ClInclude Include="source\UI\panels\RadioButtonList.hpp" />
     <ClInclude Include="source\UI\panels\TextPanel.hpp" />
     <ClInclude Include="source\UI\PowerWindow.hpp" />
     <ClInclude Include="source\UI\rendering\imgui_sw.hpp" />
