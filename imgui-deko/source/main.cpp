@@ -38,6 +38,7 @@ int main(int argc, char* argv[]) {
         ImGui::ShowDemoWindow();
         ImGui::Render();
         ImGui_ImplDeko3D_RenderDrawData(ImGui::GetDrawData());
+        svcSleepThread(1e+9);
     }
     ImGui_ImplDeko3D_Shutdown();
 }

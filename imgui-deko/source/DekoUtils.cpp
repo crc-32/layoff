@@ -3,39 +3,30 @@
 #include "SampleFramework/CApplication.h"
 #include "SampleFramework/CMemPool.h"
 #include "SampleFramework/CShader.h"
+#include <imgui.h>
 
+#include <iostream>
 #include <array>
 #include <optional>
 
 namespace
 {
-    struct Vertex
-    {
-        float position[3];
-        float color[3];
-    };
 
     constexpr std::array VertexAttribState =
     {
-        DkVtxAttribState{ 0, 0, offsetof(Vertex, position), DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
-        DkVtxAttribState{ 0, 0, offsetof(Vertex, color),    DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, pos), DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, col),    DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
     };
 
     constexpr std::array VertexBufferState =
     {
-        DkVtxBufferState{ sizeof(Vertex), 0 },
+        DkVtxBufferState{ sizeof(ImDrawVert), 0 },
     };
 
-    constexpr std::array TriangleVertexData =
-    {
-        Vertex{ {  0.0f, +1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
-        Vertex{ { -1.0f, -1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
-        Vertex{ { +1.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f } },
-    };
 }
 static constexpr unsigned NumFramebuffers = 2;
-static constexpr uint32_t FramebufferWidth = 1280;
-static constexpr uint32_t FramebufferHeight = 720;
+uint32_t FramebufferWidth = 1280;
+uint32_t FramebufferHeight = 720;
 static constexpr unsigned StaticCmdSize = 0x10000;
 
 dk::UniqueDevice device;
@@ -51,15 +42,16 @@ CShader vertexShader;
 CShader fragmentShader;
 
 CMemPool::Handle vertexBuffer;
+CMemPool::Handle indexBuffer;
 
 CMemPool::Handle framebuffers_mem[NumFramebuffers];
 dk::Image framebuffers[NumFramebuffers];
 DkCmdList framebuffer_cmdlists[NumFramebuffers];
 dk::UniqueSwapchain swapchain;
 
-DkCmdList render_cmdlist;
+int indexcount;
 
-void recordStaticCommands()
+DkCmdList prepareDraw()
 {
     // Initialize state structs with deko3d defaults
     dk::RasterizerState rasterizerState;
@@ -81,12 +73,11 @@ void recordStaticCommands()
     cmdbuf.bindVtxBuffer(0, vertexBuffer.getGpuAddr(), vertexBuffer.getSize());
     cmdbuf.bindVtxAttribState(VertexAttribState);
     cmdbuf.bindVtxBufferState(VertexBufferState);
-
-    // Draw the triangle
-    cmdbuf.draw(DkPrimitive_Triangles, TriangleVertexData.size(), 1, 0, 0);
+    cmdbuf.bindIdxBuffer(DkIdxFormat_Uint16, indexBuffer.getGpuAddr());
+    cmdbuf.drawIndexed(DkPrimitive_Triangles, indexcount, 1, 0, 0, 0);
 
     // Finish off this command list
-    render_cmdlist = cmdbuf.finishList();
+    return cmdbuf.finishList();
 }
 
 void createFramebufferResources()
@@ -120,9 +111,6 @@ void createFramebufferResources()
 
     // Create the swapchain using the framebuffers
     swapchain = dk::SwapchainMaker{device, nwindowGetDefault(), fb_array}.create();
-
-    // Generate the main rendering cmdlist
-    recordStaticCommands();
 }
 
 void destroyFramebufferResources()
@@ -144,8 +132,41 @@ void destroyFramebufferResources()
         framebuffers_mem[i].destroy();
 }
 
-void initDeko()
+void allocVb(uint32_t size, uint32_t alignment) {
+    vertexBuffer = pool_data->allocate(size, alignment);
+    std::cout << "Allocated VBO of size " << size << std::endl;
+}
+
+void allocIb(uint32_t size, uint32_t alignment) {
+    indexBuffer = pool_data->allocate(size, alignment);
+    std::cout << "Allocated IBO of size " << size << std::endl;
+}
+
+void commitVb(const void* data, uint32_t size, uint32_t alignment) {
+    uint32_t curSize = vertexBuffer.getSize();
+    if (size >= curSize) {
+        std::cout << "VBO too small, increasing" << std::endl;
+        vertexBuffer.destroy();
+        allocVb(size * 1.5, alignment);
+    }
+    memcpy(vertexBuffer.getCpuAddr(), data, vertexBuffer.getSize());
+}
+
+void commitIb(const void* data, uint32_t size, uint32_t alignment, int count) {
+    uint32_t curSize = indexBuffer.getSize();
+    if (size >= curSize) {
+        std::cout << "IBO too small, increasing" << std::endl;
+        indexBuffer.destroy();
+        allocIb(size * 1.5, alignment);
+    }
+    memcpy(indexBuffer.getCpuAddr(), data, indexBuffer.getSize());
+    indexcount = count;
+}
+
+void initDeko(uint32_t fbH, uint32_t fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign)
 {
+    FramebufferWidth = fbW;
+    FramebufferHeight = fbH;
     // Create the deko3d device
     device = dk::DeviceMaker{}.create();
 
@@ -167,8 +188,10 @@ void initDeko()
     fragmentShader.load(*pool_code, "romfs:/shaders/color_fsh.dksh");
 
     // Load the vertex buffer
-    vertexBuffer = pool_data->allocate(sizeof(TriangleVertexData), alignof(Vertex));
-    memcpy(vertexBuffer.getCpuAddr(), TriangleVertexData.data(), vertexBuffer.getSize());
+    //vertexBuffer = pool_data->allocate(sizeof(TriangleVertexData), alignof(Vertex));
+    //memcpy(vertexBuffer.getCpuAddr(), TriangleVertexData.data(), vertexBuffer.getSize());
+    allocVb(initialVBOSize, VBOAlign);
+    allocIb(initialIBOSize, IBOAlign);
 
     // Create the framebuffer resources
     createFramebufferResources();
@@ -179,21 +202,29 @@ void exitDeko()
     // Destroy the framebuffer resources
     destroyFramebufferResources();
 
-    // Destroy the vertex buffer (not strictly needed in this case)
+    // Destroy the vertex buffer
     vertexBuffer.destroy();
+    indexBuffer.destroy();
+}
+
+int slot;
+
+void drawElements() {
+    DkCmdList list = prepareDraw();
+    // Run the main rendering command list
+    queue.submitCommands(list);
+}
+
+void newFrame() {
+    // Acquire a framebuffer from the swapchain (and wait for it to be available)
+    slot = queue.acquireImage(swapchain);
+
+    // Run the command list that attaches said framebuffer to the queue
+    queue.submitCommands(framebuffer_cmdlists[slot]);
 }
 
 void render()
 {
-    // Acquire a framebuffer from the swapchain (and wait for it to be available)
-    int slot = queue.acquireImage(swapchain);
-
-    // Run the command list that attaches said framebuffer to the queue
-    queue.submitCommands(framebuffer_cmdlists[slot]);
-
-    // Run the main rendering command list
-    queue.submitCommands(render_cmdlist);
-
     // Now that we are done rendering, present it to the screen
     queue.presentImage(swapchain, slot);
 }
