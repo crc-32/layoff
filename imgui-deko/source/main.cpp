@@ -39,4 +39,5 @@ int main(int argc, char* argv[]) {
         ImGui::Render();
         ImGui_ImplDeko3D_RenderDrawData(ImGui::GetDrawData());
     }
+    ImGui_ImplDeko3D_Shutdown();
 }
