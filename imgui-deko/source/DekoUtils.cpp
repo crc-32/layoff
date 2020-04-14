@@ -3,6 +3,7 @@
 #include "SampleFramework/CApplication.h"
 #include "SampleFramework/CMemPool.h"
 #include "SampleFramework/CShader.h"
+#include "SampleFramework/CCmdMemRing.h"
 #include <imgui.h>
 
 #include <iostream>
@@ -15,7 +16,7 @@ namespace
     constexpr std::array VertexAttribState =
     {
         DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, pos), DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
-        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, col),    DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, col),    DkVtxAttribSize_1x32, DkVtxAttribType_Uint, 0 },
     };
 
     constexpr std::array VertexBufferState =
@@ -25,9 +26,10 @@ namespace
 
 }
 static constexpr unsigned NumFramebuffers = 2;
-uint32_t FramebufferWidth = 1280;
-uint32_t FramebufferHeight = 720;
+float FramebufferWidth = 1280;
+float FramebufferHeight = 720;
 static constexpr unsigned StaticCmdSize = 0x10000;
+static constexpr unsigned DynamicCmdSize = 0x10000;
 
 dk::UniqueDevice device;
 dk::UniqueQueue queue;
@@ -37,6 +39,8 @@ std::optional<CMemPool> pool_code;
 std::optional<CMemPool> pool_data;
 
 dk::UniqueCmdBuf cmdbuf;
+dk::UniqueCmdBuf dyncmd;
+CCmdMemRing<NumFramebuffers> dynmem;
 
 CShader vertexShader;
 CShader fragmentShader;
@@ -49,9 +53,11 @@ dk::Image framebuffers[NumFramebuffers];
 DkCmdList framebuffer_cmdlists[NumFramebuffers];
 dk::UniqueSwapchain swapchain;
 
+DkCmdList render_cmdlist;
+
 int indexcount;
 
-DkCmdList prepareDraw()
+void prepareDraw()
 {
     // Initialize state structs with deko3d defaults
     dk::RasterizerState rasterizerState;
@@ -74,10 +80,8 @@ DkCmdList prepareDraw()
     cmdbuf.bindVtxAttribState(VertexAttribState);
     cmdbuf.bindVtxBufferState(VertexBufferState);
     cmdbuf.bindIdxBuffer(DkIdxFormat_Uint16, indexBuffer.getGpuAddr());
-    cmdbuf.drawIndexed(DkPrimitive_Triangles, indexcount, 1, 0, 0, 0);
-
     // Finish off this command list
-    return cmdbuf.finishList();
+    render_cmdlist = cmdbuf.finishList();
 }
 
 void createFramebufferResources()
@@ -143,55 +147,68 @@ void allocIb(uint32_t size, uint32_t alignment) {
 }
 
 void commitVb(const void* data, uint32_t size, uint32_t alignment) {
-    uint32_t curSize = vertexBuffer.getSize();
+    /*uint32_t curSize = vertexBuffer.getSize();
     if (size >= curSize) {
         std::cout << "VBO too small, increasing" << std::endl;
         vertexBuffer.destroy();
         allocVb(size * 1.5, alignment);
-    }
+    }*/
     memcpy(vertexBuffer.getCpuAddr(), data, vertexBuffer.getSize());
 }
 
 void commitIb(const void* data, uint32_t size, uint32_t alignment, int count) {
-    uint32_t curSize = indexBuffer.getSize();
+    /*uint32_t curSize = indexBuffer.getSize();
     if (size >= curSize) {
         std::cout << "IBO too small, increasing" << std::endl;
         indexBuffer.destroy();
         allocIb(size * 1.5, alignment);
-    }
+    }*/
     memcpy(indexBuffer.getCpuAddr(), data, indexBuffer.getSize());
     indexcount = count;
 }
 
-void initDeko(uint32_t fbH, uint32_t fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign)
+void initDeko(float fbH, float fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign)
 {
+    std::cout << "Deko init start" << std::endl;
     FramebufferWidth = fbW;
     FramebufferHeight = fbH;
     // Create the deko3d device
     device = dk::DeviceMaker{}.create();
+    std::cout << "Created dev" << std::endl;
 
     // Create the main queue
     queue = dk::QueueMaker{device}.setFlags(DkQueueFlags_Graphics).create();
+    std::cout << "Created Q" << std::endl;
 
     // Create the memory pools
     pool_images.emplace(device, DkMemBlockFlags_GpuCached | DkMemBlockFlags_Image, 16*1024*1024);
     pool_code.emplace(device, DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached | DkMemBlockFlags_Code, 128*1024);
     pool_data.emplace(device, DkMemBlockFlags_CpuUncached | DkMemBlockFlags_GpuCached, 1*1024*1024);
+    std::cout << "Created pools" << std::endl;
 
     // Create the static command buffer and feed it freshly allocated memory
     cmdbuf = dk::CmdBufMaker{device}.create();
     CMemPool::Handle cmdmem = pool_data->allocate(StaticCmdSize);
     cmdbuf.addMemory(cmdmem.getMemBlock(), cmdmem.getOffset(), cmdmem.getSize());
+    std::cout << "Created static cmdbuf" << std::endl;
+
+    // Create the dynamic command buffer and allocate memory for it
+    dyncmd = dk::CmdBufMaker{device}.create();
+    dynmem.allocate(*pool_data, DynamicCmdSize);
+    std::cout << "Created dynamic cmdbuf" << std::endl;
 
     // Load the shaders
     vertexShader.load(*pool_code, "romfs:/shaders/basic_vsh.dksh");
     fragmentShader.load(*pool_code, "romfs:/shaders/color_fsh.dksh");
+    std::cout << "Loaded shaders" << std::endl;
 
     // Load the vertex buffer
     //vertexBuffer = pool_data->allocate(sizeof(TriangleVertexData), alignof(Vertex));
     //memcpy(vertexBuffer.getCpuAddr(), TriangleVertexData.data(), vertexBuffer.getSize());
     allocVb(initialVBOSize, VBOAlign);
     allocIb(initialIBOSize, IBOAlign);
+
+    prepareDraw();
 
     // Create the framebuffer resources
     createFramebufferResources();
@@ -209,10 +226,11 @@ void exitDeko()
 
 int slot;
 
-void drawElements() {
-    DkCmdList list = prepareDraw();
-    // Run the main rendering command list
-    queue.submitCommands(list);
+//FIXME: hangs everything and doesn't draw
+void drawElements(int count) {
+    dynmem.begin(dyncmd);
+    dyncmd.drawIndexed(DkPrimitive_Triangles, count, 1, 0, 0, 0);
+    queue.submitCommands(dynmem.end(dyncmd));
 }
 
 void newFrame() {
@@ -221,6 +239,7 @@ void newFrame() {
 
     // Run the command list that attaches said framebuffer to the queue
     queue.submitCommands(framebuffer_cmdlists[slot]);
+    queue.submitCommands(render_cmdlist);
 }
 
 void render()

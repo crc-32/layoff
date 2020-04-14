@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
 	ImGuiFreeType::BuildFontAtlas(io.Fonts, 0u);
 
     ImGui_ImplDeko3D_Init();
+    std::cout << "Deko ready" << std::endl;
 
     while(appletMainLoop()) {
         hidScanInput();
@@ -38,7 +39,7 @@ int main(int argc, char* argv[]) {
         ImGui::ShowDemoWindow();
         ImGui::Render();
         ImGui_ImplDeko3D_RenderDrawData(ImGui::GetDrawData());
-        svcSleepThread(1e+9);
+        //svcSleepThread(1e+9);
     }
     ImGui_ImplDeko3D_Shutdown();
 }

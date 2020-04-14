@@ -1,9 +1,9 @@
 #include <deko3d.h>
 
-void initDeko(uint32_t fbH, uint32_t fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign);
+void initDeko(float fbH, float fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign);
 void exitDeko();
 void render();
-void drawElements();
+void drawElements(int count);
 void newFrame();
 void commitVb(const void* data, uint32_t size, uint32_t alignment);
 void allocVb(uint32_t size, uint32_t alignment);

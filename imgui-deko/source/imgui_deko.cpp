@@ -6,7 +6,7 @@
 
 // Backend API
 bool ImGui_ImplDeko3D_Init() {
-    initDeko(FBW, FBH, 1024 * sizeof(ImDrawVert), alignof(ImDrawVert), 1024 * sizeof(ImDrawIdx), alignof(ImDrawIdx));
+    initDeko(FBW, FBH, 4096 * sizeof(ImDrawVert), alignof(ImDrawVert), 4096 * sizeof(ImDrawIdx), alignof(ImDrawIdx));
     return true;
 }
 
@@ -29,7 +29,6 @@ void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
         // Upload vertex/index buffers
         commitVb(cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), alignof(ImDrawVert));
         commitIb(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), alignof(ImDrawIdx), cmd_list->IdxBuffer.Size);
-
         //glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
@@ -70,7 +69,7 @@ void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
 #endif
                     glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, (void*)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)));
                 }*/
-                drawElements();
+                drawElements(pcmd->ElemCount);
             }
         }
     }
