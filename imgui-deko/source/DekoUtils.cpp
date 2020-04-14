@@ -252,7 +252,6 @@ void exitDeko()
 
 int slot;
 
-//FIXME: hangs everything and doesn't draw
 void drawElements(int count, int idxoffset, int vtxoffset) {
     //std::cout << "DRAW " << count << std::endl;
     dyncmd.drawIndexed(DkPrimitive_Triangles, count, 1, idxoffset, vtxoffset, 0);

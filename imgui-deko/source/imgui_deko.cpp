@@ -27,14 +27,14 @@ void ImGui_ImplDeko3D_SetupRenderState() {
 
 void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
     reAllocVb(draw_data->TotalVtxCount * sizeof(ImDrawVert), alignof(ImDrawVert));
-    //reAllocIb(draw_data->TotalIdxCount * sizeof(ImDrawIdx), alignof(ImDrawIdx));
+    reAllocIb(draw_data->TotalIdxCount * sizeof(ImDrawIdx), alignof(ImDrawIdx));
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
 
         // Upload vertex/index buffers
         commitVb(cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), alignof(ImDrawVert));
-        //commitIb(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), alignof(ImDrawIdx));
+        commitIb(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), alignof(ImDrawIdx));
 
         ImGui_ImplDeko3D_SetupRenderState();
         //glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
