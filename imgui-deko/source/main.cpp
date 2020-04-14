@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
 
     ImGui_ImplDeko3D_Init();
     std::cout << "Deko ready" << std::endl;
+    std::cout.flush();
 
     while(appletMainLoop()) {
         hidScanInput();
@@ -36,7 +37,9 @@ int main(int argc, char* argv[]) {
         
         ImGui_ImplDeko3D_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow(NULL);
+        //ImDrawList* dr = ImGui::GetBackgroundDrawList();
+        //dr->AddRectFilledMultiColor(ImVec2(-1.0f, -1.0f), ImVec2(0.0f, 0.0f), 0xffffffff, 0x000000ff, 0x000000ff, 0xffffffff);
         ImGui::Render();
         ImGui_ImplDeko3D_RenderDrawData(ImGui::GetDrawData());
         //svcSleepThread(1e+9);

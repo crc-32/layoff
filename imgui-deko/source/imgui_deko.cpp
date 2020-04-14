@@ -20,15 +20,23 @@ void ImGui_ImplDeko3D_NewFrame() {
     newFrame();
 }
 
+void ImGui_ImplDeko3D_SetupRenderState() {
+    dynBufCmds();
+}
+
 
 void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
+    reAllocVb(draw_data->TotalVtxCount * sizeof(ImDrawVert), alignof(ImDrawVert));
+    //reAllocIb(draw_data->TotalIdxCount * sizeof(ImDrawIdx), alignof(ImDrawIdx));
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
 
         // Upload vertex/index buffers
         commitVb(cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert), alignof(ImDrawVert));
-        commitIb(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), alignof(ImDrawIdx), cmd_list->IdxBuffer.Size);
+        //commitIb(cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), alignof(ImDrawIdx));
+
+        ImGui_ImplDeko3D_SetupRenderState();
         //glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx), (const GLvoid*)cmd_list->IdxBuffer.Data, GL_STREAM_DRAW);
 
         for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
@@ -38,9 +46,9 @@ void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
             {
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
-                //if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
-                //    ImGui_ImplOpenGL3_SetupRenderState(draw_data, fb_width, fb_height, vertex_array_object);
-                //else
+                if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
+                    ImGui_ImplDeko3D_SetupRenderState();
+                else
                     pcmd->UserCallback(cmd_list, pcmd);
             }
             else
@@ -54,22 +62,9 @@ void ImGui_ImplDeko3D_RenderDrawData(ImDrawData* draw_data) {
 
                 /*if (clip_rect.x < FBW && clip_rect.y < FBH && clip_rect.z >= 0.0f && clip_rect.w >= 0.0f)
                 {
-                    // Apply scissor/clipping rectangle
-                    if (clip_origin_lower_left)
-                        glScissor((int)clip_rect.x, (int)(fb_height - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
-                    else
-                        glScissor((int)clip_rect.x, (int)clip_rect.y, (int)clip_rect.z, (int)clip_rect.w); // Support for GL 4.5 rarely used glClipControl(GL_UPPER_LEFT)
-
-                    // Bind texture, Draw
-                    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
-#if IMGUI_IMPL_OPENGL_MAY_HAVE_VTX_OFFSET
-                    if (g_GlVersion >= 320)
-                        glDrawElementsBaseVertex(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, (void*)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)), (GLint)pcmd->VtxOffset);
-                    else
-#endif
-                    glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, (void*)(intptr_t)(pcmd->IdxOffset * sizeof(ImDrawIdx)));
                 }*/
-                drawElements(pcmd->ElemCount);
+                drawElements(pcmd->ElemCount, pcmd->IdxOffset, pcmd->VtxOffset);
+                //svcSleepThread(1e9);
             }
         }
     }

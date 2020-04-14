@@ -12,16 +12,23 @@
 
 namespace
 {
-
     constexpr std::array VertexAttribState =
     {
-        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, pos), DkVtxAttribSize_3x32, DkVtxAttribType_Float, 0 },
-        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, col),    DkVtxAttribSize_1x32, DkVtxAttribType_Uint, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, pos), DkVtxAttribSize_2x32, DkVtxAttribType_Float, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, uv), DkVtxAttribSize_2x32, DkVtxAttribType_Float, 0 },
+        DkVtxAttribState{ 0, 0, offsetof(ImDrawVert, col), DkVtxAttribSize_4x8, DkVtxAttribType_Unorm, 0 },
     };
 
     constexpr std::array VertexBufferState =
     {
         DkVtxBufferState{ sizeof(ImDrawVert), 0 },
+    };
+
+    std::array TriangleVertexData =
+    {
+        ImDrawVert{ ImVec2(0.0f, +1.0f), ImVec2(0.0f,0.0f), 0xff0000ff },
+        ImDrawVert{ ImVec2(-1.0f, -1.0f), ImVec2(0.0f,0.0f), 0xff0000ff },
+        ImDrawVert{ ImVec2(+1.0f, -1.0f), ImVec2(0.0f,0.0f), 0xff0000ff },
     };
 
 }
@@ -46,6 +53,7 @@ CShader vertexShader;
 CShader fragmentShader;
 
 CMemPool::Handle vertexBuffer;
+CMemPool::Handle tVtxBuf;
 CMemPool::Handle indexBuffer;
 
 CMemPool::Handle framebuffers_mem[NumFramebuffers];
@@ -69,19 +77,27 @@ void prepareDraw()
     cmdbuf.setScissors(0, { { 0, 0, FramebufferWidth, FramebufferHeight } });
 
     // Clear the color buffer
-    cmdbuf.clearColor(0, DkColorMask_RGBA, 0.0f, 0.0f, 0.0f, 0.0f);
+    cmdbuf.clearColor(0, DkColorMask_RGBA, 1.0f, 0.0f, 0.0f, 1.0f);
 
     // Bind state required for drawing the triangle
     cmdbuf.bindShaders(DkStageFlag_GraphicsMask, { vertexShader, fragmentShader });
     cmdbuf.bindRasterizerState(rasterizerState);
     cmdbuf.bindColorState(colorState);
     cmdbuf.bindColorWriteState(colorWriteState);
-    cmdbuf.bindVtxBuffer(0, vertexBuffer.getGpuAddr(), vertexBuffer.getSize());
-    cmdbuf.bindVtxAttribState(VertexAttribState);
-    cmdbuf.bindVtxBufferState(VertexBufferState);
-    cmdbuf.bindIdxBuffer(DkIdxFormat_Uint16, indexBuffer.getGpuAddr());
     // Finish off this command list
     render_cmdlist = cmdbuf.finishList();
+}
+
+void dynBufCmds() {
+    dyncmd.bindVtxBuffer(0, tVtxBuf.getGpuAddr(), tVtxBuf.getSize());
+    dyncmd.bindVtxAttribState(VertexAttribState);
+    dyncmd.bindVtxBufferState(VertexBufferState);
+    dyncmd.draw(DkPrimitive_Triangles, 3, 1, 0, 0);
+
+    dyncmd.bindIdxBuffer(DkIdxFormat_Uint16, indexBuffer.getGpuAddr());
+    dyncmd.bindVtxBuffer(0, vertexBuffer.getGpuAddr(), vertexBuffer.getSize());
+    dyncmd.bindVtxAttribState(VertexAttribState);
+    dyncmd.bindVtxBufferState(VertexBufferState);
 }
 
 void createFramebufferResources()
@@ -146,25 +162,31 @@ void allocIb(uint32_t size, uint32_t alignment) {
     std::cout << "Allocated IBO of size " << size << std::endl;
 }
 
-void commitVb(const void* data, uint32_t size, uint32_t alignment) {
-    /*uint32_t curSize = vertexBuffer.getSize();
+void reAllocVb(uint32_t size, uint32_t alignment) {
+    uint32_t curSize = vertexBuffer.getSize();
     if (size >= curSize) {
         std::cout << "VBO too small, increasing" << std::endl;
         vertexBuffer.destroy();
         allocVb(size * 1.5, alignment);
-    }*/
+    }
+}
+
+void reAllocIb(uint32_t size, uint32_t alignment) {
+    uint32_t curSize = indexBuffer.getSize();
+    if (size >= curSize) {
+        std::cout << "IBO too small, increasing" << std::endl;
+        std::cout.flush();
+        indexBuffer.destroy();
+        allocIb(size * 1.5, alignment);
+    }
+}
+
+void commitVb(const void* data, uint32_t size, uint32_t alignment) {
     memcpy(vertexBuffer.getCpuAddr(), data, vertexBuffer.getSize());
 }
 
-void commitIb(const void* data, uint32_t size, uint32_t alignment, int count) {
-    /*uint32_t curSize = indexBuffer.getSize();
-    if (size >= curSize) {
-        std::cout << "IBO too small, increasing" << std::endl;
-        indexBuffer.destroy();
-        allocIb(size * 1.5, alignment);
-    }*/
+void commitIb(const void* data, uint32_t size, uint32_t alignment) {
     memcpy(indexBuffer.getCpuAddr(), data, indexBuffer.getSize());
-    indexcount = count;
 }
 
 void initDeko(float fbH, float fbW, uint32_t initialVBOSize, uint32_t VBOAlign, uint32_t initialIBOSize, uint32_t IBOAlign)
@@ -208,6 +230,10 @@ void initDeko(float fbH, float fbW, uint32_t initialVBOSize, uint32_t VBOAlign, 
     allocVb(initialVBOSize, VBOAlign);
     allocIb(initialIBOSize, IBOAlign);
 
+    tVtxBuf = pool_data->allocate(sizeof(TriangleVertexData), alignof(ImDrawVert));
+    memcpy(tVtxBuf.getCpuAddr(), TriangleVertexData.data(), tVtxBuf.getSize());
+    
+
     prepareDraw();
 
     // Create the framebuffer resources
@@ -227,10 +253,9 @@ void exitDeko()
 int slot;
 
 //FIXME: hangs everything and doesn't draw
-void drawElements(int count) {
-    dynmem.begin(dyncmd);
-    dyncmd.drawIndexed(DkPrimitive_Triangles, count, 1, 0, 0, 0);
-    queue.submitCommands(dynmem.end(dyncmd));
+void drawElements(int count, int idxoffset, int vtxoffset) {
+    //std::cout << "DRAW " << count << std::endl;
+    dyncmd.drawIndexed(DkPrimitive_Triangles, count, 1, idxoffset, vtxoffset, 0);
 }
 
 void newFrame() {
@@ -240,10 +265,13 @@ void newFrame() {
     // Run the command list that attaches said framebuffer to the queue
     queue.submitCommands(framebuffer_cmdlists[slot]);
     queue.submitCommands(render_cmdlist);
+    dynmem.begin(dyncmd);
+    dyncmd.clearColor(0, DkColorMask_RGBA, 0.0f, 0.0f, 1.0f, 1.0f);
 }
 
 void render()
 {
+    queue.submitCommands(dynmem.end(dyncmd));
     // Now that we are done rendering, present it to the screen
     queue.presentImage(swapchain, slot);
 }

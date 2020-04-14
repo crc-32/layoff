@@ -14,3 +14,5 @@ IMGUI_IMPL_API bool     ImGui_ImplDeko3D_CreateFontsTexture();
 IMGUI_IMPL_API void     ImGui_ImplDeko3D_DestroyFontsTexture();
 IMGUI_IMPL_API bool     ImGui_ImplDeko3D_CreateDeviceObjects();
 IMGUI_IMPL_API void     ImGui_ImplDeko3D_DestroyDeviceObjects();
+
+IMGUI_IMPL_API void     ImGui_ImplDeko3D_SetupRenderState();
