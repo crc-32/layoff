@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include <switch.h>
+#include "ovlservices/npns.h"
 #include "UI/UI.hpp"
 #include "utils.hpp"
 

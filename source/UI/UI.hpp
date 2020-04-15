@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rendering/deko3d/renderer.h"
 #include <imgui/imgui.h>
 #include <switch.h>
 

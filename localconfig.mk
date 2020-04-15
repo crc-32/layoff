@@ -1,1 +1,0 @@
-LNXNIGHTLY := $(CURDIR)/libs/libnx/nx
