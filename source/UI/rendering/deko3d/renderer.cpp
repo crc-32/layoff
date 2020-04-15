@@ -60,9 +60,9 @@ constexpr auto FB_NUM = 2u;
 constexpr auto CMDBUF_SIZE = 1024 * 1024;
 
 /// \brief Framebuffer width
-unsigned s_width = 1920;
+unsigned s_width = 1280;
 /// \brief Framebuffer height
-unsigned s_height = 1080;
+unsigned s_height = 720;
 
 /// \brief deko3d device
 dk::UniqueDevice s_device;
@@ -162,16 +162,29 @@ void rebuildSwapchain (unsigned const width_, unsigned const height_)
 
 	// create swapchain
 	s_swapchain = dk::SwapchainMaker{s_device, nwindowGetDefault (), swapchainImages}.create ();
+	dkSwapchainSetSwapInterval(s_swapchain, 2);
+}
+
+#include <iostream>
+#include <fstream>
+
+void DKError(void* userData, const char* context, DkResult result) {
+	std::ofstream f;
+	f.open("sdmc:/dk_error.txt");
+	f << "ERR: " << context << " (result " << result << ")" << std::endl;
+	f.flush();
+	f.close();
+	fatalThrow(MAKERESULT(133,7000));
 }
 
 /// \brief Initialize deko3d
 void deko3dInit ()
 {
 	// create deko3d device
-	s_device = dk::DeviceMaker{}.create ();
+	s_device = dk::DeviceMaker{}.setCbError(DKError).create ();
 
 	// initialize swapchain with maximum resolution
-	rebuildSwapchain (1920, 1080);
+	rebuildSwapchain (1280, 720);
 
 	// create memblocks for each image slot
 	for (std::size_t i = 0; i < FB_NUM; ++i)
@@ -367,6 +380,14 @@ void deko3dExit ()
 	s_device        = nullptr;
 }
 
+void renderer::SlowMode() {
+	dkSwapchainSetSwapInterval(s_swapchain, 4);
+}
+
+void renderer::FastMode() {
+	dkSwapchainSetSwapInterval(s_swapchain, 2);
+}
+
 bool renderer::init ()
 {
 #ifndef NDEBUG
@@ -418,7 +439,9 @@ void renderer::render ()
 	dk::ImageView colorTarget{s_frameBuffers[slot]};
 	dk::ImageView depthTarget{s_depthBuffer};
 	cmdBuf.bindRenderTargets (&colorTarget, &depthTarget);
-	cmdBuf.clearColor (0, DkColorMask_RGBA, 0.125f, 0.294f, 0.478f, 1.0f);
+	cmdBuf.bindColorWriteState (dk::ColorWriteState{});
+	cmdBuf.setScissors(0, DkScissor{0,0,1280,720});
+	cmdBuf.clearColor (0, DkColorMask_RGBA, 0.0f, 0.0f, 0.0f, 0.0f);
 	cmdBuf.clearDepthStencil (true, 1.0f, 0xFF, 0);
 	s_queue.submitCommands (cmdBuf.finishList ());
 

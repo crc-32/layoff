@@ -27,7 +27,7 @@ float s_width = 1280.0f;
 float s_height = 720.0f;
 
 /// \brief Whether to show mouse
-float s_showMouse = false;
+//float s_showMouse = false;
 /// \brief Mouse position
 ImVec2 s_mousePos = ImVec2 (0.0f, 0.0f);
 
@@ -36,7 +36,7 @@ std::string s_clipboard;
 
 /// \brief Applet hook cookie
 AppletHookCookie s_appletHookCookie;
-
+/*
 /// \brief System font glyph ranges
 ImWchar const nxFontRanges[] = {
     // clang-format off
@@ -1128,7 +1128,7 @@ ImWchar const nxFontRanges[] = {
 	0xf9dc, 0xf9dc, 0xfa0e, 0xfa2d, 0xfb01, 0xfb02, 0xfe30, 0xfe33,
 	0xfe35, 0xfe44, 0xff01, 0xff5e, 0xff61, 0xff9f, 0xffe0, 0xffe6,
     // clang-format on
-};
+};*/
 
 /// \brief Handle applet hook
 /// \param hook_ Callback reason
@@ -1196,14 +1196,14 @@ void moveMouse (ImGuiIO &io_, ImVec2 const &pos_, bool const force_ = false)
 	if (!force_ && pos_.x == s_mousePos.x && pos_.y == s_mousePos.y)
 	{
 		// stop displaying mouse cursor after inactivity timeout
-		if (now - s_lastMouseUpdate > 1s)
-			s_showMouse = false;
+		/*if (now - s_lastMouseUpdate > 1s)
+			s_showMouse = false;*/
 
 		return;
 	}
 
 	// update mouse position
-	s_showMouse       = true;
+	//s_showMouse       = true;
 	s_lastMouseUpdate = now;
 	s_mousePos        = pos_;
 
@@ -1222,14 +1222,14 @@ void updateMouseButtons (ImGuiIO &io_)
 		io_.MouseDown[i] = buttons & BIT (i);
 
 		// force mouse cursor to show on click
-		if (io_.MouseDown[i])
-			moveMouse (io_, s_mousePos, true);
+		/*if (io_.MouseDown[i])
+			moveMouse (io_, s_mousePos, true);*/
 	}
 }
 
 /// \brief Update mouse position
 /// \param io_ ImGui IO
-void updateMousePos (ImGuiIO &io_)
+/*void updateMousePos (ImGuiIO &io_)
 {
 	MousePosition pos;
 	hidMouseRead (&pos);
@@ -1239,7 +1239,7 @@ void updateMousePos (ImGuiIO &io_)
 
 	moveMouse (
 	    io_, ImVec2 (s_mousePos.x + 2.0f * pos.velocityX, s_mousePos.y + 2.0f * pos.velocityY));
-}
+}*/
 
 /// \brief Update touch position
 /// \param io_ ImGui IO
@@ -1257,7 +1257,7 @@ void updateTouch (ImGuiIO &io_)
 	// set mouse position to touch point; force hide mouse cursor
 	moveMouse (io_, ImVec2 (pos.px, pos.py));
 	io_.MouseDown[0] = true;
-	s_showMouse      = false;
+	//s_showMouse      = false;
 }
 
 /// \brief Update gamepad inputs
@@ -1291,7 +1291,7 @@ void updateGamepads (ImGuiIO &io_)
 	}
 
 	// use ZR/ZL as left-click/right-click, respectively
-	if (keys & KEY_ZR)
+	/*if (keys & KEY_ZR)
 	{
 		io_.MouseDown[0] = true;
 		moveMouse (io_, s_mousePos, true);
@@ -1300,7 +1300,7 @@ void updateGamepads (ImGuiIO &io_)
 	{
 		io_.MouseDown[1] = true;
 		moveMouse (io_, s_mousePos, true);
-	}
+	}*/
 
 	// update joystick
 	JoystickPosition js;
@@ -1320,7 +1320,7 @@ void updateGamepads (ImGuiIO &io_)
 	}
 
 	// use right stick as mouse
-	auto scale = 5.0f;
+	/*auto scale = 5.0f;
 	if (keys & KEY_L)
 		scale = 1.0f;
 	if (keys & KEY_R)
@@ -1330,7 +1330,7 @@ void updateGamepads (ImGuiIO &io_)
 	// move mouse
 	moveMouse (io_,
 	    ImVec2 (s_mousePos.x + js.dx / static_cast<float> (JOYSTICK_MAX) * scale,
-	        s_mousePos.y - js.dy / static_cast<float> (JOYSTICK_MAX) * scale));
+	        s_mousePos.y - js.dy / static_cast<float> (JOYSTICK_MAX) * scale));*/
 }
 
 /// \brief Update keyboard inputs
@@ -1357,48 +1357,19 @@ void updateKeyboard (ImGuiIO &io_)
 bool imgui::nx::init ()
 {
 	auto &io = ImGui::GetIO ();
-
-	// get system language
-	u64 languageCode;
-	auto rc = setInitialize ();
-	if (R_FAILED (rc))
-		return false;
-
-	rc = setGetSystemLanguage (&languageCode);
-	if (R_FAILED (rc))
-	{
-		setExit ();
-		return false;
-	}
-	setExit ();
-
-	// get fonts for system language
-	std::vector<PlFontData> fonts (PlSharedFontType_Total);
-	s32 numFonts = 0;
-	rc           = plGetSharedFont (languageCode, fonts.data (), fonts.size (), &numFonts);
-	if (R_FAILED (rc))
-		return false;
-	fonts.resize (numFonts);
-
-	// add fonts
-	ImFontConfig config;
-	config.MergeMode            = false;
-	config.FontDataOwnedByAtlas = false;
-	for (auto const &font : fonts)
-	{
-		io.Fonts->AddFontFromMemoryTTF (font.address, font.size, 24.0f, &config, nxFontRanges);
-		config.MergeMode = true;
-	}
+	PlFontData font;
+	plGetSharedFontByType(&font, PlSharedFontType_Standard);
+	io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 20.0f);
 
 	// build font atlas
 	io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight;
 	io.Fonts->Build ();
 
 	// initialize applet hooks
-	appletSetFocusHandlingMode (AppletFocusHandlingMode_NoSuspend);
+	/*appletSetFocusHandlingMode (AppletFocusHandlingMode_NoSuspend);
 	appletHook (&s_appletHookCookie, handleAppletHook, nullptr);
 	handleAppletHook (AppletHookType_OnFocusState, nullptr);
-	handleAppletHook (AppletHookType_OnOperationMode, nullptr);
+	handleAppletHook (AppletHookType_OnOperationMode, nullptr);*/
 
 	// disable imgui.ini file
 	io.IniFilename = nullptr;
@@ -1461,26 +1432,26 @@ void imgui::nx::newFrame ()
 	io.DisplayFramebufferScale = ImVec2 (1.0f, 1.0f);
 
 	// time step
-	/*
-	static auto const start = platform::steady_clock::now ();
+	
+	static auto const start = std::chrono::steady_clock::now ();
 	static auto prev        = start;
-	auto const now          = platform::steady_clock::now ();
+	auto const now          = std::chrono::steady_clock::now ();
 
 	io.DeltaTime = std::chrono::duration<float> (now - prev).count ();
-	prev         = now;*/
+	prev         = now;
 
 	if (s_focused)
 	{
 		// update inputs
-		updateMouseButtons (io);
-		updateMousePos (io);
+		//updateMouseButtons (io);
+		//updateMousePos (io);
 		updateTouch (io);
 		updateGamepads (io);
 		updateKeyboard (io);
 	}
 
 	// whether to draw mouse cursor
-	io.MouseDrawCursor = s_showMouse;
+	//io.MouseDrawCursor = s_showMouse;
 
 	// clamp mouse to screen
 	s_mousePos.x = std::clamp (s_mousePos.x, 0.0f, s_width);

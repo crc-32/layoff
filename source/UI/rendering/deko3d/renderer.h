@@ -13,4 +13,7 @@ void newFrame ();
 void render ();
 
 void exit ();
+
+void SlowMode();
+void FastMode();
 }

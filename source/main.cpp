@@ -23,9 +23,27 @@
 using namespace layoff;
 
 extern "C" {
-    u32 __nx_applet_type = AppletType_OverlayApplet;
 	
-    __attribute__((weak)) size_t __nx_heap_size = 30 * 1024 * 1024;
+    //__attribute__((weak)) size_t __nx_heap_size = 30 * 1024 * 1024;
+
+	#define INNER_HEAP_SIZE 40 * 1024 * 1024
+	size_t nx_inner_heap_size = INNER_HEAP_SIZE;
+	char   nx_inner_heap[INNER_HEAP_SIZE];
+
+	u32 __nx_applet_type = AppletType_OverlayApplet;
+
+	void __libnx_initheap(void)
+	{
+		void*  addr = nx_inner_heap;
+		size_t size = nx_inner_heap_size;
+
+		// Newlib
+		extern char* fake_heap_start;
+		extern char* fake_heap_end;
+
+		fake_heap_start = (char*)addr;
+		fake_heap_end   = (char*)addr + size;
+	}
 	
 	extern void __nx_win_init(void);
 	extern void __nx_win_exit(void);
@@ -204,8 +222,8 @@ static UI::LogWindow logWin;
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
-	ClearFramebuffer();
 	ClearEvents();
+	UI::SlowMode();
 	
 	//Close all the current windows 
 	mainWindow.Visible = false;
@@ -234,6 +252,7 @@ static bool IdleLoop() {
 //The active loop will draw either the power menu, sidebar or the active window.
 static bool ActiveLoop() {
 	ClearEvents();
+	UI::FastMode();
     while (MessageLoop())
     {					
 		console::UpdateStatus();
@@ -263,8 +282,6 @@ static bool ActiveLoop() {
         
 		if (!AnyWindowRendered || HomeLongPressed || HomePressed)
 			return true;
-		
-		svcSleepThread(1e+9 / 25); //25 fps-ish
 	}
     return false;
 }
@@ -306,7 +323,7 @@ int main(int argc, char* argv[]) {
         SwitchToActiveMode();
         if(!ActiveLoop()) break;
     }
-
+	plExit();
 	lblExit();
 	nifmExit();
     npnsExit();

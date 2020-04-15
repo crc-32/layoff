@@ -6,6 +6,7 @@ build/
 *.elf
 *.nacp
 *.npdm
+*.dksh
 npdmtool.exe
 atmosphere/
 Layoff.vcxproj.user
