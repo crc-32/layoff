@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include <switch.h>
+#include "ovlservices/npns.h"
 #include "UI/UI.hpp"
 #include "utils.hpp"
 
@@ -21,13 +22,69 @@
 
 using namespace layoff;
 
+ViDisplay disp;
+ViLayer layer;
+NWindow win;
+
 extern "C" {
-    u32 __nx_applet_type = AppletType_OverlayApplet;
 	
-    __attribute__((weak)) size_t __nx_heap_size = 30 * 1024 * 1024;
-	
-	extern void __nx_win_init(void);
-	extern void __nx_win_exit(void);
+    //__attribute__((weak)) size_t __nx_heap_size = 30 * 1024 * 1024;
+
+	#define INNER_HEAP_SIZE 40 * 1024 * 1024
+	size_t nx_inner_heap_size = INNER_HEAP_SIZE;
+	char   nx_inner_heap[INNER_HEAP_SIZE];
+
+	u32 __nx_applet_type = AppletType_OverlayApplet;
+
+	void __libnx_initheap(void)
+	{
+		void*  addr = nx_inner_heap;
+		size_t size = nx_inner_heap_size;
+
+		// Newlib
+		extern char* fake_heap_start;
+		extern char* fake_heap_end;
+
+		fake_heap_start = (char*)addr;
+		fake_heap_end   = (char*)addr + size;
+	}
+
+	void __nx_win_init(void)
+	{
+		Result rc;
+		rc = viInitialize(ViServiceType_Default);
+		if (R_SUCCEEDED(rc)) {
+			rc = viOpenDefaultDisplay(&disp);
+			if (R_SUCCEEDED(rc)) {
+				rc = viCreateLayer(&disp, &layer);
+				if (R_SUCCEEDED(rc)) {
+					rc = viSetLayerScalingMode(&layer, ViScalingMode_FitToLayer);
+					viSetLayerZ(&layer, 100);
+					if (R_SUCCEEDED(rc)) {
+						rc = nwindowCreateFromLayer(&win, &layer);
+						if (R_SUCCEEDED(rc))
+							nwindowSetDimensions(&win, 1280, 720);
+					}
+					if (R_FAILED(rc))
+						viCloseLayer(&layer);
+				}
+				if (R_FAILED(rc))
+					viCloseDisplay(&disp);
+			}
+			if (R_FAILED(rc))
+				viExit();
+		}
+		if (R_FAILED(rc))
+			fatalThrow(MAKERESULT(Module_Libnx, LibnxError_BadGfxInit));
+	}
+
+	void __nx_win_exit(void)
+	{
+		nwindowClose(&win);
+		viCloseLayer(&layer);
+		viCloseDisplay(&disp);
+		viExit();
+	}
 
     void __attribute__((weak)) __appInit(void) {
         Result rc;
@@ -67,6 +124,42 @@ extern "C" {
 
 u64 kHeld, kDown;
 NotificationManager *layoff::nman = nullptr;
+
+Result capsscCaptureForDebug(void *buffer, size_t buffer_size, u64 *size) {
+	Service capssc;
+	smGetService(&capssc, "caps:sc");
+    struct {
+        u32 a;
+        u64 b;
+    } in = {0, 10000000000};
+    return serviceDispatchInOut(&capssc, 1204, in, *size,
+        .buffer_attrs = {SfBufferAttr_HipcMapTransferAllowsNonSecure | SfBufferAttr_HipcMapAlias | SfBufferAttr_Out},
+        .buffers = { { buffer, buffer_size } },
+    );
+	serviceClose(&capssc);
+}
+
+int ssC = 0;
+char buf[4*1280*720];
+void overlayScreenshot() {
+	size_t size;
+	std::stringstream path;
+	path << "sdmc:/ovlSS_" << ssC << ".raw";
+	ssC++;
+	Result rc = capsscCaptureForDebug(&buf, sizeof(buf), &size);
+	if (R_FAILED(rc)) {
+		std::stringstream err;
+		err << "Failed to take overlay screenshot: " << R_MODULE(rc) << "-" << R_DESCRIPTION(rc);
+		PrintLn(err.str());
+		return;
+	}else{
+		PrintLn("Took overlay screenshot");
+	}
+	FILE* f = fopen(path.str().c_str(),"w");
+	fwrite(buf, size, 1, f);
+	fclose(f);
+}
+
 static inline void ImguiBindInputs()
 {	
 	ImGuiIO &io = ImGui::GetIO();
@@ -93,8 +186,12 @@ static inline void ImguiBindInputs()
 	io.NavInputs[ImGuiNavInput_Activate] = kHeld & KEY_A;
 	io.NavInputs[ImGuiNavInput_Cancel] = kHeld & KEY_B;
 	io.NavInputs[ImGuiNavInput_Menu] = kHeld & KEY_X;
-	io.NavInputs[ImGuiNavInput_FocusNext] = kHeld & (KEY_ZR | KEY_R);
-	io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
+	if (kDown & KEY_L && kDown & KEY_R) {
+		overlayScreenshot();
+	}else {
+		io.NavInputs[ImGuiNavInput_FocusNext] = kHeld & (KEY_ZR | KEY_R);
+		io.NavInputs[ImGuiNavInput_FocusPrev] = kHeld & (KEY_ZL | KEY_L);
+	}
 }
 
 static bool HomeLongPressed = false;
@@ -203,8 +300,8 @@ static UI::LogWindow logWin;
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
-	ClearFramebuffer();
 	ClearEvents();
+	UI::SlowMode();
 	
 	//Close all the current windows 
 	mainWindow.Visible = false;
@@ -233,6 +330,7 @@ static bool IdleLoop() {
 //The active loop will draw either the power menu, sidebar or the active window.
 static bool ActiveLoop() {
 	ClearEvents();
+	UI::FastMode();
     while (MessageLoop())
     {					
 		console::UpdateStatus();
@@ -262,8 +360,6 @@ static bool ActiveLoop() {
         
 		if (!AnyWindowRendered || HomeLongPressed || HomePressed)
 			return true;
-		
-		svcSleepThread(1e+9 / 25); //25 fps-ish
 	}
     return false;
 }
@@ -271,7 +367,7 @@ static bool ActiveLoop() {
 #include "IPC/IPCThread.hpp"
 
 int main(int argc, char* argv[]) {
-    svcSleepThread(30e+9);
+    svcSleepThread(10e+9);
     __nx_win_init();
 
     romfsInit();
@@ -289,7 +385,7 @@ int main(int argc, char* argv[]) {
 	lblInitialize();
 
     SwitchToIdleMode();
-    UIInit();
+    UIInit(&win);
 
 	nman = new NotificationManager();
 	IPC::LaunchThread();
@@ -305,7 +401,7 @@ int main(int argc, char* argv[]) {
         SwitchToActiveMode();
         if(!ActiveLoop()) break;
     }
-
+	plExit();
 	lblExit();
 	nifmExit();
     npnsExit();

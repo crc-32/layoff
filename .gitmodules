@@ -1,7 +1,3 @@
-[submodule "libs/libnx"]
-	path = libs/libnx
-	url = https://github.com/crc-32/libnx.git
-	branch = layoff
 [submodule "libs/inih"]
 	path = libs/inih
 	url = https://github.com/jtilly/inih.git

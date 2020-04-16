@@ -27,3 +27,7 @@ Then just `make`, the scripts `makelayeredfs.bat` and `makelayeredfs.sh` generat
 
   - [exelix11](https://github.com/exelix11/)
   - [crc-32](https://github.com/crc-32/)
+
+## Special thanks
+
+  - [mtheall](https://github.com/mtheall/) for the deko3d imgui backend (from [ftpd](https://github.com/mtheall/ftpd/))

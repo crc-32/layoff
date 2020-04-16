@@ -52,11 +52,9 @@ inline void Sidebar::PopStyiling()
 inline void Sidebar::DoUpdate()
 {
 	auto s = &console::Status.DateTime;
-	ImGui::PushFont(Font30);
 	ImGui::Text("%d:%d   %d/%d", s->hour, s->minute, s->day, s->month);
 	ImGui::SameLine();
 	ImGui::TextRight("%d%%", console::Status.BatteryLevel);
-	ImGui::PopFont();
 	ImGui::Spacing();
 
 	ImGui::BeginChild("WidgetsArea", { W - 15, H * 3 / 4 });
@@ -64,7 +62,6 @@ inline void Sidebar::DoUpdate()
 		if (win->ShouldRender())
 			win->Update();
 	ImGui::EndChild();
-
 	ImGui::NewLine();
 
 	sidebar::WirelessControl();

@@ -1,5 +1,4 @@
 #include <sstream>
-#include <stratosphere.hpp>
 #include "LayoffService.hpp"
 #include "../NotificationManager.hpp"
 #include "../utils.hpp"

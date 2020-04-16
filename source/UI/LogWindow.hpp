@@ -21,7 +21,8 @@ namespace layoff::UI {
 	
 		void Update() override 
 		{
-			ImGui::Begin("Log window", &Visible, ImVec2(300, 400));
+			ImGui::Begin("Log window", &Visible);
+			ImGui::SetWindowSize(ImVec2(300, 400), ImGuiCond_Once);
 			ImGui::Text(LogText.c_str());
 			ImGui::End();
 		}
