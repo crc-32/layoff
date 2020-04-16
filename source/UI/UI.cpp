@@ -1,15 +1,13 @@
 #include "UI.hpp"
 #include <switch.h>
 
-Framebuffer fb;
-
-void UIInit() {
+void UIInit(NWindow *win) {
 	Result rc = plInitialize();
 	if (R_FAILED(rc))
 		fatalThrow(rc);
 
 	ImguiInitialize();
-	renderer::init();
+	renderer::init(win);
 }
 
 void FrameStart() {

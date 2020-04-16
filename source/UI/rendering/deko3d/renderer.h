@@ -3,10 +3,11 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <switch.h>
 
 namespace renderer
 {
-bool init ();
+bool init (NWindow *win);
 
 void newFrame ();
 

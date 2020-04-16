@@ -205,7 +205,7 @@ DkCmdList setupRenderState (dk::UniqueCmdBuf &cmdBuf_,
 	cmdBuf_.bindBlendStates (0,
 	    dk::BlendState{}.setFactors (DkBlendFactor_SrcAlpha,
 	        DkBlendFactor_InvSrcAlpha,
-	        DkBlendFactor_InvSrcAlpha,
+	        DkBlendFactor_One,
 	        DkBlendFactor_Zero));
 	cmdBuf_.bindVtxAttribState (VERTEX_ATTRIB_STATE);
 	cmdBuf_.bindVtxBufferState (VERTEX_BUFFER_STATE);

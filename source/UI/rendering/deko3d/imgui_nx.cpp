@@ -1262,7 +1262,7 @@ void updateTouch (ImGuiIO &io_)
 
 /// \brief Update gamepad inputs
 /// \param io_ ImGui IO
-void updateGamepads (ImGuiIO &io_)
+/*void updateGamepads (ImGuiIO &io_)
 {
 	// clear navigation inputs
 	std::memset (io_.NavInputs, 0, sizeof (io_.NavInputs));
@@ -1291,7 +1291,7 @@ void updateGamepads (ImGuiIO &io_)
 	}
 
 	// use ZR/ZL as left-click/right-click, respectively
-	/*if (keys & KEY_ZR)
+	if (keys & KEY_ZR)
 	{
 		io_.MouseDown[0] = true;
 		moveMouse (io_, s_mousePos, true);
@@ -1300,7 +1300,7 @@ void updateGamepads (ImGuiIO &io_)
 	{
 		io_.MouseDown[1] = true;
 		moveMouse (io_, s_mousePos, true);
-	}*/
+	}
 
 	// update joystick
 	JoystickPosition js;
@@ -1320,7 +1320,7 @@ void updateGamepads (ImGuiIO &io_)
 	}
 
 	// use right stick as mouse
-	/*auto scale = 5.0f;
+	auto scale = 5.0f;
 	if (keys & KEY_L)
 		scale = 1.0f;
 	if (keys & KEY_R)
@@ -1330,12 +1330,12 @@ void updateGamepads (ImGuiIO &io_)
 	// move mouse
 	moveMouse (io_,
 	    ImVec2 (s_mousePos.x + js.dx / static_cast<float> (JOYSTICK_MAX) * scale,
-	        s_mousePos.y - js.dy / static_cast<float> (JOYSTICK_MAX) * scale));*/
-}
+	        s_mousePos.y - js.dy / static_cast<float> (JOYSTICK_MAX) * scale));
+}*/
 
 /// \brief Update keyboard inputs
 /// \param io_ ImGui IO
-void updateKeyboard (ImGuiIO &io_)
+/*void updateKeyboard (ImGuiIO &io_)
 {
 	io_.KeyCtrl =
 	    hidKeyboardModifierHeld (static_cast<HidKeyboardModifier> (KBD_MOD_LCTRL | KBD_MOD_RCTRL));
@@ -1351,7 +1351,7 @@ void updateKeyboard (ImGuiIO &io_)
 
 	for (int i = 0; i < 256; ++i)
 		io_.KeysDown[i] = hidKeyboardHeld (static_cast<HidKeyboardScancode> (i));
-}
+}*/
 }
 
 bool imgui::nx::init ()
@@ -1359,7 +1359,7 @@ bool imgui::nx::init ()
 	auto &io = ImGui::GetIO ();
 	PlFontData font;
 	plGetSharedFontByType(&font, PlSharedFontType_Standard);
-	io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 20.0f);
+	io.Fonts->AddFontFromMemoryTTF(font.address, font.size, 24.0f);
 
 	// build font atlas
 	io.Fonts->Flags |= ImFontAtlasFlags_NoPowerOfTwoHeight;
@@ -1440,7 +1440,7 @@ void imgui::nx::newFrame ()
 	io.DeltaTime = std::chrono::duration<float> (now - prev).count ();
 	prev         = now;
 
-	if (s_focused)
+	/*if (s_focused)
 	{
 		// update inputs
 		//updateMouseButtons (io);
@@ -1455,7 +1455,7 @@ void imgui::nx::newFrame ()
 
 	// clamp mouse to screen
 	s_mousePos.x = std::clamp (s_mousePos.x, 0.0f, s_width);
-	s_mousePos.y = std::clamp (s_mousePos.y, 0.0f, s_height);
+	s_mousePos.y = std::clamp (s_mousePos.y, 0.0f, s_height);*/
 }
 
 void imgui::nx::exit ()

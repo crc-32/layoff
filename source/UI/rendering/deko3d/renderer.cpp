@@ -102,6 +102,7 @@ dk::UniqueSwapchain s_swapchain;
 /// \param width_ Framebuffer width
 /// \param height_ Framebuffer height
 /// \note This assumes the first call is the largest a framebuffer will ever be
+NWindow *wind;
 void rebuildSwapchain (unsigned const width_, unsigned const height_)
 {
 	// destroy old swapchain
@@ -161,7 +162,7 @@ void rebuildSwapchain (unsigned const width_, unsigned const height_)
 	}
 
 	// create swapchain
-	s_swapchain = dk::SwapchainMaker{s_device, nwindowGetDefault (), swapchainImages}.create ();
+	s_swapchain = dk::SwapchainMaker{s_device, wind, swapchainImages}.create ();
 	dkSwapchainSetSwapInterval(s_swapchain, 2);
 }
 
@@ -178,8 +179,10 @@ void DKError(void* userData, const char* context, DkResult result) {
 }
 
 /// \brief Initialize deko3d
-void deko3dInit ()
+void deko3dInit (NWindow *in_win)
 {
+	wind = in_win;
+
 	// create deko3d device
 	s_device = dk::DeviceMaker{}.setCbError(DKError).create ();
 
@@ -388,7 +391,7 @@ void renderer::FastMode() {
 	dkSwapchainSetSwapInterval(s_swapchain, 2);
 }
 
-bool renderer::init ()
+bool renderer::init (NWindow* win)
 {
 #ifndef NDEBUG
 	std::setvbuf (stderr, nullptr, _IOLBF, 0);
@@ -397,7 +400,7 @@ bool renderer::init ()
 	if (!imgui::nx::init ())
 		return false;
 
-	deko3dInit ();
+	deko3dInit (win);
 	//loadTextures ();
 	imgui::deko3d::init (s_device,
 	    s_queue,
