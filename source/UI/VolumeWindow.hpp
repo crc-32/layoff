@@ -1,7 +1,7 @@
 #include "Window.hpp"
 #include <switch.h>
 #include <atomic>
-#include <imgui\imgui.h>
+#include <imgui/imgui.h>
 
 namespace layoff::UI
 {

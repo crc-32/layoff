@@ -6,6 +6,8 @@
 
 #include <imgui/imgui_internal.h>
 
+#include "../../utils.hpp"
+
 namespace layoff::UI::IPC {
 
 	class ButtonList : public Control
