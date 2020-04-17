@@ -6,13 +6,16 @@ namespace layoff::UI::IPC {
 	class CheckBoxList : public ButtonList
 	{
 	public:
-		CheckBoxList(const LayoffName* data, u8 count, LayoffIdentifier id) : ButtonList(data, count > 63 ? 62 : count, id) {}
+		CheckBoxList(const LayoffName* data, u8 count, LayoffIdentifier id, u64 inlineFlags) : ButtonList(data, count, id, inlineFlags) {}
 
 		void Update() override
 		{
 			int i = 0;
 			for (auto& n : names)
 			{
+				if (inlineFlags & (1 << i))
+					ImGui::SameLine();
+
 				bool curChecked = IsChecked(i);
 				if (ImGui::Checkbox(n.str, &curChecked))
 				{
@@ -27,7 +30,7 @@ namespace layoff::UI::IPC {
 	private:
 		u64 Checked = 0;
 
-		inline bool IsChecked(int index) 
+		inline bool IsChecked(int index)
 		{
 			return (Checked >> index) & 1;
 		}

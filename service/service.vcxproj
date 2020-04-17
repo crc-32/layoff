@@ -31,7 +31,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <NMakeForcedIncludes>$(SolutionDir)cpp.hint</NMakeForcedIncludes>
     <AdditionalOptions>/std:c++17</AdditionalOptions>
-    <IncludePath>$(VC_IncludePath);C:\devkitPro\libnx\include;$(SolutionDir)libs\Atmosphere-libs\libmesosphere\include;$(SolutionDir)libs\Atmosphere-libs\libvapours\include;$(SolutionDir)libs\Atmosphere-libs\libstratosphere\include;$(SolutionDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
+    <IncludePath>$(VC_IncludePath);C:\devkitPro\libnx\nx\include;$(SolutionDir)libs\Atmosphere-libs\libmesosphere\include;$(SolutionDir)libs\Atmosphere-libs\libvapours\include;$(SolutionDir)libs\Atmosphere-libs\libstratosphere\include;$(SolutionDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

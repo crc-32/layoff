@@ -23,17 +23,17 @@ namespace layoff::UI::IPC {
 			case LayoffUIKind_ButtonList:
 			{
 				const LayoffUIButtonList* lst = (const LayoffUIButtonList*)data;
-				return std::make_unique<ButtonList>(lst->data, lst->count, header.panelID);
+				return std::make_unique<ButtonList>(lst->data, lst->count, header.panelID, lst->inlineFlags);
 			}
 			case LayoffUIKind_CheckBoxList:
 			{
 				const LayoffUICheckBoxList* lst = (const LayoffUICheckBoxList*)data;
-				return std::make_unique<CheckBoxList>(lst->data, lst->count, header.panelID);
+				return std::make_unique<CheckBoxList>(lst->data, lst->count, header.panelID, lst->inlineFlags);
 			}
 			case LayoffUIKind_RadioButtonList:
 			{
 				const LayoffUIRadioButtonList* lst = (const LayoffUIRadioButtonList*)data;
-				return std::make_unique<RadioButtonList>(lst->data, lst->count, header.panelID);
+				return std::make_unique<RadioButtonList>(lst->data, lst->count, header.panelID, lst->inlineFlags);
 			}
 			case LayoffUIKind_ComboBox:
 			{
