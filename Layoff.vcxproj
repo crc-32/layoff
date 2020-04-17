@@ -1,20 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -22,26 +10,12 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Makefile</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -49,49 +23,81 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>make clean &amp;&amp; make</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <IncludePath>libnx\nx\include\;libs\libstratosphere\include;source\lvgl;$(IncludePath)</IncludePath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ExecutablePath>
+    </ExecutablePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\devkitPro\libnx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</IncludePath>
+    <NMakePreprocessorDefinitions>LAYOFF_LOGGING;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakeForcedIncludes>$(ProjectDir)cpp.hint;</NMakeForcedIncludes>
+    <AdditionalOptions>/std:c++17</AdditionalOptions>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <NMakeBuildCommandLine>make</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>make clean &amp;&amp; make</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;NDEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-  </PropertyGroup>
-  <ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)libs\libnx\nx\include;$(ProjectDir)libs\inih\;$(ProjectDir)libs\;$(ProjectDir)libs\Atmosphere-libs\libmesosphere\include;$(ProjectDir)libs\Atmosphere-libs\libvapours\include;$(ProjectDir)libs\Atmosphere-libs\libstratosphere\include;$(ProjectDir)libs\liblayoff\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\ipc\IPCThread.cpp" />
-    <ClCompile Include="source\IPC\servers\Notification.cpp" />
-    <ClCompile Include="source\main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\ipc\IPCThread.hpp" />
-    <ClInclude Include="source\IPC\servers\Notification.hpp" />
-    <ClInclude Include="source\lv_conf.h" />
-    <ClInclude Include="source\ui\NWindowCustom.hpp" />
-    <ClInclude Include="source\ui\UI.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="config.json" />
+    <None Include="cpp.hint" />
     <None Include="Makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libs\imgui\imgui_user.cpp" />
+    <ClCompile Include="source\Config.cpp" />
+    <ClCompile Include="source\ConsoleStatus.cpp" />
+    <ClCompile Include="source\IPC\Clients.cpp" />
+    <ClCompile Include="source\IPC\GeneralChannel.cpp" />
+    <ClCompile Include="source\IPC\IPCThread.cpp" />
+    <ClCompile Include="source\IPC\ServiceWrappers\npns.c" />
+    <ClCompile Include="source\IPC\ServiceWrappers\overlay.c" />
+    <ClCompile Include="source\IPC\ServiceWrappers\ovln.c" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\NotificationManager.cpp" />
+    <ClCompile Include="source\set\ConsoleSettings.cpp" />
+    <ClCompile Include="source\UI\NotificationWindow.cpp" />
+    <ClCompile Include="source\UI\panels\IPCControl.cpp" />
+    <ClCompile Include="source\UI\PowerWindow.cpp" />
+    <ClCompile Include="source\UI\rendering\imgui_sw.cpp" />
+    <ClCompile Include="source\UI\sidebar\Sidebar.cpp" />
+    <ClCompile Include="source\UI\UI.cpp" />
+    <ClCompile Include="source\UI\VolumeWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\imgui\imgui_user.h" />
+    <ClInclude Include="source\Config.hpp" />
+    <ClInclude Include="source\ConsoleStatus.hpp" />
+    <ClInclude Include="source\debug\imgui_memory_editor.h" />
+    <ClInclude Include="source\debug\DebugControls.hpp" />
+    <ClInclude Include="source\IPC\Clients.hpp" />
+    <ClInclude Include="source\IPC\ErrorCodes.h" />
+    <ClInclude Include="source\IPC\GeneralChannel.hpp" />
+    <ClInclude Include="source\IPC\IPCLock.hpp" />
+    <ClInclude Include="source\IPC\IPCThread.hpp" />
+    <ClInclude Include="source\IPC\ServiceWrappers\npns.h" />
+    <ClInclude Include="source\IPC\ServiceWrappers\overlay.h" />
+    <ClInclude Include="source\IPC\ServiceWrappers\ovln.h" />
+    <ClInclude Include="source\NotificationManager.hpp" />
+    <ClInclude Include="source\set\ConsoleSettings.hpp" />
+    <ClInclude Include="source\UI\NotificationWindow.hpp" />
+    <ClInclude Include="source\UI\panels\ButtonList.hpp" />
+    <ClInclude Include="source\UI\panels\CheckBoxList.hpp" />
+    <ClInclude Include="source\UI\panels\ComboBox.hpp" />
+    <ClInclude Include="source\UI\panels\IPCControl.hpp" />
+    <ClInclude Include="source\UI\panels\RadioButtonList.hpp" />
+    <ClInclude Include="source\UI\panels\TextPanel.hpp" />
+    <ClInclude Include="source\UI\PowerWindow.hpp" />
+    <ClInclude Include="source\UI\rendering\imgui_sw.hpp" />
+    <ClInclude Include="source\UI\sidebar\Sidebar.hpp" />
+    <ClInclude Include="source\UI\sidebar\SidebarControls.hpp" />
+    <ClInclude Include="source\UI\UI.hpp" />
+    <ClInclude Include="source\UI\VolumeWindow.hpp" />
+    <ClInclude Include="source\UI\Window.hpp" />
+    <ClInclude Include="source\utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

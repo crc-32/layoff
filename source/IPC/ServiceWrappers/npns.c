@@ -1,5 +1,5 @@
-#include <switch.h>
 #include "npns.h"
+
 Service g_npnsSrv;
 Service g_iNRecSrv;
 

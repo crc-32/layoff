@@ -1,8 +1,3 @@
-
-#if !defined(__SWITCH__)
-#define __attribute__(x)
-#endif
-
 // Include the most common headers from the C standard library
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,15 +5,20 @@
 #include <sstream>
 
 #include <switch.h>
-#include "ovlservices/npns.h"
 #include "UI/UI.hpp"
 #include "utils.hpp"
+#include "Config.hpp"
+#include "ConsoleStatus.hpp"
 
+#include "UI/UI.hpp"
 #include "UI/sidebar/Sidebar.hpp"
 #include "UI/PowerWindow.hpp"
-#include "ConsoleStatus.hpp"
-#include "Config.hpp"
-#include "NotificationManager.hpp"
+#include "UI/NotificationWindow.hpp"
+#include "UI/VolumeWindow.hpp"
+
+#include "IPC/GeneralChannel.hpp"
+#include "IPC/ServiceWrappers/npns.h"
+#include "IPC/ServiceWrappers/ovln.h"
 
 using namespace layoff;
 
@@ -123,7 +123,6 @@ extern "C" {
 }
 
 u64 kHeld, kDown;
-NotificationManager *layoff::nman = nullptr;
 
 Result capsscCaptureForDebug(void *buffer, size_t buffer_size, u64 *size) {
 	Service capssc;
@@ -159,7 +158,6 @@ void overlayScreenshot() {
 	fwrite(buf, size, 1, f);
 	fclose(f);
 }
-
 static inline void ImguiBindInputs()
 {	
 	ImGuiIO &io = ImGui::GetIO();
@@ -215,7 +213,7 @@ OverlayMode layoff::GetCurrentMode() {return mode;}
 static bool MessageLoop(void) {
     u32 msg = 0;
     if (R_FAILED(appletGetMessage(&msg))) return true;
-	
+		
 	if (msg == 0x17)
 		PowerPressed = true;
 	else if (msg == 0x15)
@@ -230,33 +228,6 @@ static bool MessageLoop(void) {
 
 	return true;
 }
-
-// TODO
-/*static void NotifThread(void* _arg) {
-	Result rc = ovlnInitialize();
-	if (R_FAILED(rc)) {
-		ovlnExit();
-		fatalThrow(rc);
-	}
-
-	Event notEv;
-	rc = ovlnIReceiverGetEvent(&notEv);
-	if (R_FAILED(rc)) {
-		fatalThrow(rc);
-	}
-	while(true) {
-		if (!R_FAILED(eventWait(&notEv, 1000000))) {
-			IReceiverNotification notif;
-			ovlnIReceiverGetNotification(&notif);
-			std::stringstream nlog;
-			nlog << "SysNotif: " << std::hex << notif.type;
-			PrintLn(nlog.str());
-		}else{
-			break;
-		}
-	}
-	fatalThrow(MAKERESULT(255, 10));
-}*/
 
 void layoff::SwitchToActiveMode()
 {	
@@ -292,11 +263,77 @@ static void SwitchToIdleMode()
 static UI::Sidebar mainWindow;
 static UI::PowerWindow powerWindow;
 static UI::WinPtr foregroundWin = nullptr;
+static UI::NotificationWindow notifWin;
+static UI::VolumeWindow volumeWin;
 
 #if LAYOFF_LOGGING
-#include "UI/LogWindow.hpp"
-static UI::LogWindow logWin;
+#include "debug/DebugControls.hpp"
 #endif
+
+static void NotifThread(void* _arg) {
+	Result rc = ovlnInitialize();
+	if (R_FAILED(rc)) {
+		PrintLn("ovlnInit: " + R_STRING(rc));
+		return;
+	}
+
+	Event notEv;
+	rc = ovlnIReceiverGetReceiveEventHandle(&notEv);
+	if (R_FAILED(rc)) {
+		ovlnExit();
+		PrintLn("ovlnEvent: " + R_STRING(rc));
+		return;
+	}
+	while (true) {
+		rc = eventWait(&notEv, UINT64_MAX);
+
+		if (R_FAILED(rc))
+		{
+			PrintLn("ovln eventWait failed");
+			break;
+		}
+		else
+		{
+			OvlnNotificationWithTick notif;
+
+			if (R_FAILED(ovlnIReceiverReceiveWithTick(&notif)))
+				continue;
+
+			switch (notif.Type)
+			{
+			case OvlnNotificationType_Battery:
+				console::RequestStatusUpdate();
+				break;
+			case OvlnNotificationType_LowBat:
+				notif::PushSimple("Low battery !", "Layoff");
+				break;
+			case OvlnNotificationType_Volume:
+				volumeWin.Signal(notif.Payload[0]);
+				PrintHex((u8*)&notif, sizeof(notif)); //TODO remove this
+				break;
+			case OvlnNotificationType_Screenshot:
+				notif::PushSimple("Screenshot saved !", "Layoff");
+				break;
+			case OvlnNotificationType_ScreenshotFail:
+				notif::PushSimple("Couldn't save the screenshot.", "Layoff");
+				break;
+			case OvlnNotificationType_Video:
+				notif::PushSimple("Recording saved !", "Layoff");
+				break;
+			case OvlnNotificationType_VideoFail:
+				notif::PushSimple("Recording saved !", "Layoff");
+				break;
+			default:
+				PrintLn("Got unknown notification " + std::to_string(notif.Type));
+				PrintHex((u8*)&notif, sizeof(notif));
+			}			
+		}
+	}
+
+	ovlnExit();
+	PrintLn("Exiting ovln notif thread");
+	return;
+}
 
 //In the idle loop layoff only checks for events, when the idle loops breaks the active loop starts
 static bool IdleLoop() {
@@ -311,6 +348,7 @@ static bool IdleLoop() {
 		foregroundWin->RequestClose();
     
 	SwitchToIdleMode();
+	//As this is likely being called after the active loop we assume we have to clear the framebuffer
 	while (MessageLoop())
     {
         if (PowerPressed || HomeLongPressed)
@@ -320,9 +358,20 @@ static bool IdleLoop() {
             return true;
 		}
 		FrameStart();
-		nman->Update();
+
+		const bool notif = notifWin.ShouldRender();
+		const bool volume = volumeWin.ShouldRender();
+		const bool shouldRender = notif || volume;
+		const bool userCanInteract = volume;
+
+		if (shouldRender)
+		{
+			if (volume)
+				volumeWin.Update();
+			if (notif)
+				notifWin.Update(volume);
+		}
 		FrameEnd();
-        svcSleepThread(3e+8); // 3/10 of a second
     }
     return false;
 }
@@ -331,7 +380,10 @@ static bool IdleLoop() {
 static bool ActiveLoop() {
 	ClearEvents();
 	UI::FastMode();
-    while (MessageLoop())
+	console::RequestStatusUpdate();
+	IPC::qlaunch::SignalOverlayOpened();
+	SwitchToActiveMode();
+	while (MessageLoop())
     {					
 		console::UpdateStatus();
 		
@@ -339,44 +391,47 @@ static bool ActiveLoop() {
         
 		bool AnyWindowRendered = false;
 		FrameStart();
-		nman->Update();
-		if (AnyWindowRendered = powerWindow.ShouldRender())
+
+		if ((AnyWindowRendered = powerWindow.ShouldRender()))
 			powerWindow.Update();
-		//The foreground window has to come before the sidebar as it can optionally stay open (but not do any process) when switching to idle mode
+		//The foreground window has to come before the sidebar as it can optionally stay open when switching to idle mode (but update it's not called)
 		else if (foregroundWin && (AnyWindowRendered = foregroundWin->ShouldRender()))
 				foregroundWin->Update();
-		else if (AnyWindowRendered = mainWindow.ShouldRender())
-		{
-			if (mode == OverlayMode::Idle)
-				SwitchToActiveMode();	
+		else if ((AnyWindowRendered = mainWindow.ShouldRender()))
 			mainWindow.Update();
-		}
-		
+
+		//These are shown as overlay and don't need to prevent transitioning to the idle loop, so don't set AnyWindowRendered
+		bool volume = volumeWin.ShouldRender();
+		if (volume)
+			volumeWin.Update();
+		if (notifWin.ShouldRender())
+			notifWin.Update(volume);
+
 		#if LAYOFF_LOGGING
-			logWin.Update();
+			debug::Instance.Update();
 		#endif
 		
         FrameEnd();		
         
 		if (!AnyWindowRendered || HomeLongPressed || HomePressed)
+		{
+			IPC::qlaunch::SignalOverlayClosed();
 			return true;
+		}
 	}
     return false;
 }
 
 #include "IPC/IPCThread.hpp"
+#include <time.h>
 
 int main(int argc, char* argv[]) {
-    svcSleepThread(10e+9);
+    svcSleepThread(15e+9);
     __nx_win_init();
 
     romfsInit();
 	if(!config::ConfigInit())
-	{
-		#ifdef LAYOFF_LOGGING
 		PrintLn("ERR: Couldn't read layoff ini, using defaults");
-		#endif
-	}
 	
 	timeInitialize();
 	psmInitialize();
@@ -387,21 +442,22 @@ int main(int argc, char* argv[]) {
     SwitchToIdleMode();
     UIInit(&win);
 
-	nman = new NotificationManager();
+	notif::Initialize();
 	IPC::LaunchThread();
 
-	//TODO
-	/*Thread nThread;
+	Thread nThread;
 	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
-	threadStart(&nThread);*/
+	threadStart(&nThread);
+	srand(time(NULL));
 
     while (true)
 	{		
         if(!IdleLoop()) break;
-        SwitchToActiveMode();
         if(!ActiveLoop()) break;
     }
 	plExit();
+
+	IPC::RequestAndWaitExit();
 	lblExit();
 	nifmExit();
     npnsExit();

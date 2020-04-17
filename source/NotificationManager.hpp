@@ -1,17 +1,31 @@
 #pragma once
 
 #include <string>
-#include <map>
-#include "UI/Notification.hpp"
+#include <vector>
+#include <switch.h>
 
-namespace layoff {
-    class NotificationManager
-    {
-        public:
-        void PushNotif(std::string content, std::string notifIdentifier, std::string ipcIdentifier) ;
-        void PopNotif(std::string notifIdentifier, std::string ipcIdentifier);
-        void Update();
-        private:
-        std::map<std::string, UI::Notification*> notifications;
-    };
+#include "IPC/IPCLock.hpp"
+
+namespace layoff::notif {
+  
+	void Initialize();
+
+	struct Notification 
+	{
+	public:
+		std::string message = "";
+		std::string author = "";
+		std::vector<u8> image;
+		s64 ts;
+
+		bool HasImage() const { return image.size() != 0; }
+	};
+	
+	void PushSimple(const std::string& content, const std::string& author);
+	void Push(Notification&& notif);
+	bool HasNewNotifs();
+
+	using NotifLock = layoff::IPC::ObjLock<std::vector<Notification>>;
+
+	NotifLock LockNotifs();
 }

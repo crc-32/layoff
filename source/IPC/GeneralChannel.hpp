@@ -1,7 +1,7 @@
 #pragma once
 #include <switch.h>
 
-namespace layoff::ipc::qlaunch {
+namespace layoff::IPC::qlaunch {
 	Result PowerShutdown();
 	Result PowerSleep();
 	Result PowerReboot();
@@ -9,4 +9,7 @@ namespace layoff::ipc::qlaunch {
 	Result SignalBrightnessChange(float valuie);
 	Result SignalAutoBrightnessChange(bool enabled);
 	Result SignalAirplaneChange();
+
+	Result SignalOverlayOpened();
+	Result SignalOverlayClosed();
 }

@@ -1,8 +1,9 @@
 #pragma once
-#include <imgui/imgui.h>
+#include "imgui.h"
 
-namespace ImGui 
+namespace ImGui
 {
+	void SelectItem(bool enableNav = true, ImGuiID ID = 0);
 	void TextRight(const char* fmt, ...);
 	void TextRightV(const char* fmt, va_list args);
 }

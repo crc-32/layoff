@@ -11,3 +11,7 @@ npdmtool.exe
 atmosphere/
 Layoff.vcxproj.user
 .vs/
+*.cache
+*.log
+*.user
+*.lnk

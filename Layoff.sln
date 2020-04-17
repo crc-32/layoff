@@ -5,22 +5,18 @@ VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Layoff", "Layoff.vcxproj", "{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "liblayoff", "libs\liblayoff\liblayoff.vcxproj", "{036B95BF-3015-4E73-8CC0-F9CB4957B674}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "service", "service\service.vcxproj", "{9E9A22E6-B532-438E-8F94-863FE5FA7947}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		Debug|ARM64 = Debug|ARM64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Debug|x64.ActiveCfg = Debug|x64
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Debug|x64.Build.0 = Debug|x64
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Debug|x86.ActiveCfg = Debug|Win32
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Debug|x86.Build.0 = Debug|Win32
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Release|x64.ActiveCfg = Release|x64
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Release|x64.Build.0 = Release|x64
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Release|x86.ActiveCfg = Release|Win32
-		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Release|x86.Build.0 = Release|Win32
+		{DC1D7C48-95B3-4EAE-9FFA-73363ECEE41B}.Debug|ARM64.ActiveCfg = Debug|x64
+		{036B95BF-3015-4E73-8CC0-F9CB4957B674}.Debug|ARM64.ActiveCfg = Debug|x64
+		{9E9A22E6-B532-438E-8F94-863FE5FA7947}.Debug|ARM64.ActiveCfg = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

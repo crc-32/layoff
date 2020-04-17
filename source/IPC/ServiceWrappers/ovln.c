@@ -1,19 +1,25 @@
 #define NX_SERVICE_ASSUME_NON_DOMAIN
-#include <switch.h>
+#include <string.h>
 #include "ovln.h"
 
 static Service g_ovlnSrv;
 static Service g_irecSrv;
 
-Result _getIRec() {
+static Result _getIRec() {
 	return serviceDispatch(&g_ovlnSrv, 0,
         .out_num_objects = 1,
         .out_objects = &g_irecSrv,
     );
 }
 
-Result _regIRec() {
-	return serviceDispatchIn(&g_irecSrv, 0, "overlay");
+static Result _regIRec() {
+	struct {
+		char name[0x10];
+	} name = { 0 };
+	strcpy(name.name, "overlay");
+	//serviceDispatchIn is a macro, passing a string will break cause it tries to get the address, also sizeof but it's not the case here
+	//using a struct we get a "value type" string
+	return serviceDispatchIn(&g_irecSrv, 0, name);
 }
 
 Result ovlnInitialize() {
@@ -21,9 +27,8 @@ Result ovlnInitialize() {
 
     if (R_SUCCEEDED(rc)) {
         rc = _getIRec();
-        if (R_SUCCEEDED(rc)) {
-            rc = _regIRec();
-        }
+		if (R_SUCCEEDED(rc))
+			rc = _regIRec();
     }
 
     if (R_FAILED(rc)) {
@@ -38,11 +43,10 @@ void ovlnExit() {
     serviceClose(&g_irecSrv);
 }
 
-Result ovlnIReceiverGetEvent(Event *out) {
+Result ovlnIReceiverGetReceiveEventHandle(Event *out) {
 	Handle tmp_handle;
 
 	Result rc = serviceDispatch(&g_irecSrv, 2,
-        .in_send_pid = true,
         .out_handle_attrs = { SfOutHandleAttr_HipcCopy },
         .out_handles = &tmp_handle,
     );
@@ -50,20 +54,7 @@ Result ovlnIReceiverGetEvent(Event *out) {
     return rc;
 }
 
-Result ovlnIReceiverGetNotification(IReceiverNotification *out)
+Result ovlnIReceiverReceiveWithTick(OvlnNotificationWithTick*out)
 {
-	struct {
-		u64 magic;
-		u64 result;
-		u16 type;
-		u8 off[6];
-		u16 content;
-	} *resp = {0};
-
-	Result rc = serviceDispatchOut(&g_irecSrv, 4, resp);
-	if(R_SUCCEEDED(rc)) {
-		out->content = resp->content;
-		out->type = (resp->type>>8) | (resp->type<<8);
-	}
-    return rc;
+	return serviceDispatchOut(&g_irecSrv, 4, *out);
 }

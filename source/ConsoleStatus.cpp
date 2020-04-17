@@ -2,13 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <atomic>
 
 #include "ConsoleStatus.hpp"
 
 namespace layoff::console
 {
 	ConsoleStatus_t Status;
-	static u64 LastUpdate = 0;		
+	static std::atomic<time_t> LastUpdate = 0;
+
+	static const time_t MinRefreshWaitSecs = 5;
 		
 	void RequestStatusUpdate()
 	{
@@ -25,11 +28,17 @@ namespace layoff::console
 	static inline void DoStatusUpdate()
 	{
 		psmGetBatteryChargePercentage(&Status.BatteryLevel);
+		psmGetChargerType(&Status.chargerType);
 		
+		Status.connectionStatus = NifmInternetConnectionStatus_ConnectingUnknown1;
+		if (R_FAILED(nifmGetInternetConnectionStatus(&Status.connectionType, &Status.ConnectionStrenght, &Status.connectionStatus)))
+			Status.IpAddress = 0;
+		else {
+			nifmGetCurrentIpAddress(&Status.IpAddress);
+			IpAddrToString(Status.IpAddress, Status.IpStr);
+		}
 		nifmIsWirelessCommunicationEnabled(&Status.WirelessEnabled);
-		nifmGetCurrentIpAddress(&Status.IpAddress);	
-		IpAddrToString(Status.IpAddress, Status.IpStr);
-				
+
 		lblGetCurrentBrightnessSetting(&Status.BrightnessLevel);
 		lblIsAutoBrightnessControlEnabled(&Status.AutoBrightness);	
 
@@ -39,7 +48,7 @@ namespace layoff::console
 	
 	void UpdateStatus()
 	{
-		if (time(NULL) - LastUpdate <= 5) return;
+		if (time(NULL) - LastUpdate <= MinRefreshWaitSecs) return;
 		LastUpdate = time(NULL);		
 		
 		DoStatusUpdate();

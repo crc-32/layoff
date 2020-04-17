@@ -1,42 +1,169 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\ipc\IPCThread.cpp">
-      <Filter>IPC</Filter>
-    </ClCompile>
-    <ClCompile Include="source\IPC\servers\Notification.cpp">
-      <Filter>IPC\servers</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="source\lv_conf.h" />
-    <ClInclude Include="source\ui\UI.hpp">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ui\NWindowCustom.hpp">
-      <Filter>UI</Filter>
-    </ClInclude>
-    <ClInclude Include="source\ipc\IPCThread.hpp">
-      <Filter>IPC</Filter>
-    </ClInclude>
-    <ClInclude Include="source\IPC\servers\Notification.hpp">
-      <Filter>IPC\servers</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="UI">
       <UniqueIdentifier>{2605e18d-ed39-4317-8112-9b6162c8251e}</UniqueIdentifier>
     </Filter>
     <Filter Include="IPC">
       <UniqueIdentifier>{c44e8be0-5dd1-4fe4-89ed-e3ff7e3e7451}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IPC\servers">
-      <UniqueIdentifier>{8a017a52-d59b-4646-9519-c08b253a0444}</UniqueIdentifier>
+    <Filter Include="UI\sidebar">
+      <UniqueIdentifier>{2fe3375e-7e7b-4e24-b711-35ee52e52c1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\rendering">
+      <UniqueIdentifier>{3f4bdaf6-6662-47e3-9ee2-4e721fc08baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="set">
+      <UniqueIdentifier>{e4c2c0be-ca1c-4848-be87-a84dc08a6379}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\panels">
+      <UniqueIdentifier>{208916c9-2943-430f-a431-ab1953755ebf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="debug">
+      <UniqueIdentifier>{742561b4-9513-48c4-a702-b3afc593cbf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IPC\ServiceWrappers">
+      <UniqueIdentifier>{5199f9b9-bb60-4ec0-acad-500e1220e04a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile" />
     <None Include="config.json" />
+    <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\ConsoleStatus.cpp" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\NotificationManager.cpp" />
+    <ClCompile Include="source\Config.cpp" />
+    <ClCompile Include="source\UI\PowerWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\UI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\sidebar\Sidebar.cpp">
+      <Filter>UI\sidebar</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\rendering\imgui_sw.cpp">
+      <Filter>UI\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="source\set\ConsoleSettings.cpp">
+      <Filter>set</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\GeneralChannel.cpp">
+      <Filter>IPC</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\IPCThread.cpp">
+      <Filter>IPC</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\NotificationWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\Clients.cpp">
+      <Filter>IPC</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\panels\IPCControl.cpp">
+      <Filter>UI\panels</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\ovln.c">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\npns.c">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="source\UI\VolumeWindow.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\imgui\imgui_user.cpp">
+      <Filter>UI\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IPC\ServiceWrappers\overlay.c">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="source\ConsoleStatus.hpp" />
+    <ClInclude Include="source\NotificationManager.hpp" />
+    <ClInclude Include="source\utils.hpp" />
+    <ClInclude Include="source\Config.hpp" />
+    <ClInclude Include="source\UI\PowerWindow.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\UI.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\Window.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\sidebar\Sidebar.hpp">
+      <Filter>UI\sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\sidebar\SidebarControls.hpp">
+      <Filter>UI\sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\rendering\imgui_sw.hpp">
+      <Filter>UI\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="source\set\ConsoleSettings.hpp">
+      <Filter>set</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\IPCThread.hpp">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\GeneralChannel.hpp">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\NotificationWindow.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\Clients.hpp">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ErrorCodes.h">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\IPCLock.hpp">
+      <Filter>IPC</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\TextPanel.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\IPCControl.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\ButtonList.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\debug\imgui_memory_editor.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="source\debug\DebugControls.hpp">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\ovln.h">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\npns.h">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\VolumeWindow.hpp">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\imgui\imgui_user.h">
+      <Filter>UI\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IPC\ServiceWrappers\overlay.h">
+      <Filter>IPC\ServiceWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\ComboBox.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\RadioButtonList.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
+    <ClInclude Include="source\UI\panels\CheckBoxList.hpp">
+      <Filter>UI\panels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

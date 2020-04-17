@@ -6,5 +6,13 @@
 #pragma once
 #include <switch.h>
 
-Result npnsInitialize();
-void npnsExit();
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	Result npnsInitialize();
+	void npnsExit();
+
+#ifdef __cplusplus
+}
+#endif

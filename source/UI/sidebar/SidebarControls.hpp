@@ -1,4 +1,5 @@
 #pragma once
+#include <imgui/imgui.h>
 
 #include "../../ConsoleStatus.hpp"
 #include "../../set/ConsoleSettings.hpp"
@@ -15,7 +16,7 @@ namespace layoff::UI::sidebar
 
 		ImGui::SameLine();
 
-		ImGui::PushItemWidth(260);
+		ImGui::PushItemWidth(250);
 		if (ImGui::SliderFloat("##Brightness", &st->BrightnessLevel, 0.0f, 1.0f, ""))
 			layoff::set::SetBrightness(st->BrightnessLevel);
 
@@ -29,14 +30,14 @@ namespace layoff::UI::sidebar
 	{
 		CONSOLE_STATUS_SHORTCUT
 
-			if (st->Connected())
-				ImGui::Text("Ip: %s", st->IpStr);
-			else
-				ImGui::Text("Not connected");
+		if (st->Connected())
+			ImGui::Text("Ip: %s", st->IpStr);
+		else
+			ImGui::Text("Offline");
 
 		ImGui::SameLine(Sidebar::W - 210, 0);
 
-		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless " : "Enable wireless ", ImVec2(200, 0)))
+		if (ImGui::Button(st->WirelessEnabled ? "Disable wireless###WirelessBtn" : "Enable wireless###WirelessBtn", ImVec2(200, 0)))
 			layoff::set::SetWireless(!st->WirelessEnabled);
 	}
 

@@ -4,7 +4,7 @@
 #include "../ConsoleStatus.hpp"
 #include "../utils.hpp"
 
-using namespace layoff::ipc;
+using namespace layoff::IPC;
 
 namespace layoff::set
 {
