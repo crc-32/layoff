@@ -362,7 +362,6 @@ static bool IdleLoop() {
 		const bool notif = notifWin.ShouldRender();
 		const bool volume = volumeWin.ShouldRender();
 		const bool shouldRender = notif || volume;
-		const bool userCanInteract = volume;
 
 		if (shouldRender)
 		{

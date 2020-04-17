@@ -1,7 +1,6 @@
 #pragma once
 
 #include <imgui/imgui.h>
-#include "rendering/imgui_sw.hpp"
 #include "Window.hpp"
 #include "../NotificationManager.hpp"
 
