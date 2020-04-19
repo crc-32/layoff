@@ -4,6 +4,3 @@
 [submodule "libs/liblayoff"]
 	path = libs/liblayoff
 	url = https://github.com/crc-32/liblayoff.git
-[submodule "libs/Atmosphere-libs"]
-	path = libs/Atmosphere-libs
-	url = https://github.com/Atmosphere-NX/Atmosphere-libs.git
