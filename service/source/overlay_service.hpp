@@ -1,15 +1,17 @@
 #pragma once
-#include <stratosphere.hpp>
 #include <layoff.h>
 #include <queue>
 #include <string>
+#include <array>
+#include <atomic>
 
+#include <nxIpc/Types.hpp>
+#include <nxIpc/Server.hpp>
+#include <nxIpc/Exceptions.hpp>
 #include "OverlayServiceTypes.h"
 
 namespace services {
-	using namespace ams;
-
-	class OverlayService : public ams::sf::IServiceObject {
+	class OverlayService : public nxIpc::IInterface {
 	public:
 		struct ClientUIPush
 		{
@@ -18,64 +20,68 @@ namespace services {
 			std::vector<u8> data;
 		};
 	private:
-		enum class CommandId {
-			LockEvents = LayoffOverlayCmdID_Lock,
-			UnlockEvents = LayoffOverlayCmdID_Unlock,
-			GetQueueStatus = LayoffOverlayCmdID_GetQueueStatus,
-			PopPrintQueue = LayoffOverlayCmdID_PopPrintQueue,
-			PopUIQueue = LayoffOverlayCmdID_PopUIQueue,
-			ReadClientQueue = LayoffOverlayCmdID_ReadClientQueue,
-			ReadNotifQueue = LayoffOverlayCmdID_ReadNotifQueue,
-			AcquireNewDataEvent = LayoffOverlayCmdID_AcquireNewDataEvent,
-			PushUIStateChange = LayoffOverlayCmdID_PushUIStateChange
-		};						  
+		using CallHandler = void (OverlayService::*)(nxIpc::Request& req);
+
+		const std::array<CallHandler, 10> handlers{
+			/* 0 */ nullptr,
+			/* 1 */ &OverlayService::LockEvents,
+			/* 2 */ &OverlayService::UnlockEvents,
+			/* 3 */ &OverlayService::GetQueueStatus,
+			/* 4 */ &OverlayService::PopPrintQueue,
+			/* 5 */ &OverlayService::PopUIQueue,
+			/* 6 */ &OverlayService::ReadClientQueue,
+			/* 7 */ &OverlayService::ReadNotifQueue,
+			/* 8 */ &OverlayService::AcquireNewDataEvent,
+			/* 9 */ &OverlayService::PushUIStateChange
+		};
 
 		static Event newData;
-		static Mutex mutex;
 
 		static std::queue<std::string> printQueue;
 		static std::queue<IPCClient> clientQueue;
 		static std::queue<services::OverlayService::ClientUIPush> UIQueue;
 		static std::queue<SimpleNotification> notifQueue;
 	public:
+		static std::atomic<bool> Locked; //Not really needed as now server is single-threaded
+		
+		OverlayService()
+		{
+			Locked = false;
+			LogFunction("Overlay svc created\n");
+		}
+
+		~OverlayService() 
+		{
+			LogFunction("Overlay svc destroyed\n");
+		}
+
 		static void InitializeStatics();
 		static void FinalizeStatics();
 
-	//Signaling
+		//Signaling
 		static void PrintLn(const std::string&& str);
 		static void ClientAction(const IPCClient&& cli);
 		static void UIPush(const ClientUIPush&& p);
 		static void NotifSimple(const SimpleNotification& n);
 
-	//Reading
-		ams::Result LockEvents();
-		ams::Result UnlockEvents();
+		bool ReceivedCommand(nxIpc::Request& req) override;
+		//Reading		
+		void LockEvents(nxIpc::Request& req);
+		void UnlockEvents(nxIpc::Request& req);
 
-		ams::Result GetQueueStatus(sf::Out<IPCQUeueStatus> status);
+		void GetQueueStatus(nxIpc::Request& req);
 
 		//We can't know string len beforehand so we must pop strings one at a time
-		ams::Result PopPrintQueue(sf::OutBuffer buf, sf::Out<u32> WrittenLen);
-		ams::Result PopUIQueue(sf::OutBuffer buf, sf::Out<IPCUIPush> data);
-		
-		ams::Result ReadClientQueue(sf::OutBuffer buf, sf::Out<u32> WrittenCount);
-		ams::Result ReadNotifQueue(sf::OutBuffer buf, sf::Out<u32> WrittenCount);
+		void PopPrintQueue(nxIpc::Request& req);
+		void PopUIQueue(nxIpc::Request& req);
 
-		ams::Result AcquireNewDataEvent(sf::OutCopyHandle evt);
+		void ReadClientQueue(nxIpc::Request& req);
+		void ReadNotifQueue(nxIpc::Request& req);
 
-	//Writing
-		ams::Result PushUIStateChange(IPCUIEvent evt);
+		void AcquireNewDataEvent(nxIpc::Request& req);
 
-		DEFINE_SERVICE_DISPATCH_TABLE{
-			MAKE_SERVICE_COMMAND_META(LockEvents),
-			MAKE_SERVICE_COMMAND_META(UnlockEvents),
-			MAKE_SERVICE_COMMAND_META(GetQueueStatus),
-			MAKE_SERVICE_COMMAND_META(PopPrintQueue),
-			MAKE_SERVICE_COMMAND_META(PopUIQueue),
-			MAKE_SERVICE_COMMAND_META(ReadClientQueue),
-			MAKE_SERVICE_COMMAND_META(ReadNotifQueue),
-			MAKE_SERVICE_COMMAND_META(AcquireNewDataEvent),
-			MAKE_SERVICE_COMMAND_META(PushUIStateChange)
-		};
+		//Writing
+		void PushUIStateChange(nxIpc::Request& req);
+
 	};
-
 }

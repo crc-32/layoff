@@ -2,23 +2,48 @@
 #include "../../source/IPC/ErrorCodes.h"
 
 #include "Clients.hpp"
+#include <nxIpc/Exceptions.hpp>
+
+void PrintLn(const char* str) 
+{
+	services::OverlayService::PrintLn(std::string(str));
+}
 
 namespace services
 {
 	Event OverlayService::newData;
-	Mutex OverlayService::mutex;
+	std::atomic<bool> OverlayService::Locked;
 
 	std::queue<std::string> OverlayService::printQueue;
 	std::queue<IPCClient> OverlayService::clientQueue;
 	std::queue<services::OverlayService::ClientUIPush> OverlayService::UIQueue;
 	std::queue<SimpleNotification> OverlayService::notifQueue;
 
+	bool OverlayService::ReceivedCommand(nxIpc::Request& req)
+	{
+		if (req.cmdId >= handlers.size())
+		{
+			nxIpc::Response(R_UNKNOWN_CMDID).Finalize();
+			return true;
+		}
+
+		auto handler = handlers[req.cmdId];
+
+		if (!handler)
+		{
+			nxIpc::Response(R_UNIMPLEMENTED_CMDID).Finalize();
+			return true;
+		}
+
+		(this->*handler)(req);
+		return false;
+	}
+
 	void OverlayService::InitializeStatics() 
 	{
-		ams::Result rc = eventCreate(&newData, true);
-		if (rc.IsFailure())
-			fatalThrow(rc.GetValue());
-		mutexInit(&mutex);
+		Result rc = eventCreate(&newData, true);
+		if (R_FAILED(rc))
+			fatalThrow(rc);
 	}
 
 	void OverlayService::FinalizeStatics() 
@@ -26,67 +51,73 @@ namespace services
 		eventClose(&newData);
 	}
 
-	ams::Result OverlayService::LockEvents()
+	void OverlayService::LockEvents(nxIpc::Request& req)
 	{
-		mutexLock(&mutex);
-		return ams::ResultSuccess();
+		Locked = true;
+		nxIpc::Response().Finalize();
 	}
 
-	ams::Result OverlayService::UnlockEvents()
+	void OverlayService::UnlockEvents(nxIpc::Request& req)
 	{
-		mutexUnlock(&mutex);
-		return ams::ResultSuccess();
+		Locked = false;
+		nxIpc::Response().Finalize();
 	}
 
-	ams::Result OverlayService::GetQueueStatus(sf::Out<IPCQUeueStatus> status)
+	void OverlayService::GetQueueStatus(nxIpc::Request& req)
 	{
 		IPCQUeueStatus res;
 		res.Prints = printQueue.size();
 		res.Notifs = notifQueue.size();
 		res.Clients = clientQueue.size();
 		res.UI = UIQueue.size();
-		*status = res;
-		return ams::ResultSuccess();
+		nxIpc::Response().Payload(res).Finalize();
 	}
 
-	ams::Result OverlayService::PopPrintQueue(sf::OutBuffer buf, sf::Out<u32> WrittenLen)
+	void OverlayService::PopPrintQueue(nxIpc::Request& req)
 	{
 		auto& t = printQueue.front();
-		u32 toCopy = std::max(buf.GetSize(), t.size() + 1);
 
-		std::memcpy(buf.GetPointer(), t.c_str(), toCopy);
-		buf.GetPointer()[toCopy - 1] = '\0';
-		*WrittenLen = toCopy;
+		auto buf = req.WriteBuffer(0);
+		u32 toCopy = std::min(t.size(), buf.length);
 
+		buf.AssignFrom_s(t.c_str(), toCopy);
+		((char*)buf.data)[toCopy - 1] = '\0';
+		
+		nxIpc::Response().Payload<u32>(toCopy).Finalize();
+		
 		printQueue.pop();
-		return ams::ResultSuccess();
 	}
 
-	ams::Result OverlayService::PopUIQueue(sf::OutBuffer buf, sf::Out<IPCUIPush> out)
+	void OverlayService::PopUIQueue(nxIpc::Request& req)
 	{
 		auto& t = UIQueue.front();
-		if (buf.GetSize() < t.data.size())
-			return ERR_BUFFER_TOO_SMALL;
+		auto buf = req.WriteBuffer(0);
+
+		if (buf.length < t.data.size())
+		{
+			nxIpc::Response(ERR_BUFFER_TOO_SMALL).Finalize();
+			return;
+		}
 
 		IPCUIPush res;
 		res.client = t.client;
 		res.BufferLen = t.data.size();
 		res.header = t.header;
-		std::memcpy(buf.GetPointer(), t.data.data(), t.data.size());
-		*out = res;
+		buf.AssignFrom_s(t.data.data(), t.data.size());
+
+		nxIpc::Response().Payload(res).Finalize();
 
 		UIQueue.pop();
-		return ams::ResultSuccess();
 	}
 
 	template<typename T>
-	static inline u32 CopyToIPCBuf(std::queue<T>& queue, sf::OutBuffer& buf)
+	static inline u32 CopyToIPCBuf(std::queue<T>& queue, nxIpc::WritableBuffer& buf)
 	{
 		static_assert(std::is_pod<T>::value);
 
 		int count = 0;
-		u8* out = buf.GetPointer();
-		u8* limit = out + buf.GetSize();
+		u8* out = (u8*)buf.data;
+		u8* limit = out + buf.length;
 		while (queue.size())
 		{
 			T& obj = queue.front();
@@ -102,52 +133,51 @@ namespace services
 		return count;
 	}
 
-	ams::Result OverlayService::ReadClientQueue(sf::OutBuffer buf, sf::Out<u32> WrittenCount)
+	void OverlayService::ReadClientQueue(nxIpc::Request& req)
 	{		
-		*WrittenCount = CopyToIPCBuf(clientQueue, buf);
-		return ams::ResultSuccess();
+		auto buf = req.WriteBuffer(0);
+		u32 WrittenCount = CopyToIPCBuf(clientQueue, buf);
+		nxIpc::Response().Payload<u32>(WrittenCount).Finalize();
 	}
 
-	ams::Result OverlayService::ReadNotifQueue(sf::OutBuffer buf, sf::Out<u32> WrittenCount) 
+	void OverlayService::ReadNotifQueue(nxIpc::Request& req)
 	{
-		*WrittenCount = CopyToIPCBuf(notifQueue, buf);
-		return ams::ResultSuccess();
+		auto buf = req.WriteBuffer(0);
+		u32 WrittenCount = CopyToIPCBuf(notifQueue, buf);
+		nxIpc::Response().Payload<u32>(WrittenCount).Finalize();
 	}
 
-	ams::Result OverlayService::AcquireNewDataEvent(sf::OutCopyHandle evt) {
-		*evt = newData.revent;
-		return ams::ResultSuccess();
+	void OverlayService::AcquireNewDataEvent(nxIpc::Request& req) {
+		nxIpc::Response().CopyHandle(newData.revent).Finalize();
 	}
 
-	ams::Result OverlayService::PushUIStateChange(IPCUIEvent evt)
+	void OverlayService::PushUIStateChange(nxIpc::Request& req)
 	{
-		return layoff::IPC::clients::PushUIEventData(evt.Client, evt.evt);
+		IPCUIEvent evt = *req.Payload<IPCUIEvent>();
+		Result rc = layoff::IPC::clients::PushUIEventData(evt.Client, evt.evt);
+		nxIpc::Response(rc).Finalize();
 	}
 
 	void OverlayService::PrintLn(const std::string&& str)
 	{
-		layoff::IPC::ScopeLock lock(mutex);
 		printQueue.push(std::move(str));
 		eventFire(&newData);
 	}
 
 	void OverlayService::ClientAction(const IPCClient&& cli)
 	{
-		layoff::IPC::ScopeLock lock(mutex);
 		clientQueue.push(std::move(cli));
 		eventFire(&newData);
 	}
 	
 	void OverlayService::UIPush(const ClientUIPush&& p)
 	{
-		layoff::IPC::ScopeLock lock(mutex);
 		UIQueue.push(std::move(p));
 		eventFire(&newData);
 	}
 
 	void OverlayService::NotifSimple(const SimpleNotification& n) 
 	{
-		layoff::IPC::ScopeLock lock(mutex);
 		notifQueue.push(n);
 		eventFire(&newData);
 	}

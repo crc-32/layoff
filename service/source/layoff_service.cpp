@@ -3,17 +3,20 @@
 #include "layoff_service.hpp"
 #include "../../source/IPC/ErrorCodes.h"
 #include "Clients.hpp"
-
 #include "overlay_service.hpp"
+
+#include <nxIpc/Exceptions.hpp>
 
 namespace services {
 	LayoffService::LayoffService()
 	{
+		LogFunction("Layoff service created\n");
 		id = layoff::IPC::clients::CreateIdentifier(this);
 	}
 
 	LayoffService::~LayoffService()
 	{
+		LogFunction("Layoff service destroyed\n");
 		IPCClient action;
 		action.id = id;
 		action.action = OverlayAction_Disconnected;
@@ -21,7 +24,37 @@ namespace services {
 		
 		if (eventActive(&UiEvent))
 			eventClose(&UiEvent);
+
 		layoff::IPC::clients::FreeIdentifier(id);
+	}
+
+	bool LayoffService::ReceivedCommand(nxIpc::Request& req)
+	{
+		//TODO: either make layoff read all queues in a single call or figure out a safe way to do it
+		//Not sure what happens if a module writes to a queue while OverlayService::Locked
+
+		//if (OverlayService::Locked)
+		//{
+		//	nxIpc::Response(ERR_QUEUES_LOCKED).Finalize();
+		//	return false;
+		//}
+
+		if (req.cmdId >= handlers.size())
+		{
+			nxIpc::Response(R_UNKNOWN_CMDID).Finalize();
+			return true;
+		}
+
+		auto handler = handlers[req.cmdId];
+
+		if (!handler)
+		{
+			nxIpc::Response(R_UNIMPLEMENTED_CMDID).Finalize();
+			return true;
+		}
+
+		(this->*handler)(req);
+		return false;
 	}
 
 	void LayoffService::PushUIEventData(const LayoffUIEvent& evt)
@@ -31,12 +64,15 @@ namespace services {
 			eventFire(&UiEvent);
 	}
 
-	ams::Result LayoffService::SetClientName(LayoffName clientName) {		
-		name = clientName;
+	void LayoffService::SetClientName(nxIpc::Request &req) {		
+		name = *req.Payload<LayoffName>();
 		name.str[sizeof(name) - 1] = '\0';
 
 		if (std::strlen(name.str) < 1)
-			return ERR_INVALID_NAME;
+		{
+			nxIpc::Response(ERR_INVALID_NAME).Finalize();
+			return;
+		}
 
 		IPCClient action;
 		action.id = id;
@@ -44,48 +80,62 @@ namespace services {
 		std::memcpy(&action.name, &name, sizeof(LayoffName));
 		OverlayService::ClientAction(std::move(action));
 
-		return ams::ResultSuccess();
+		nxIpc::Response().Finalize();
 	}
 
-	ams::Result LayoffService::NotifySimple(SimpleNotification notification) {
-		OverlayService::NotifSimple(notification);
-		return ams::ResultSuccess();
+	void LayoffService::NotifySimple(nxIpc::Request& req) {
+		OverlayService::NotifSimple(*req.Payload<SimpleNotification>());
+		nxIpc::Response().Finalize();
 	}
 
-	ams::Result LayoffService::NotifyEx() {
+	void LayoffService::NotifyEx(nxIpc::Request& req) {
 		// TODO
-		return ams::ResultSuccess();
+		nxIpc::Response().Finalize();
 	}
 
-	ams::Result LayoffService::PushUIPanel(sf::InBuffer& buf, LayoffUIHeader header) {
-		if (header.panelID == 0)
-			return ERR_INVALID_ID;
+	void LayoffService::PushUIPanel(nxIpc::Request& req) {
+		LayoffUIHeader header = *req.Payload<LayoffUIHeader>();
 		
+		if (header.panelID == 0)
+		{
+			nxIpc::Response(ERR_INVALID_ID).Finalize();
+			return;
+		}
+
 		services::OverlayService::ClientUIPush push;
 		push.client = id;
 		push.header = header;
-		push.data = std::vector<u8>(buf.GetPointer(), buf.GetPointer() + buf.GetSize());
+
+		if (header.kind != LayoffUIKind_None)
+		{
+			auto buf = req.ReadBuffer(0);
+			push.data = std::vector<u8>((u8*)buf.data, (u8*)buf.data + buf.length);
+		}
+		
 		OverlayService::UIPush(std::move(push));
-		return ams::ResultSuccess();
+		
+		nxIpc::Response().Finalize();
+		return;
 	}
 
-	ams::Result LayoffService::AcquireUiEvent(sf::OutCopyHandle out_evt) {
+	void LayoffService::AcquireUiEvent(nxIpc::Request& req) {
 		if (!eventActive(&UiEvent))
 		{
-			ams::Result rc = eventCreate(&UiEvent, true);
-			if (rc.IsFailure())
-				return rc;
+			Result rc = eventCreate(&UiEvent, true);
+			if (R_FAILED(rc))
+			{
+				nxIpc::Response(rc).Finalize();
+				return;
+			}
 		}
 
-		*out_evt = UiEvent.revent;
-		return ams::ResultSuccess();
+		nxIpc::Response().CopyHandle(UiEvent.revent).Finalize();
 	}
 
-	ams::Result LayoffService::GetLastUiEvent(sf::Out<LayoffUIEvent> evt)
+	void LayoffService::GetLastUiEvent(nxIpc::Request& req)
 	{
-		*evt = LastUIEvent;
+		nxIpc::Response().Payload(this->LastUIEvent).Finalize();
 		LastUIEvent = {};
-		return ams::ResultSuccess();
 	}
 
 }

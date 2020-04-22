@@ -1,6 +1,5 @@
 #include <switch.h>
-#include <stratosphere.hpp>
-#include <vapours.hpp>
+#include <nxIpc/ServerHost.hpp>
 
 #include "layoff_service.hpp"
 #include "overlay_service.hpp"
@@ -16,71 +15,35 @@ extern "C" {
 	size_t nx_inner_heap_size = INNER_HEAP_SIZE;
 	char   nx_inner_heap[INNER_HEAP_SIZE];
 
-	void __libnx_initheap(void);
-	void __appInit(void);
-	void __appExit(void);
-}
+	void __libnx_initheap(void) {
+		void* addr = nx_inner_heap;
+		size_t size = nx_inner_heap_size;
 
-namespace ams {
+		/* Newlib */
+		extern char* fake_heap_start;
+		extern char* fake_heap_end;
 
-	ncm::ProgramId CurrentProgramId = { 0x01006C61796F6666ul }; //01 00 layoff
-
-	namespace result {
-		bool CallFatalOnResultAssertion = true;
+		fake_heap_start = (char*)addr;
+		fake_heap_end = (char*)addr + size;
 	}
 }
 
-using namespace ams;
-
-void __libnx_initheap(void) {
-	void* addr = nx_inner_heap;
-	size_t size = nx_inner_heap_size;
-
-	/* Newlib */
-	extern char* fake_heap_start;
-	extern char* fake_heap_end;
-
-	fake_heap_start = (char*)addr;
-	fake_heap_end = (char*)addr + size;
-}
-
-void __appInit(void) {
-	hos::SetVersionForLibnx();
-}
-
-void __appExit(void) {
-
-}
-
 namespace {
+	nxIpc::Server<services::OverlayService> OverlayService(1, "overlay");
+	nxIpc::Server<services::LayoffService> LayoffService(15, "layoff");
 
-	using ServerOptions = sf::hipc::DefaultServerManagerOptions;
-
-	constexpr sm::ServiceName LayoffServiceName = sm::ServiceName::Encode("layoff");
-	constexpr size_t          LayoffMaxSessions = 15;
-
-	constexpr sm::ServiceName OverlayServiceName = sm::ServiceName::Encode("overlay");
-	constexpr size_t          OverlayMaxSessions = 1;
-
-	constexpr size_t NumServers = 2;
-	constexpr size_t NumSessions = LayoffMaxSessions + OverlayMaxSessions;
-
-	sf::hipc::ServerManager<NumServers, ServerOptions, NumSessions> g_server_manager;
+	nxIpc::ServerHost Host;
 }
 
 int main(int argc, char** argv)
 {
-	ams::Result rc = g_server_manager.RegisterServer<services::OverlayService>(OverlayServiceName, OverlayMaxSessions);
-	if (rc.IsFailure())
-		fatalThrow(rc.GetValue());
-	
-	rc = g_server_manager.RegisterServer<services::LayoffService>(LayoffServiceName, LayoffMaxSessions);
-	if (rc.IsFailure())
-		fatalThrow(rc.GetValue());
+	//freopen("/file.txt", "w", stdout);
 
 	services::OverlayService::InitializeStatics();
 
-	g_server_manager.LoopProcess();
+	Host.AddServer(&OverlayService);
+	Host.AddServer(&LayoffService);
+	Host.StartServer();
 
 	services::OverlayService::FinalizeStatics();
 

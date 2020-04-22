@@ -10,11 +10,28 @@
     <ClInclude Include="source\IPCLock.hpp" />
     <ClInclude Include="source\OverlayServiceTypes.h" />
     <ClInclude Include="source\Clients.hpp" />
+    <ClInclude Include="..\libs\nxIpc\Server.hpp">
+      <Filter>nxIpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\nxIpc\Types.hpp">
+      <Filter>nxIpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\nxIpc\Exceptions.hpp">
+      <Filter>nxIpc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libs\nxIpc\ServerHost.hpp">
+      <Filter>nxIpc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\overlay_service.cpp" />
     <ClCompile Include="source\Clients.cpp" />
     <ClCompile Include="source\layoff_service.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="nxIpc">
+      <UniqueIdentifier>{047d1d2e-ef57-4328-90b0-ffcda22ca43a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
