@@ -3,17 +3,17 @@
 
 namespace layoff::UI::IPC {
 
-	class RadioButtonList : public ButtonList
+	class RadioButtonList : public ButtonsListBase
 	{
 	public:
-		RadioButtonList(const LayoffName* data, u8 count, LayoffIdentifier id, u64 inlineFlags) : ButtonList(data, count, id, inlineFlags) {}
+		RadioButtonList(const LayoffName* data, u8 count, LayoffIdentifier id, u64 inlineFlags) : ButtonsListBase(data, count, id, inlineFlags) {}
 
 		void Update() override
 		{
 			int i = 0;
 			for (auto& n : names)
 			{
-				if (inlineFlags & (1 << i))
+				if (inlineFlags & (1ull << i))
 					ImGui::SameLine();
 
 				if (ImGui::RadioButton(n.str, active == i))

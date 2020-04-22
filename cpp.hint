@@ -8,3 +8,4 @@
 #deinfe serviceDispatchIn(...)
 #define serviceDispatch(...)
 #define _Static_assert(x,y)
+#define IMGUI_API

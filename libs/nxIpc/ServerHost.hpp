@@ -184,6 +184,7 @@ namespace nxIpc
 		void CloseHandle(Handle handle)
 		{
 			Sessions[handle].server->Clients--;
+			Sessions.erase(handle);
 			Handles.erase(std::find(Handles.begin(), Handles.end(), handle));
 			R_THROW(svcCloseHandle(handle));
 		}

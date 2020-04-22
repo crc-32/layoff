@@ -360,9 +360,11 @@ int main(int argc, char* argv[]) {
 	notif::Initialize();
 	IPC::LaunchThread();
 
+	//As a workaround on 10.0 coment out the following three lines:
 	Thread nThread;
 	threadCreate(&nThread, NotifThread, NULL, NULL, 0x2000, 0x2D, -2);
 	threadStart(&nThread);
+
 	srand(time(NULL));
 
     while (true)

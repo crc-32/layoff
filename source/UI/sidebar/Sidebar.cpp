@@ -109,15 +109,23 @@ inline void Sidebar::DoUpdate()
 		for (auto& cli : clients.obj)
 		{
 			if (cli.second.Panels.size() == 0) continue;
-			if (ImGui::CollapsingHeader(cli.second.name.str, ImGuiTreeNodeFlags_DefaultOpen)) {
 
+			ImGui::PushID(cli.first);
+
+			int ControlCount = 0;
+			if (ImGui::CollapsingHeader(cli.second.name.str, ImGuiTreeNodeFlags_DefaultOpen)) {
 				for (auto& control : cli.second.Panels)
 				{
+					ImGui::PushID(ControlCount++);
+
 					control.second->Update();
 					if (control.second->SignalEvent())
 						layoff::IPC::PushEvent(cli.second, control.second->GetEvent());
+
+					ImGui::PopID();
 				}
 			}
+			ImGui::PopID();
 		}
 	}
 
